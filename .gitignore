@@ -27,3 +27,4 @@ src/OrcaSlicer-doc/
 .idea/
 /.cache/
 *.mo
+/usr/
