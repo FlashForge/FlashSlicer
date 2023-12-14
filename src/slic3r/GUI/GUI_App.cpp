@@ -1323,6 +1323,12 @@ void GUI_App::shutdown()
         login_dlg = nullptr;
     }
 
+    if(m_login_dlg != nullptr){
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy login dialog");
+        delete m_login_dlg;
+        m_login_dlg = nullptr;
+    }
+
     if (m_is_recreating_gui) return;
     m_is_closing = true;
     stop_sync_user_preset();
@@ -3459,22 +3465,42 @@ void GUI_App::ShowDownNetPluginDlg() {
 void GUI_App::ShowUserLogin(bool show)
 {
     // BBS: User Login Dialog
-    if (show) {
-        try {
-            if (!login_dlg)
-                login_dlg = new ZUserLogin();
-            else {
-                delete login_dlg;
-                login_dlg = new ZUserLogin();
+    if(show){
+        try{
+            if(!m_login_dlg){
+                m_login_dlg = new LoginDialog();
             }
-            login_dlg->ShowModal();
-        } catch (std::exception &e) {
+        else{
+                delete m_login_dlg;
+                m_login_dlg = new LoginDialog();
+            }
+        m_login_dlg->ShowModal();
+        }catch(std::exception &e){
             ;
         }
-    } else {
-        if (login_dlg)
-            login_dlg->EndModal(wxID_OK);
     }
+    else{
+        if(m_login_dlg){
+            m_login_dlg->EndModal(wxID_OK);
+        }
+    }
+
+    // if (show) {
+    //     try {
+    //         if (!login_dlg)
+    //             login_dlg = new ZUserLogin();
+    //         else {
+    //             delete login_dlg;
+    //             login_dlg = new ZUserLogin();
+    //         }
+    //         login_dlg->ShowModal();
+    //     } catch (std::exception &e) {
+    //         ;
+    //     }
+    // } else {
+    //     if (login_dlg)
+    //         login_dlg->EndModal(wxID_OK);
+    // }
 }
 
 

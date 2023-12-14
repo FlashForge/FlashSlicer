@@ -15,6 +15,7 @@
 #include "slic3r/GUI/HMS.hpp"
 #include "slic3r/GUI/Jobs/UpgradeNetworkJob.hpp"
 #include "slic3r/GUI/HttpServer.hpp"
+#include "slic3r/GUI/FlashForge/LoginDialog.hpp"
 #include "../Utils/PrintHost.hpp"
 
 #include <wx/app.h>
@@ -281,6 +282,8 @@ private:
 
     // login widget
     ZUserLogin*     login_dlg { nullptr };
+    //FlashForge login
+    LoginDialog*    m_login_dlg {nullptr};
 
     VersionInfo version_info;
     VersionInfo privacy_version_info;
