@@ -56,7 +56,7 @@ DeviceListPanel::~DeviceListPanel()
 
 void DeviceListPanel::msw_rescale()
 {
-
+	int test = 9;
 }
 
 }
