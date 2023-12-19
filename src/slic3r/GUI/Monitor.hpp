@@ -80,6 +80,7 @@ private:
     wxSizer*        m_main_sizer{ nullptr };
     
     AddMachinePanel*    m_status_add_machine_panel;
+	DeviceListPanel* 	m_device_list_panel;
     StatusPanel*        m_status_info_panel;
     MediaFilePanel*     m_media_file_panel;
     UpgradePanel*       m_upgrade_panel;
