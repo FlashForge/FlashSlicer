@@ -143,10 +143,20 @@ set(SLIC3R_GUI_SOURCES
     GUI/GLSelectionRectangle.hpp
     GUI/Gizmos/GizmoObjectManipulation.cpp
     GUI/Gizmos/GizmoObjectManipulation.hpp
+	GUI/FlashForge/ComConnection.cpp
+	GUI/FlashForge/ComConnection.hpp
     GUI/FlashForge/DeviceListPanel.cpp
     GUI/FlashForge/DeviceListPanel.hpp
-    GUI/FlashForge/LoginDialog.cpp
+    GUI/FlashForge/FlashNetwork.h
+    GUI/FlashForge/FlashNetworkIntfc.cpp
+	GUI/FlashForge/FlashNetworkIntfc.h
+	GUI/FlashForge/FreeInDestructor.h
+	GUI/FlashForge/LoginDialog.cpp
     GUI/FlashForge/LoginDialog.hpp
+    GUI/FlashForge/MultiComDef.hpp
+    GUI/FlashForge/MultiComMgr.cpp
+    GUI/FlashForge/MultiComMgr.hpp
+    GUI/FlashForge/Singleton.hpp
     GUI/GLModel.hpp
     GUI/GLModel.cpp
     GUI/GLTexture.hpp
