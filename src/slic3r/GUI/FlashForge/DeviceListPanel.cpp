@@ -1,7 +1,7 @@
 #include "DeviceListPanel.hpp"
 
-namespace slic3r{
-namespace GUI{
+namespace Slic3r {
+namespace GUI {
 
 DeviceListPanel::DeviceListPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
         const wxSize& size, long style, const wxString& name)
@@ -59,5 +59,5 @@ void DeviceListPanel::msw_rescale()
 	int test = 9;
 }
 
-}
-}
+} // GUI
+} // Slic3r

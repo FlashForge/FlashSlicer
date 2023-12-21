@@ -4,8 +4,8 @@
 #include <wx/panel.h>
 #include "slic3r/GUI/Widgets/Button.hpp"
 
-namespace slic3r{
-namespace GUI{
+namespace Slic3r {
+namespace GUI {
 class DeviceListPanel : public wxPanel
 {
 protected:
@@ -21,7 +21,7 @@ public:
     void msw_rescale();
 };
 
-}
-}
+} // GUI
+} // Slic3r
 
-#endif
+#endif /* slic3r_DeviceListPanel_hpp_ */
