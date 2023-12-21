@@ -22,15 +22,8 @@ public:
     bool initalize(const std::string &newtworkDllPath);
 
     void uninitalize();
-
-    ComErrno getLanDevList(std::vector<fnet_lan_dev_info> &devInfos);
     
     ComErrno addLanDev(const fnet_lan_dev_info &devInfo);
-
-    ComErrno getTokenByPassword(const std::string &userName, const std::string &password,
-        com_token_info_t &tokenInfo);
-
-    ComErrno refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo);
 
     ComErrno addWanDevList(const std::string &accessToken);
 
@@ -39,12 +32,20 @@ public:
     const com_dev_data_t &devData(com_id_t &id, bool *valid = nullptr);
 
 private:
+    friend class MultiComUtils;
+
     typedef std::shared_ptr<ComConnection> com_ptr_t;
+
     typedef std::list<com_ptr_t> com_ptrs_t;
+
     typedef std::set<com_id_t> com_id_set_t;
+
     typedef std::map<com_id_t, com_dev_data_t> com_dat_map_t;
+
     typedef std::unique_ptr<fnet::FlashNetworkIntfc> network_intfc_ptr_t;
+
     typedef boost::bimap<com_id_t, ComConnection*> com_ptr_map_t;
+
     typedef boost::bimap<com_id_t, ComConnection*>::value_type com_ptr_map_val_t;
 
     void initConnection(const com_ptr_t &comPtr);

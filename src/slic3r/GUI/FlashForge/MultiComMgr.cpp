@@ -20,60 +20,9 @@ void MultiComMgr::uninitalize()
     m_networkIntfc.reset(nullptr);
 }
 
-ComErrno MultiComMgr::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
-{
-    if (m_networkIntfc.get() == nullptr) {
-        return COM_UNINITIALIZED;
-    }
-    int devCnt;
-    fnet_lan_dev_info *fnetDevInfos;
-    if (m_networkIntfc->getLanDevList(&fnetDevInfos, &devCnt) != 0) {
-        return COM_ERROR;
-    }
-    fnet::FreeInDestructor freeDevInfos(fnetDevInfos, m_networkIntfc->freeLanDevInfos);
-    devInfos.clear();
-    for (int i = 0; i < devCnt; ++i) {
-        devInfos.push_back(fnetDevInfos[i]);
-    }
-    return COM_OK;
-}
-
 ComErrno MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo)
 {
     initConnection(com_ptr_t(new ComConnection));
-    return COM_OK;
-}
-
-ComErrno MultiComMgr::getTokenByPassword(const std::string &userName, const std::string &password,
-    com_token_info_t &tokenInfo)
-{
-    if (m_networkIntfc.get() == nullptr) {
-        return COM_UNINITIALIZED;
-    }
-    fnet_token_info_t *fnetTokenInfo;
-    if (m_networkIntfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenInfo) != 0) {
-        return COM_ERROR;
-    }
-    fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, m_networkIntfc->freeTokenInfo);
-    tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
-    tokenInfo.accessToken = fnetTokenInfo->accessToken;
-    tokenInfo.refreshToken = fnetTokenInfo->refreshToken;
-    return COM_OK;
-}
-
-ComErrno MultiComMgr::refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo)
-{
-    if (m_networkIntfc.get() == nullptr) {
-        return COM_UNINITIALIZED;
-    }
-    fnet_token_info_t *fnetTokenInfo;
-    if (m_networkIntfc->refreshToken(refreshToken.c_str(), &fnetTokenInfo) != 0) {
-        return COM_ERROR;
-    }
-    fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, m_networkIntfc->freeTokenInfo);
-    tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
-    tokenInfo.accessToken = fnetTokenInfo->accessToken;
-    tokenInfo.refreshToken = fnetTokenInfo->refreshToken;
     return COM_OK;
 }
 
@@ -87,6 +36,7 @@ ComErrno MultiComMgr::addWanDevList(const std::string &accessToken)
     if (m_networkIntfc->getWanDevList(accessToken.c_str(), &fnetWanDevInfos, &devCnt) != 0) {
         return COM_ERROR;
     }
+    fnet::FreeInDestructorArg freeWanDevInfos(fnetWanDevInfos, m_networkIntfc->freeWanDevList, devCnt);
     for (int i = 0; i < devCnt; ++i) {
         initConnection(com_ptr_t(new ComConnection));
     }
