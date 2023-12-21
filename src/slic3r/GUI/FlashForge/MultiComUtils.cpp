@@ -6,7 +6,7 @@ namespace Slic3r { namespace GUI {
 
 ComErrno MultiComUtils::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
 {
-    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->m_networkIntfc.get();
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
     if (intfc == nullptr) {
         return COM_UNINITIALIZED;
     }
@@ -26,7 +26,7 @@ ComErrno MultiComUtils::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
 ComErrno MultiComUtils::getTokenByPassword(const std::string &userName, const std::string &password,
     com_token_info_t &tokenInfo)
 {
-    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->m_networkIntfc.get();
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
     if (intfc == nullptr) {
         return COM_UNINITIALIZED;
     }
@@ -43,7 +43,7 @@ ComErrno MultiComUtils::getTokenByPassword(const std::string &userName, const st
 
 ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo)
 {
-    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->m_networkIntfc.get();
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
     if (intfc == nullptr) {
         return COM_UNINITIALIZED;
     }

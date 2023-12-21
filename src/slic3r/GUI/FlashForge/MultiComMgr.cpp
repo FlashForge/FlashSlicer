@@ -12,35 +12,33 @@ MultiComMgr::MultiComMgr()
 bool MultiComMgr::initalize(const std::string &newtworkDllPath)
 {
     m_networkIntfc.reset(new fnet::FlashNetworkIntfc(newtworkDllPath.c_str()));
-    return m_networkIntfc->isOk();
+    if (!m_networkIntfc->isOk()) {
+        return false;
+    }
+    m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
+    return true;
 }
 
 void MultiComMgr::uninitalize()
 {
+    m_wanDevUpdateThd->exit();
+    m_wanDevUpdateThd.reset(nullptr);
     m_networkIntfc.reset(nullptr);
 }
 
-ComErrno MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo)
+fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 {
-    initConnection(com_ptr_t(new ComConnection));
-    return COM_OK;
+    return m_networkIntfc.get();
 }
 
-ComErrno MultiComMgr::addWanDevList(const std::string &accessToken)
+void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    if (m_networkIntfc.get() == nullptr) {
-        return COM_UNINITIALIZED;
-    }
-    int devCnt;
-    fnet_wan_dev_info_t *fnetWanDevInfos;
-    if (m_networkIntfc->getWanDevList(accessToken.c_str(), &fnetWanDevInfos, &devCnt) != 0) {
-        return COM_ERROR;
-    }
-    fnet::FreeInDestructorArg freeWanDevInfos(fnetWanDevInfos, m_networkIntfc->freeWanDevList, devCnt);
-    for (int i = 0; i < devCnt; ++i) {
-        initConnection(com_ptr_t(new ComConnection));
-    }
-    return COM_OK;
+    initConnection(com_ptr_t(new ComConnection));
+}
+
+void MultiComMgr::setWanDevToken(const std::string &accessToken)
+{
+    m_wanDevUpdateThd->setToken(accessToken);
 }
 
 com_id_list_t MultiComMgr::getReadyDevList()
@@ -76,7 +74,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 
 void MultiComMgr::uninitConnection(ComConnection *comConnection)
 {
-    comConnection->Wait();
+    comConnection->disconnect();
     m_datMap.erase(m_ptrMap.right.find(comConnection)->get_left());
     m_ptrMap.right.erase(comConnection);
     m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {

@@ -4,12 +4,16 @@ namespace Slic3r { namespace GUI {
 
 void ComConnection::connect()
 {
-    Run();
+    m_thread.reset(new boost::thread(boost::bind(&ComConnection::run, this)));
 }
 
-wxThread::ExitCode ComConnection::Entry()
+void ComConnection::disconnect()
 {
-    return 0;
+    m_thread->join();
+}
+
+void ComConnection::run()
+{
 }
 
 }} // namespace Slic3r::GUI

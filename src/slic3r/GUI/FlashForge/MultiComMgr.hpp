@@ -11,6 +11,7 @@
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
 #include "Singleton.hpp"
+#include "WanDevUpdateThd.hpp"
 
 namespace Slic3r { namespace GUI {
 
@@ -22,27 +23,19 @@ public:
     bool initalize(const std::string &newtworkDllPath);
 
     void uninitalize();
-    
-    ComErrno addLanDev(const fnet_lan_dev_info &devInfo);
 
-    ComErrno addWanDevList(const std::string &accessToken);
+    fnet::FlashNetworkIntfc *networkIntfc();
+    
+    void addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode);
+
+    void setWanDevToken(const std::string &accessToken);
 
     com_id_list_t getReadyDevList();
 
     const com_dev_data_t &devData(com_id_t &id, bool *valid = nullptr);
 
 private:
-    friend class MultiComUtils;
-
     typedef std::shared_ptr<ComConnection> com_ptr_t;
-
-    typedef std::list<com_ptr_t> com_ptrs_t;
-
-    typedef std::set<com_id_t> com_id_set_t;
-
-    typedef std::map<com_id_t, com_dev_data_t> com_dat_map_t;
-
-    typedef std::unique_ptr<fnet::FlashNetworkIntfc> network_intfc_ptr_t;
 
     typedef boost::bimap<com_id_t, ComConnection*> com_ptr_map_t;
 
@@ -53,12 +46,13 @@ private:
     void uninitConnection(ComConnection *comConnection);
 
 private:
-    int                 m_idNum;
-    com_ptrs_t          m_comPtrs;
-    com_ptr_map_t       m_ptrMap;
-    com_dat_map_t       m_datMap;
-    com_id_set_t        m_readyIdSet;
-    network_intfc_ptr_t m_networkIntfc;
+    int                                      m_idNum;
+    std::list<com_ptr_t>                     m_comPtrs;
+    com_ptr_map_t                            m_ptrMap;
+    std::map<com_id_t, com_dev_data_t>       m_datMap;
+    std::set<com_id_t>                       m_readyIdSet;
+    std::unique_ptr<WanDevUpdateThd>         m_wanDevUpdateThd;
+    std::unique_ptr<fnet::FlashNetworkIntfc> m_networkIntfc;
 };
 
 }} // namespace Slic3r::GUI
