@@ -5,13 +5,16 @@
 #include <string>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include <wx/event.h>
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
 #include "WaitEvent.hpp"
 
 namespace Slic3r { namespace GUI {
 
-class ComConnection
+wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
+
+class ComConnection : public wxEvtHandler
 {
 public:
     ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc);

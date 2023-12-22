@@ -30,6 +30,8 @@ public:
 
     void setWanDevToken(const std::string &accessToken);
 
+    void removeWanDev();
+
     com_id_list_t getReadyDevList();
 
     const com_dev_data_t &devData(com_id_t &id, bool *valid = nullptr);

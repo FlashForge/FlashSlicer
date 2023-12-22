@@ -32,12 +32,12 @@ public:
 
     void exit();
 
+    std::string getAccessToken();
+
     void setToken(const std::string &accessToken);
 
 private:
     void run();
-
-    std::string getAccessToken();
 
 private:
     std::string              m_accessToken;

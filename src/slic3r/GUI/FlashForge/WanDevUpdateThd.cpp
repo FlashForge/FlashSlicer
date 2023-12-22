@@ -17,6 +17,12 @@ void WanDevUpdateThd::exit()
     m_thread.join();
 }
 
+std::string WanDevUpdateThd::getAccessToken()
+{
+    boost::mutex::scoped_lock lock(m_tokenMutex);
+    return m_accessToken;
+}
+
 void WanDevUpdateThd::setToken(const std::string &accessToken)
 {
     boost::mutex::scoped_lock lock(m_tokenMutex);
@@ -41,12 +47,6 @@ void WanDevUpdateThd::run()
         }
         m_exitEvent.waitTrue(5000);
     }
-}
-
-std::string WanDevUpdateThd::getAccessToken()
-{
-    boost::mutex::scoped_lock lock(m_tokenMutex);
-    return m_accessToken;
 }
 
 }} // namespace Slic3r::GUI

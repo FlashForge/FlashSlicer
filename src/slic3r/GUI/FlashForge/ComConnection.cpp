@@ -2,6 +2,8 @@
 
 namespace Slic3r { namespace GUI {
 
+wxDEFINE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
+
 ComConnection::ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
     : m_connectMode(COM_CONNECT_LAN)
     , m_devId(devInfo.id)
@@ -26,7 +28,9 @@ void ComConnection::connect()
 void ComConnection::disconnect(unsigned int waitMilliseconds/*= -1*/)
 {
     m_exitEvent.set(true);
-    m_thread->try_join_for(boost::chrono::milliseconds(waitMilliseconds));
+    if (waitMilliseconds > 0) {
+        m_thread->try_join_for(boost::chrono::milliseconds(waitMilliseconds));
+    }
 }
 
 void ComConnection::joinThread()
@@ -45,6 +49,7 @@ void ComConnection::run()
     while (!m_exitEvent.get()) {
         m_exitEvent.waitTrue(5000);
     }
+    QueueEvent(wxCommandEvent(COM_CONNECTION_EXIT_EVENT).Clone());
 }
 
 std::string ComConnection::getAccessToken()

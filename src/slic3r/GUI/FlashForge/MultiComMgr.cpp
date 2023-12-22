@@ -42,6 +42,14 @@ void MultiComMgr::setWanDevToken(const std::string &accessToken)
     m_wanDevUpdateThd->setToken(accessToken);
 }
 
+void MultiComMgr::removeWanDev()
+{
+    m_wanDevUpdateThd->setToken("");
+    for (auto &comPtr : m_comPtrs) {
+        uninitConnection(comPtr.get());
+    }
+}
+
 com_id_list_t MultiComMgr::getReadyDevList()
 {
     com_id_list_t idList;
@@ -76,17 +84,22 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 
 void MultiComMgr::uninitConnection(ComConnection *comConnection)
 {
-    comConnection->disconnect();
+    comConnection->Bind(COM_CONNECTION_EXIT_EVENT, [this, comConnection](wxCommandEvent &) {
+        m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {
+            return ptr.get() == comConnection;
+        });
+    });
+    comConnection->disconnect(0);
     m_devIdSet.erase(comConnection->devId());
     m_datMap.erase(m_ptrMap.right.find(comConnection)->get_left());
     m_ptrMap.right.erase(comConnection);
-    m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {
-        return ptr.get() == comConnection;
-    });
 }
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
 {
+    if (m_wanDevUpdateThd->getAccessToken() != event.accessToken) {
+        return;
+    }
     fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);
     std::set<std::string> devIdSet;
     for (int i = 0; i < event.devCnt; ++i) {
