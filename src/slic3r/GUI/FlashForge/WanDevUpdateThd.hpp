@@ -3,12 +3,29 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include <wx/event.h>
 #include "FlashNetworkIntfc.h"
 #include "WaitEvent.hpp"
 
 namespace Slic3r { namespace GUI {
 
-class WanDevUpdateThd
+struct WanDevUpdateEvent : public wxCommandEvent {
+    WanDevUpdateEvent()
+        : devInfos(nullptr), devCnt(0) {
+    }
+    WanDevUpdateEvent(WanDevUpdateEvent &that)
+        : wxCommandEvent(that), accessToken(that.accessToken), devInfos(that.devInfos), devCnt(that.devCnt) {
+    }
+    WanDevUpdateEvent *Clone() {
+        return new WanDevUpdateEvent(*this);
+    }
+    std::string accessToken;
+    fnet_wan_dev_info_t *devInfos;
+    int devCnt;
+};
+wxDECLARE_EVENT(WAN_DEV_UPDATE_EVENT, WanDevUpdateEvent);
+
+class WanDevUpdateThd : public wxEvtHandler
 {
 public:
     WanDevUpdateThd(fnet::FlashNetworkIntfc *networkIntfc);

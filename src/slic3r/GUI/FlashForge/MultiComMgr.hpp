@@ -45,12 +45,15 @@ private:
 
     void uninitConnection(ComConnection *comConnection);
 
+    void onWanDevUpdated(const WanDevUpdateEvent &event);
+
 private:
     int                                      m_idNum;
     std::list<com_ptr_t>                     m_comPtrs;
     com_ptr_map_t                            m_ptrMap;
     std::map<com_id_t, com_dev_data_t>       m_datMap;
     std::set<com_id_t>                       m_readyIdSet;
+    std::set<std::string>                    m_devIdSet;
     std::unique_ptr<WanDevUpdateThd>         m_wanDevUpdateThd;
     std::unique_ptr<fnet::FlashNetworkIntfc> m_networkIntfc;
 };

@@ -16,6 +16,7 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
         return false;
     }
     m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
+    m_wanDevUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
     return true;
 }
 
@@ -33,7 +34,7 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 
 void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    initConnection(com_ptr_t(new ComConnection));
+    initConnection(com_ptr_t(new ComConnection(devInfo, m_networkIntfc.get())));
 }
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)
@@ -69,17 +70,42 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     m_comPtrs.push_back(comPtr);
     m_ptrMap.insert(com_ptr_map_val_t(id, comPtr.get()));
     m_datMap.emplace(id, com_dev_data_t());
+    m_devIdSet.insert(comPtr->devId());
     comPtr->connect();
 }
 
 void MultiComMgr::uninitConnection(ComConnection *comConnection)
 {
     comConnection->disconnect();
+    m_devIdSet.erase(comConnection->devId());
     m_datMap.erase(m_ptrMap.right.find(comConnection)->get_left());
     m_ptrMap.right.erase(comConnection);
     m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {
         return ptr.get() == comConnection;
-   });
+    });
+}
+
+void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
+{
+    fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);
+    std::set<std::string> devIdSet;
+    for (int i = 0; i < event.devCnt; ++i) {
+        devIdSet.insert(event.devInfos[i].id);
+    }
+    for (auto &comPtr : m_comPtrs) {
+        if (comPtr->connectMode() == COM_CONNECT_WAN && comPtr->isAlive()
+         && devIdSet.find(comPtr->devId()) == devIdSet.end()) {
+            uninitConnection(comPtr.get());
+        } else {
+            comPtr->setAccessToken(event.accessToken);
+        }
+    }
+    for (int i = 0; i < event.devCnt; ++i) {
+        if (m_devIdSet.find(event.devInfos[i].id) == m_devIdSet.end()) {
+            initConnection(com_ptr_t(new ComConnection(
+                event.accessToken, event.devInfos[i], m_networkIntfc.get())));
+        }
+    }
 }
 
 }} // namespace Slic3r::GUI

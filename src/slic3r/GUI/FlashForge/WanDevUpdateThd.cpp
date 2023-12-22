@@ -1,8 +1,9 @@
 #include "WanDevUpdateThd.hpp"
 #include <boost/bind/bind.hpp>
-#include "FreeInDestructor.h"
 
 namespace Slic3r { namespace GUI {
+
+wxDEFINE_EVENT(WAN_DEV_UPDATE_EVENT, WanDevUpdateEvent);
 
 WanDevUpdateThd::WanDevUpdateThd(fnet::FlashNetworkIntfc *networkIntfc)
     : m_thread(boost::bind(&WanDevUpdateThd::run, this))
@@ -30,7 +31,12 @@ void WanDevUpdateThd::run()
             int devCnt;
             fnet_wan_dev_info_t *devInfos;
             if (m_networkIntfc->getWanDevList(accessToken.c_str(), &devInfos, &devCnt) == 0) {
-                fnet::FreeInDestructorArg freeDevInfos(devInfos, m_networkIntfc->freeWanDevList, devCnt);
+                WanDevUpdateEvent event;
+                event.SetEventType(WAN_DEV_UPDATE_EVENT);
+                event.accessToken = accessToken;
+                event.devInfos = devInfos;
+                event.devCnt = devCnt;
+                QueueEvent(event.Clone());
             }
         }
         m_exitEvent.waitTrue(5000);
