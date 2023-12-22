@@ -1,5 +1,6 @@
 #include "MultiComMgr.hpp"
 #include "FreeInDestructor.h"
+#include "MultiComEvent.hpp"
 
 namespace Slic3r { namespace GUI {
 
@@ -79,6 +80,13 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     m_ptrMap.insert(com_ptr_map_val_t(id, comPtr.get()));
     m_datMap.emplace(id, com_dev_data_t());
     m_devIdSet.insert(comPtr->devId());
+
+    comPtr->Bind(COM_CONNECTION_READY_EVENT_INTERNAL, [this, id](wxCommandEvent &) {
+        m_readyIdSet.insert(id);
+        wxCommandEvent readyEvent(COM_CONNECTION_READY_EVENT);
+        readyEvent.SetInt(id);
+        QueueEvent(readyEvent.Clone());
+    });
     comPtr->connect();
 }
 

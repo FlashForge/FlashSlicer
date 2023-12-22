@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <boost/bimap.hpp>
+#include <wx/event.h>
 #include "ComConnection.hpp"
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
@@ -15,7 +16,7 @@
 
 namespace Slic3r { namespace GUI {
 
-class MultiComMgr : public Singleton<MultiComMgr>
+class MultiComMgr : public wxEvtHandler, public Singleton<MultiComMgr>
 {
 public:
     MultiComMgr();

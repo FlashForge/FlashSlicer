@@ -154,6 +154,8 @@ set(SLIC3R_GUI_SOURCES
 	GUI/FlashForge/LoginDialog.cpp
     GUI/FlashForge/LoginDialog.hpp
     GUI/FlashForge/MultiComDef.hpp
+    GUI/FlashForge/MultiComEvent.cpp
+	GUI/FlashForge/MultiComEvent.hpp
     GUI/FlashForge/MultiComMgr.cpp
     GUI/FlashForge/MultiComMgr.hpp
     GUI/FlashForge/MultiComUtils.cpp

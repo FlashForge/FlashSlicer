@@ -2,6 +2,7 @@
 
 namespace Slic3r { namespace GUI {
 
+wxDEFINE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
 wxDEFINE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
 
 ComConnection::ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
@@ -46,6 +47,7 @@ void ComConnection::setAccessToken(const std::string &accessToken)
 
 void ComConnection::run()
 {
+    QueueEvent(wxCommandEvent(COM_CONNECTION_READY_EVENT_INTERNAL).Clone());
     while (!m_exitEvent.get()) {
         m_exitEvent.waitTrue(5000);
     }

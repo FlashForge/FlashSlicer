@@ -12,6 +12,7 @@
 
 namespace Slic3r { namespace GUI {
 
+wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
 wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
 
 class ComConnection : public wxEvtHandler
