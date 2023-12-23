@@ -83,19 +83,18 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 
     comPtr->Bind(COM_CONNECTION_READY_EVENT_INTERNAL, [this, id](wxCommandEvent &) {
         m_readyIdSet.insert(id);
-        wxCommandEvent readyEvent(COM_CONNECTION_READY_EVENT);
-        readyEvent.SetInt(id);
-        QueueEvent(readyEvent.Clone());
+        QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, id));
     });
     comPtr->connect();
 }
 
 void MultiComMgr::uninitConnection(ComConnection *comConnection)
 {
-    comConnection->Bind(COM_CONNECTION_EXIT_EVENT, [this, comConnection](wxCommandEvent &) {
+    comConnection->Bind(COM_CONNECTION_EXIT_EVENT, [this, comConnection](ComConnectionExitEvent &event) {
         m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {
             return ptr.get() == comConnection;
         });
+        QueueEvent(new ComConnectionExitEvent(event.GetEventType(), event.exitCode));
     });
     comConnection->disconnect(0);
     m_devIdSet.erase(comConnection->devId());

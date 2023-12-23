@@ -37,12 +37,7 @@ void WanDevUpdateThd::run()
             int devCnt;
             fnet_wan_dev_info_t *devInfos;
             if (m_networkIntfc->getWanDevList(accessToken.c_str(), &devInfos, &devCnt) == 0) {
-                WanDevUpdateEvent event;
-                event.SetEventType(WAN_DEV_UPDATE_EVENT);
-                event.accessToken = accessToken;
-                event.devInfos = devInfos;
-                event.devCnt = devCnt;
-                QueueEvent(event.Clone());
+                QueueEvent(new WanDevUpdateEvent(WAN_DEV_UPDATE_EVENT, accessToken, devInfos, devCnt));
             }
         }
         m_exitEvent.waitTrue(5000);

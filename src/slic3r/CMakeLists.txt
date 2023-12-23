@@ -143,6 +143,9 @@ set(SLIC3R_GUI_SOURCES
     GUI/GLSelectionRectangle.hpp
     GUI/Gizmos/GizmoObjectManipulation.cpp
     GUI/Gizmos/GizmoObjectManipulation.hpp
+	GUI/FlashForge/ComCommand.hpp
+	GUI/FlashForge/ComCommandQue.cpp
+	GUI/FlashForge/ComCommandQue.hpp
 	GUI/FlashForge/ComConnection.cpp
 	GUI/FlashForge/ComConnection.hpp
     GUI/FlashForge/DeviceListPanel.cpp

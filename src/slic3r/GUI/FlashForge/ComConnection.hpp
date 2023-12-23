@@ -6,6 +6,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <wx/event.h>
+#include "ComCommandQue.hpp"
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
 #include "WaitEvent.hpp"
@@ -13,7 +14,6 @@
 namespace Slic3r { namespace GUI {
 
 wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
-wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
 
 class ComConnection : public wxEvtHandler
 {
@@ -40,6 +40,8 @@ public:
 private:
     void run();
 
+    ComErrno commandLoop();
+
     std::string getAccessToken();
 
 private:
@@ -48,6 +50,7 @@ private:
     std::string                     m_devId;
     boost::mutex                    m_tokenMutex;
     WaitEvent                       m_exitEvent;
+    ComCommandQue                   m_commandQue;
     fnet::FlashNetworkIntfc        *m_networkIntfc;
     std::unique_ptr<boost::thread>  m_thread;
 };

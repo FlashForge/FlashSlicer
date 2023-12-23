@@ -1,9 +1,9 @@
 #include "ComConnection.hpp"
+#include "MultiComEvent.hpp"
 
 namespace Slic3r { namespace GUI {
 
 wxDEFINE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
-wxDEFINE_EVENT(COM_CONNECTION_EXIT_EVENT, wxCommandEvent);
 
 ComConnection::ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
     : m_connectMode(COM_CONNECT_LAN)
@@ -47,11 +47,26 @@ void ComConnection::setAccessToken(const std::string &accessToken)
 
 void ComConnection::run()
 {
-    QueueEvent(wxCommandEvent(COM_CONNECTION_READY_EVENT_INTERNAL).Clone());
+    QueueEvent(new wxCommandEvent(COM_CONNECTION_READY_EVENT_INTERNAL));
+    ComErrno ret = commandLoop();
+    QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, ret));
+}
+
+ComErrno ComConnection::commandLoop()
+{
+    int errorCnt = 0;
     while (!m_exitEvent.get()) {
-        m_exitEvent.waitTrue(5000);
+        ComCommandPtr frontCommand = m_commandQue.popFront(100);
+        if (frontCommand.get() != nullptr) {
+            ComErrno ret = frontCommand->exec(m_networkIntfc);
+            if (ret == COM_OK) {
+                errorCnt = 0;
+            } else if (++errorCnt > 5) {
+                return ret;
+            }
+        }
     }
-    QueueEvent(wxCommandEvent(COM_CONNECTION_EXIT_EVENT).Clone());
+    return COM_OK;
 }
 
 std::string ComConnection::getAccessToken()
