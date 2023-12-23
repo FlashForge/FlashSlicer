@@ -11,6 +11,7 @@
 #include "ComConnection.hpp"
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
+#include "MultiComEvent.hpp"
 #include "Singleton.hpp"
 #include "WanDevUpdateThd.hpp"
 
@@ -46,9 +47,11 @@ private:
 
     void initConnection(const com_ptr_t &comPtr);
 
-    void uninitConnection(ComConnection *comConnection);
-
     void onWanDevUpdated(const WanDevUpdateEvent &event);
+
+    void onConnectionReady(const ComConnectionReadyEvent &event);
+
+    void onConnectionExit(const ComConnectionExitEvent &event);
 
 private:
     int                                      m_idNum;

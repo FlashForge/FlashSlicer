@@ -14,9 +14,10 @@ struct ComConnectionReadyEvent : public wxCommandEvent {
 };
 
 struct ComConnectionExitEvent : public wxCommandEvent {
-    ComConnectionExitEvent(wxEventType type, ComErrno exitCode)
-        : wxCommandEvent(type), exitCode(exitCode) {
+    ComConnectionExitEvent(wxEventType type,  com_id_t _id, ComErrno _exitCode)
+        : wxCommandEvent(type), id(_id), exitCode(_exitCode) {
     }
+    com_id_t id;
     ComErrno exitCode;
 };
 

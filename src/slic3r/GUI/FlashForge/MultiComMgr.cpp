@@ -1,6 +1,5 @@
 #include "MultiComMgr.hpp"
 #include "FreeInDestructor.h"
-#include "MultiComEvent.hpp"
 
 namespace Slic3r { namespace GUI {
 
@@ -35,7 +34,7 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 
 void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    initConnection(com_ptr_t(new ComConnection(devInfo, m_networkIntfc.get())));
+    initConnection(com_ptr_t(new ComConnection(m_idNum++, devInfo, m_networkIntfc.get())));
 }
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)
@@ -47,7 +46,7 @@ void MultiComMgr::removeWanDev()
 {
     m_wanDevUpdateThd->setToken("");
     for (auto &comPtr : m_comPtrs) {
-        uninitConnection(comPtr.get());
+        comPtr.get()->disconnect(0);
     }
 }
 
@@ -75,31 +74,30 @@ const com_dev_data_t &MultiComMgr::devData(com_id_t &id, bool *valid /* = nullpt
 
 void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 {
-    int id = m_idNum++;
     m_comPtrs.push_back(comPtr);
-    m_ptrMap.insert(com_ptr_map_val_t(id, comPtr.get()));
-    m_datMap.emplace(id, com_dev_data_t());
+    m_ptrMap.insert(com_ptr_map_val_t(comPtr->id(), comPtr.get()));
+    m_datMap.emplace(comPtr->id(), com_dev_data_t());
     m_devIdSet.insert(comPtr->devId());
-
-    comPtr->Bind(COM_CONNECTION_READY_EVENT_INTERNAL, [this, id](wxCommandEvent &) {
-        m_readyIdSet.insert(id);
-        QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, id));
-    });
+    comPtr->Bind(COM_CONNECTION_READY_EVENT, &MultiComMgr::onConnectionReady, this);
+    comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
     comPtr->connect();
 }
 
-void MultiComMgr::uninitConnection(ComConnection *comConnection)
+void MultiComMgr::onConnectionReady(const ComConnectionReadyEvent &event)
 {
-    comConnection->Bind(COM_CONNECTION_EXIT_EVENT, [this, comConnection](ComConnectionExitEvent &event) {
-        m_comPtrs.remove_if([comConnection](const com_ptr_t &ptr) {
-            return ptr.get() == comConnection;
-        });
-        QueueEvent(new ComConnectionExitEvent(event.GetEventType(), event.exitCode));
-    });
-    comConnection->disconnect(0);
+    m_readyIdSet.insert(event.id);
+    QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, event.id));
+}
+
+void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
+{
+    ComConnection *comConnection = m_ptrMap.left.at(event.id);
+    m_readyIdSet.erase(event.id);
     m_devIdSet.erase(comConnection->devId());
-    m_datMap.erase(m_ptrMap.right.find(comConnection)->get_left());
-    m_ptrMap.right.erase(comConnection);
+    m_datMap.erase(event.id);
+    m_ptrMap.left.erase(event.id);
+    m_comPtrs.remove_if([comConnection](auto &ptr) { return ptr.get() == comConnection; });
+    QueueEvent(new ComConnectionExitEvent(event.GetEventType(), event.id, event.exitCode));
 }
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
@@ -113,9 +111,8 @@ void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
         devIdSet.insert(event.devInfos[i].id);
     }
     for (auto &comPtr : m_comPtrs) {
-        if (comPtr->connectMode() == COM_CONNECT_WAN && comPtr->isAlive()
-         && devIdSet.find(comPtr->devId()) == devIdSet.end()) {
-            uninitConnection(comPtr.get());
+        if (comPtr->connectMode() == COM_CONNECT_WAN && devIdSet.find(comPtr->devId()) == devIdSet.end()) {
+            comPtr.get()->disconnect(0);
         } else {
             comPtr->setAccessToken(event.accessToken);
         }
@@ -123,7 +120,7 @@ void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
     for (int i = 0; i < event.devCnt; ++i) {
         if (m_devIdSet.find(event.devInfos[i].id) == m_devIdSet.end()) {
             initConnection(com_ptr_t(new ComConnection(
-                event.accessToken, event.devInfos[i], m_networkIntfc.get())));
+                m_idNum++, event.accessToken, event.devInfos[i], m_networkIntfc.get())));
         }
     }
 }

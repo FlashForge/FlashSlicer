@@ -13,21 +13,19 @@
 
 namespace Slic3r { namespace GUI {
 
-wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
-
 class ComConnection : public wxEvtHandler
 {
 public:
-    ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc);
+    ComConnection(com_id_t id, const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc);
     
-    ComConnection(const std::string &accessToken, const fnet_wan_dev_info_t &devInfo,
+    ComConnection(com_id_t id, const std::string &accessToken, const fnet_wan_dev_info_t &devInfo,
         fnet::FlashNetworkIntfc *networkIntfc);
+
+    com_id_t id() const { return m_id; }
 
     ComConnectMode connectMode() const { return m_connectMode; }
 
     const std::string &devId() const { return m_devId; }
-
-    bool isAlive() { return !m_exitEvent.get(); }
 
     void connect();
 
@@ -45,6 +43,7 @@ private:
     std::string getAccessToken();
 
 private:
+    com_id_t                        m_id;
     ComConnectMode                  m_connectMode;
     std::string                     m_accessToken;
     std::string                     m_devId;

@@ -3,18 +3,19 @@
 
 namespace Slic3r { namespace GUI {
 
-wxDEFINE_EVENT(COM_CONNECTION_READY_EVENT_INTERNAL, wxCommandEvent);
-
-ComConnection::ComConnection(const fnet_lan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
-    : m_connectMode(COM_CONNECT_LAN)
+ComConnection::ComConnection(com_id_t id, const fnet_lan_dev_info_t &devInfo,
+    fnet::FlashNetworkIntfc *networkIntfc)
+    : m_id(id)
+    , m_connectMode(COM_CONNECT_LAN)
     , m_devId(devInfo.id)
     , m_networkIntfc(networkIntfc)
 {
 }
 
-ComConnection::ComConnection(const std::string &accessToken, const fnet_wan_dev_info_t &devInfo,
-    fnet::FlashNetworkIntfc *networkIntfc)
-    : m_connectMode(COM_CONNECT_WAN)
+ComConnection::ComConnection(com_id_t id, const std::string &accessToken,
+    const fnet_wan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
+    : m_id(id)
+    , m_connectMode(COM_CONNECT_WAN)
     , m_accessToken(accessToken)
     , m_devId(devInfo.id)
     , m_networkIntfc(networkIntfc)
@@ -47,9 +48,9 @@ void ComConnection::setAccessToken(const std::string &accessToken)
 
 void ComConnection::run()
 {
-    QueueEvent(new wxCommandEvent(COM_CONNECTION_READY_EVENT_INTERNAL));
-    ComErrno ret = commandLoop();
-    QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, ret));
+    QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, m_id));
+    ComErrno exitCode = commandLoop();
+    QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, m_id, exitCode));
 }
 
 ComErrno ComConnection::commandLoop()
