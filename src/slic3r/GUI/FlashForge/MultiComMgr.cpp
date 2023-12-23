@@ -86,7 +86,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 void MultiComMgr::onConnectionReady(const ComConnectionReadyEvent &event)
 {
     m_readyIdSet.insert(event.id);
-    QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, event.id));
+    QueueEvent(event.Clone());
 }
 
 void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
@@ -97,7 +97,7 @@ void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
     m_datMap.erase(event.id);
     m_ptrMap.left.erase(event.id);
     m_comPtrs.remove_if([comConnection](auto &ptr) { return ptr.get() == comConnection; });
-    QueueEvent(new ComConnectionExitEvent(event.GetEventType(), event.id, event.exitCode));
+    QueueEvent(event.Clone());
 }
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
