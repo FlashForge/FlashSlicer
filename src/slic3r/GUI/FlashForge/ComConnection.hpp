@@ -25,7 +25,7 @@ public:
 
     ComConnectMode connectMode() const { return m_connectMode; }
 
-    const std::string &devId() const { return m_devId; }
+    const std::string &serialNumber() const { return m_serialNumber; }
 
     void connect();
 
@@ -45,8 +45,9 @@ private:
 private:
     com_id_t                        m_id;
     ComConnectMode                  m_connectMode;
+    std::string                     m_serialNumber;
     std::string                     m_accessToken;
-    std::string                     m_devId;
+    std::string                     m_deviceId;
     boost::mutex                    m_tokenMutex;
     WaitEvent                       m_exitEvent;
     ComCommandQue                   m_commandQue;

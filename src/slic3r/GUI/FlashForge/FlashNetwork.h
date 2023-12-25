@@ -14,11 +14,11 @@
 
 #pragma pack(push, 4)
 
-#define MAX_DEVICE_ID_LEN 128
+#define MAX_DEVICE_SN_LEN 128
 #define MAX_DEVICE_NAME_LEN 128
 
 typedef struct fnet_lan_dev_info {
-    char id[MAX_DEVICE_ID_LEN];
+    char serialNumber[MAX_DEVICE_SN_LEN];
     char name[MAX_DEVICE_NAME_LEN];
     char ip[16];
     unsigned short port;
@@ -34,17 +34,18 @@ typedef struct fnet_token_info {
 } fnet_token_info_t;
 
 typedef struct fnet_wan_dev_info {
-    char *id;
+    char *devId;
     char *name;
     char *model;
     char *imageUrl;
     char *status;
     char *location;
+    char *serialNumber;
 } fnet_wan_dev_info_t;
 
-typedef struct fnet_wan_dev_status {
+typedef struct fnet_dev_status {
     //
-} fnet_wan_dev_status_t;
+} fnet_dev_status_t;
 
 #pragma pack(pop)
 
@@ -76,9 +77,9 @@ FNET_API int fnet_getWanDevList(const char *accessToken, fnet_wan_dev_info_t **i
 FNET_API void fnet_freeWanDevList(fnet_wan_dev_info_t *infos, int devCnt);
 
 FNET_API int fnet_getWanDevStatus(const char *accessToken, const char *devId,
-    fnet_wan_dev_status_t **status);
+    fnet_dev_status_t **status);
 
-FNET_API void fnet_freeWanDevStatus(fnet_wan_dev_status_t *status);
+FNET_API void fnet_freeWanDevStatus(fnet_dev_status_t *status);
 
 #ifdef __cplusplus
 }

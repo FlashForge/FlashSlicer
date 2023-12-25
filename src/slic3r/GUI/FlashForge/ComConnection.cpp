@@ -7,7 +7,7 @@ ComConnection::ComConnection(com_id_t id, const fnet_lan_dev_info_t &devInfo,
     fnet::FlashNetworkIntfc *networkIntfc)
     : m_id(id)
     , m_connectMode(COM_CONNECT_LAN)
-    , m_devId(devInfo.id)
+    , m_serialNumber(devInfo.serialNumber)
     , m_networkIntfc(networkIntfc)
 {
 }
@@ -16,8 +16,9 @@ ComConnection::ComConnection(com_id_t id, const std::string &accessToken,
     const fnet_wan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
     : m_id(id)
     , m_connectMode(COM_CONNECT_WAN)
+    , m_serialNumber(devInfo.serialNumber)
     , m_accessToken(accessToken)
-    , m_devId(devInfo.id)
+    , m_deviceId(devInfo.devId)
     , m_networkIntfc(networkIntfc)
 {
 }

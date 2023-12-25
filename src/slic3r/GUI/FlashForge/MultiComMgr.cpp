@@ -77,7 +77,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     m_comPtrs.push_back(comPtr);
     m_ptrMap.insert(com_ptr_map_val_t(comPtr->id(), comPtr.get()));
     m_datMap.emplace(comPtr->id(), com_dev_data_t());
-    m_devIdSet.insert(comPtr->devId());
+    m_serialNumberSet.insert(comPtr->serialNumber());
     comPtr->Bind(COM_CONNECTION_READY_EVENT, &MultiComMgr::onConnectionReady, this);
     comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
     comPtr->connect();
@@ -94,7 +94,7 @@ void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
     ComConnection *comConnection = m_ptrMap.left.at(event.id);
     comConnection->joinThread();
     m_readyIdSet.erase(event.id);
-    m_devIdSet.erase(comConnection->devId());
+    m_serialNumberSet.erase(comConnection->serialNumber());
     m_datMap.erase(event.id);
     m_ptrMap.left.erase(event.id);
     m_comPtrs.remove_if([comConnection](auto &ptr) { return ptr.get() == comConnection; });
@@ -109,17 +109,18 @@ void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
     fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);
     std::set<std::string> devIdSet;
     for (int i = 0; i < event.devCnt; ++i) {
-        devIdSet.insert(event.devInfos[i].id);
+        devIdSet.insert(event.devInfos[i].serialNumber);
     }
     for (auto &comPtr : m_comPtrs) {
-        if (comPtr->connectMode() == COM_CONNECT_WAN && devIdSet.find(comPtr->devId()) == devIdSet.end()) {
+        if (comPtr->connectMode() == COM_CONNECT_WAN
+         && devIdSet.find(comPtr->serialNumber()) == devIdSet.end()) {
             comPtr.get()->disconnect(0);
         } else {
             comPtr->setAccessToken(event.accessToken);
         }
     }
     for (int i = 0; i < event.devCnt; ++i) {
-        if (m_devIdSet.find(event.devInfos[i].id) == m_devIdSet.end()) {
+        if (m_serialNumberSet.find(event.devInfos[i].serialNumber) == m_serialNumberSet.end()) {
             initConnection(com_ptr_t(new ComConnection(
                 m_idNum++, event.accessToken, event.devInfos[i], m_networkIntfc.get())));
         }
