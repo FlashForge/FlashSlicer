@@ -92,6 +92,7 @@ void MultiComMgr::onConnectionReady(const ComConnectionReadyEvent &event)
 void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
 {
     ComConnection *comConnection = m_ptrMap.left.at(event.id);
+    comConnection->joinThread();
     m_readyIdSet.erase(event.id);
     m_devIdSet.erase(comConnection->devId());
     m_datMap.erase(event.id);
