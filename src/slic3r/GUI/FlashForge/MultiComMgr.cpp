@@ -78,15 +78,18 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     m_ptrMap.insert(com_ptr_map_val_t(comPtr->id(), comPtr.get()));
     m_datMap.emplace(comPtr->id(), com_dev_data_t());
     m_serialNumberSet.insert(comPtr->serialNumber());
-    comPtr->Bind(COM_CONNECTION_READY_EVENT, &MultiComMgr::onConnectionReady, this);
-    comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
-    comPtr->connect();
-}
 
-void MultiComMgr::onConnectionReady(const ComConnectionReadyEvent &event)
-{
-    m_readyIdSet.insert(event.id);
-    QueueEvent(event.Clone());
+    comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
+
+    comPtr->Bind(COM_CONNECTION_READY_EVENT, [this](const ComConnectionReadyEvent &event) {
+        m_readyIdSet.insert(event.id);
+        QueueEvent(event.Clone());
+    });
+    comPtr->Bind(COM_DEV_DETAIL_UPDATE_EVENT, [this](const ComDevDetailUpdateEvent &event) {
+        m_datMap.at(event.id).devDetail = event.devDetail;
+        QueueEvent(event.Clone());
+    });
+    comPtr->connect();
 }
 
 void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)

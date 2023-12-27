@@ -49,8 +49,6 @@ private:
 
     void onWanDevUpdated(const WanDevUpdateEvent &event);
 
-    void onConnectionReady(const ComConnectionReadyEvent &event);
-
     void onConnectionExit(const ComConnectionExitEvent &event);
 
 private:

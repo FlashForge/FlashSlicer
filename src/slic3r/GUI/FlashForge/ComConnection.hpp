@@ -44,6 +44,8 @@ private:
 
     std::string getAccessToken();
 
+    void processCommand(ComCommand *command);
+
 private:
     com_id_t                        m_id;
     ComConnectMode                  m_connectMode;

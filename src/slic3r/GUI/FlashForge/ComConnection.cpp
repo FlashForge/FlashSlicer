@@ -84,6 +84,7 @@ ComErrno ComConnection::commandLoop()
                 ret = frontCommand->exec(m_networkIntfc, m_accessToken, m_deviceId);
             }
             if (ret == COM_OK) {
+                processCommand(frontCommand.get());
                 errorCnt = 0;
             } else if (++errorCnt > 5) {
                 return ret;
@@ -101,6 +102,15 @@ std::string ComConnection::getAccessToken()
 {
     boost::mutex::scoped_lock lock(m_tokenMutex);
     return m_accessToken;
+}
+
+void ComConnection::processCommand(ComCommand *command)
+{
+    ComGetDevDetail *getDevDetail = dynamic_cast<ComGetDevDetail *>(command);
+    if (getDevDetail != nullptr) {
+        QueueEvent(new ComDevDetailUpdateEvent(COM_DEV_DETAIL_UPDATE_EVENT, m_id,
+            getDevDetail->commandId(), getDevDetail->devDetail()));
+    }
 }
 
 }} // namespace Slic3r::GUI

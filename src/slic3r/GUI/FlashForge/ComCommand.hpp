@@ -10,12 +10,16 @@ namespace Slic3r { namespace GUI {
 class ComCommand
 {
 public:
-    ComCommand(int cmdId = -1)
-        : m_cmdId(cmdId)
+    ComCommand(int commandId = -1)
+        : m_commandId(commandId)
     {
     }
     virtual ~ComCommand()
     {
+    }
+    int commandId() const
+    {
+        return m_commandId;
     }
     virtual bool isDup(const ComCommand *that)
     {
@@ -28,14 +32,14 @@ public:
         const std::string &deviceId) = 0;
 
 private:
-    int m_cmdId;
+    int m_commandId;
 };
 
 class ComGetDevDetail : public ComCommand
 {
 public:
-    ComGetDevDetail(int cmdId = -1)
-        : ComCommand(cmdId), m_devDetail(nullptr)
+    ComGetDevDetail(int commandId = -1)
+        : ComCommand(commandId), m_devDetail(nullptr)
     {
     }
     ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &ip,
@@ -51,6 +55,10 @@ public:
         int ret = networkIntfc->getWanDevDetail(
             accessToken.c_str(), deviceId.c_str(), &m_devDetail);
         return MultiComUtils::networkIntfcRet2ComErrno(ret);
+    }
+    fnet_dev_detail_t *devDetail()
+    {
+        return m_devDetail;
     }
  
 private:
