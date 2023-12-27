@@ -1,6 +1,7 @@
 #ifndef slic3r_GUI_ComConnection_hpp_
 #define slic3r_GUI_ComConnection_hpp_
 
+#include <ctime>
 #include <memory>
 #include <string>
 #include <boost/thread/mutex.hpp>
@@ -52,6 +53,7 @@ private:
     std::string                     m_checkCode;
     std::string                     m_accessToken;
     std::string                     m_deviceId;
+    clock_t                         m_getDetailClock;
     boost::mutex                    m_tokenMutex;
     WaitEvent                       m_exitEvent;
     ComCommandQue                   m_commandQue;

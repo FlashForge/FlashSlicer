@@ -11,6 +11,7 @@ ComConnection::ComConnection(com_id_t id, const std::string &checkCode,
     , m_ip(devInfo.ip)
     , m_port(devInfo.port)
     , m_checkCode(checkCode)
+    , m_getDetailClock(clock())
     , m_networkIntfc(networkIntfc)
 {
 }
@@ -23,6 +24,7 @@ ComConnection::ComConnection(com_id_t id, const std::string &accessToken,
     , m_port(0)
     , m_accessToken(accessToken)
     , m_deviceId(devInfo.devId)
+    , m_getDetailClock(clock())
     , m_networkIntfc(networkIntfc)
 {
 }
@@ -86,6 +88,10 @@ ComErrno ComConnection::commandLoop()
             } else if (++errorCnt > 5) {
                 return ret;
             }
+        }
+        if ((clock() - m_getDetailClock) / (double)CLOCKS_PER_SEC > 5) {
+            m_commandQue.pushBack(ComCommandPtr(new ComGetDevDetail), 5, true);
+            m_getDetailClock = clock();
         }
     }
     return COM_OK;
