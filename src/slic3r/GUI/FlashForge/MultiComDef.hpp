@@ -14,6 +14,7 @@ enum ComErrno {
     COM_OK,
     COM_ERROR,
     COM_UNINITIALIZED,
+    COM_VERIFY_LAN_DEV_FAILED,
 };
 
 enum ComConnectMode {

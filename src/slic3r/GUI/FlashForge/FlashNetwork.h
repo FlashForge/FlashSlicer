@@ -43,12 +43,65 @@ typedef struct fnet_wan_dev_info {
     char *serialNumber;
 } fnet_wan_dev_info_t;
 
-typedef struct fnet_dev_status {
-    //
-} fnet_dev_status_t;
+typedef struct fnet_dev_detail {
+    char *model;
+    int nozzleCnt;
+    int nozzleStyle;            // 0 independent, 1 non-independent
+    char *measure;
+    char *nozzleModel;
+    char *firmwareVersion;
+    char *macAddr;
+    char *ipAddr;
+    char *name;
+    char *location;
+    char *printStatus;
+    char *printFileName;
+    char *printFileThumbUrl;
+    int printLayer;
+    int targetPrintLayer;
+    double printProgress;       // percent
+    double rightTemp;
+    double rightTargetTemp;
+    double leftTemp;
+    double leftTargetTemp;
+    double platTemp;
+    double platTargetTemp;
+    double chamberTemp;
+    double chamberTargetTemp;
+    double fillAmount;          // percent
+    double zAxisCompensation;   // mm
+    char *rightFilamentType;
+    char *leftFilamentType;
+    double currentPrintSpeed;   // mm/s
+    double printSpeedAdjust;    // percent
+    double printDuration;       // second
+    double estimatedTime;       // second
+    double estimatedRightLen;   // mm
+    double estimatedLeftLen;    // mm
+    double coolingFanSpeed;     // percent
+    double chamberFanSpeed;     // percent
+    char *internalFanStatus;
+    char *externalFanStatus;
+    char *doorStatus;
+    char *lightStatus;
+    char *autoShutdown;
+    double autoShutdownTime;    // minute
+    double tvoc;
+    double remainingDiskSpace;  // GB
+    double cumulativePrintTime; // minute
+    double cumulativeFilament;  // mm
+    char *cameraStreamUrl;
+    char *polarRegisterCode;
+    char *flashRegisterCode;
+    char *errorCode;
+} fnet_dev_detail_t;
 
 #pragma pack(pop)
 
+
+#define FNET_OK 0
+#define FNET_ERROR -1
+#define FNET_VERIFY_LAN_DEV_FAILED 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +117,11 @@ FNET_API int fnet_getLanDevList(fnet_lan_dev_info_t **infos, int *devCnt);
 
 FNET_API void fnet_freeLanDevInfos(fnet_lan_dev_info_t *infos);
 
+FNET_API int fnet_getLanDevDetail(const char *ip, unsigned short port, const char *serialNumber,
+    const char *checkCode, fnet_dev_detail_t **detail);
+
+FNET_API void fnet_freeDevDetail(fnet_dev_detail_t *detail);
+
 FNET_API int fnet_getTokenByPassword(const char *userName, const char *password,
     fnet_token_info_t **tokenInfo);
 
@@ -76,10 +134,8 @@ FNET_API int fnet_getWanDevList(const char *accessToken, fnet_wan_dev_info_t **i
 
 FNET_API void fnet_freeWanDevList(fnet_wan_dev_info_t *infos, int devCnt);
 
-FNET_API int fnet_getWanDevStatus(const char *accessToken, const char *devId,
-    fnet_dev_status_t **status);
-
-FNET_API void fnet_freeWanDevStatus(fnet_dev_status_t *status);
+FNET_API int fnet_getWanDevDetail(const char *accessToken, const char *devId,
+    fnet_dev_detail_t **detail);
 
 #ifdef __cplusplus
 }

@@ -34,7 +34,7 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 
 void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    initConnection(com_ptr_t(new ComConnection(m_idNum++, devInfo, m_networkIntfc.get())));
+    initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, m_networkIntfc.get())));
 }
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)

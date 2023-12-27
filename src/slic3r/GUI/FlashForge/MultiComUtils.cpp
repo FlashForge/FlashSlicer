@@ -12,8 +12,9 @@ ComErrno MultiComUtils::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
     }
     int devCnt;
     fnet_lan_dev_info *fnetDevInfos;
-    if (intfc->getLanDevList(&fnetDevInfos, &devCnt) != 0) {
-        return COM_ERROR;
+    int ret = intfc->getLanDevList(&fnetDevInfos, &devCnt);
+    if (ret != COM_OK) {
+        return networkIntfcRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeDevInfos(fnetDevInfos, intfc->freeLanDevInfos);
     devInfos.clear();
@@ -31,8 +32,9 @@ ComErrno MultiComUtils::getTokenByPassword(const std::string &userName, const st
         return COM_UNINITIALIZED;
     }
     fnet_token_info_t *fnetTokenInfo;
-    if (intfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenInfo) != 0) {
-        return COM_ERROR;
+    int ret = intfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenInfo);
+    if (ret != COM_OK) {
+        return networkIntfcRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
     tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
@@ -48,14 +50,27 @@ ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_
         return COM_UNINITIALIZED;
     }
     fnet_token_info_t *fnetTokenInfo;
-    if (intfc->refreshToken(refreshToken.c_str(), &fnetTokenInfo) != 0) {
-        return COM_ERROR;
+    int ret = intfc->refreshToken(refreshToken.c_str(), &fnetTokenInfo);
+    if (ret != COM_OK) {
+        return networkIntfcRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
     tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
     tokenInfo.accessToken = fnetTokenInfo->accessToken;
     tokenInfo.refreshToken = fnetTokenInfo->refreshToken;
     return COM_OK;
+}
+
+ComErrno MultiComUtils::networkIntfcRet2ComErrno(int networkRet)
+{
+    switch (networkRet) {
+    case FNET_OK:
+        return COM_OK;
+    case FNET_VERIFY_LAN_DEV_FAILED:
+        return COM_VERIFY_LAN_DEV_FAILED;
+    default:
+        return COM_ERROR;
+    }
 }
 
 }} // namespace Slic3r::GUI

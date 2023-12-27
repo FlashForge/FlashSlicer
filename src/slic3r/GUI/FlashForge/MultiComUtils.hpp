@@ -16,6 +16,8 @@ public:
         com_token_info_t &tokenInfo);
 
     static ComErrno refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo);
+
+    static ComErrno networkIntfcRet2ComErrno(int networkRet);
 };
 
 }} // namespace Slic3r::GUI

@@ -11,7 +11,8 @@ namespace Slic3r { namespace GUI {
 
 struct WanDevUpdateEvent : public wxCommandEvent {
     WanDevUpdateEvent(wxEventType _type, const std::string &_accessToken,
-        fnet_wan_dev_info_t *_devInfos, int _devCnt) {
+        fnet_wan_dev_info_t *_devInfos, int _devCnt)
+    {
         SetEventType(_type);
         accessToken = _accessToken;
         devInfos = _devInfos;
