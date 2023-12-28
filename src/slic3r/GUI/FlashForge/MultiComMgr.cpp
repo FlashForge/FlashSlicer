@@ -11,8 +11,12 @@ MultiComMgr::MultiComMgr()
 
 bool MultiComMgr::initalize(const std::string &newtworkDllPath)
 {
+    if (networkIntfc() != nullptr) {
+        return false;
+    }
     m_networkIntfc.reset(new fnet::FlashNetworkIntfc(newtworkDllPath.c_str()));
     if (!m_networkIntfc->isOk()) {
+        m_networkIntfc.reset(nullptr);
         return false;
     }
     m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
