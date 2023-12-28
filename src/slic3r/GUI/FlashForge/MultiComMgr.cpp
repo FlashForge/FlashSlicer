@@ -96,6 +96,7 @@ void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
 {
     ComConnection *comConnection = m_ptrMap.left.at(event.id);
     comConnection->joinThread();
+    m_networkIntfc->freeDevDetail(m_datMap.at(event.id).devDetail);
     m_readyIdSet.erase(event.id);
     m_serialNumberSet.erase(comConnection->serialNumber());
     m_datMap.erase(event.id);

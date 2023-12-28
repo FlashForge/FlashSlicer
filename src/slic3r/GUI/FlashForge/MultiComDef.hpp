@@ -30,6 +30,8 @@ struct com_token_info_t {
 };
 
 struct com_dev_data_t {
+    com_dev_data_t() : devDetail(nullptr) {
+    }
     fnet_dev_detail_t *devDetail;
 };
 
