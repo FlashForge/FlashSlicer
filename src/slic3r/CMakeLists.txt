@@ -157,6 +157,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/FlashForge/MultiComMgr.cpp
     GUI/FlashForge/MultiComMgr.hpp
     GUI/FlashForge/Singleton.hpp
+    GUI/FlashForge/SingleDeviceState.cpp
+    GUI/FlashForge/SingleDeviceState.hpp
     GUI/GLModel.hpp
     GUI/GLModel.cpp
     GUI/GLTexture.hpp
