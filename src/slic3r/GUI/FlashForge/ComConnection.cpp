@@ -86,7 +86,7 @@ ComErrno ComConnection::commandLoop()
             if (ret == COM_OK) {
                 processCommand(frontCommand.get());
                 errorCnt = 0;
-            } else if (++errorCnt > 5) {
+            } else if (ret == COM_VERIFY_LAN_DEV_FAILED || ++errorCnt > 5) {
                 return ret;
             }
         }
