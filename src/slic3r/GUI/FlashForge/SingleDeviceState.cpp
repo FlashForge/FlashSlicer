@@ -494,7 +494,7 @@ wxBoxSizer* SingleDeviceState::create_machine_control_page(wxWindow *parent)
         m_panel_control_print->SetBackgroundColour(wxColour(255,255,255));
 
         //显示继续打印按钮
-        Button* m_print_button = new Button(m_panel_control_print, wxString("pause print"), "device_pause_print", 0, FromDIP(18));
+        m_print_button = new Button(m_panel_control_print, wxString("pause print"), "device_pause_print", 0, FromDIP(18));
         m_print_button->SetFont(wxFont(wxFontInfo(16)));
         m_print_button->SetBorderWidth(0);
         m_print_button->SetBackgroundColor(wxColour(255,255,255));
@@ -510,7 +510,7 @@ wxBoxSizer* SingleDeviceState::create_machine_control_page(wxWindow *parent)
         bSizer_control_print->Add(m_panel_separotor_print, 0, wxEXPAND | wxALL, 0);
 
         //显示取消打印按钮
-        Button* m_cancel_button = new Button(m_panel_control_print, wxString("cancel print"), "device_cancel_print", 0, FromDIP(18));
+        m_cancel_button = new Button(m_panel_control_print, wxString("cancel print"), "device_cancel_print", 0, FromDIP(18));
         m_cancel_button->SetFont(wxFont(wxFontInfo(16)));
         m_cancel_button->SetBorderWidth(0);
         m_cancel_button->SetBackgroundColor(wxColour(255,255,255));
@@ -535,37 +535,128 @@ wxBoxSizer* SingleDeviceState::create_machine_control_page(wxWindow *parent)
         bSizer_right->Add(m_panel_separotor5, 0, wxEXPAND, 0);
 
 //***温度布局
-        // wxBoxSizer *bSizer_control_temperature = new wxBoxSizer(wxHORIZONTAL);
-        // auto m_panel_control_temperature = new wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(-1, FromDIP(30)), wxTAB_TRAVERSAL);
-        // m_panel_control_temperature->SetBackgroundColour(wxColour(255,255,255));
+        wxBoxSizer *bSizer_control_temperature = new wxBoxSizer(wxHORIZONTAL);
+        auto m_panel_control_temperature = new wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(-1, FromDIP(30)), wxTAB_TRAVERSAL);
+        m_panel_control_temperature->SetBackgroundColour(wxColour(255,255,255));
 
-        // //显示继续打印按钮
-        // Button* m_print_button = new Button(m_panel_control_temperature, wxString("pause print"), "device_pause_print", 0, FromDIP(18));
-        // m_print_button->SetFont(wxFont(wxFontInfo(16)));
-        // m_print_button->SetBorderWidth(0);
-        // m_print_button->SetBackgroundColor(wxColour(255,255,255));
-        // m_print_button->SetBorderColor(wxColour(255,255,255));
-        // m_print_button->SetTextColor(wxColour(51,51,51));
-        // m_print_button->SetMinSize((wxSize(FromDIP(158), FromDIP(29))));
-        // m_print_button->SetCornerRadius(0);
-        // bSizer_control_print->Add(m_print_button, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+        //显示顶部温度控件
+        wxWindowID top_id = wxWindow::NewControlId();
+        m_tempCtrl_top = new TempInput(m_panel_control_temperature, top_id, wxString("--"), wxString("--"), wxString("device_top_temperature"), wxString("device_top_temperature"), wxDefaultPosition,
+                                        wxDefaultSize, wxALIGN_CENTER);
 
-        // auto m_panel_separotor_print = new wxPanel(m_panel_control_temperature, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(6), -1), wxTAB_TRAVERSAL);
-        // m_panel_separotor_print->SetBackgroundColour(wxColour(255,255,255));
+        m_tempCtrl_top->SetMinTemp(20);
+        m_tempCtrl_top->SetMaxTemp(120);
+        m_tempCtrl_top->SetMinSize((wxSize(FromDIP(106), FromDIP(29))));
+        m_tempCtrl_top->SetBorderWidth(0);
+        StateColor tempinput_text_colour(std::make_pair(wxColour(51,51,51), (int) StateColor::Disabled), std::make_pair(wxColour(48,58,60), (int) StateColor::Normal));
+        m_tempCtrl_top->SetTextColor(tempinput_text_colour);
+        StateColor tempinput_border_colour(std::make_pair(*wxWHITE, (int)StateColor::Disabled), std::make_pair(wxColour(0, 150, 136), (int)StateColor::Focused),
+                                        std::make_pair(wxColour(0, 150, 136), (int)StateColor::Hovered),std::make_pair(*wxWHITE, (int)StateColor::Normal));
+        m_tempCtrl_top->SetBorderColor(tempinput_border_colour);
+        bSizer_control_temperature->Add(m_tempCtrl_top, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
 
-        // bSizer_control_print->Add(m_panel_separotor_print, 0, wxEXPAND | wxALL, 0);
+        //间距
+        auto m_panel_separotor_temp = new wxPanel(m_panel_control_temperature, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(6), -1), wxTAB_TRAVERSAL);
+        m_panel_separotor_temp->SetBackgroundColour(wxColour(240,240,240));
+        bSizer_control_temperature->Add(m_panel_separotor_temp, 0, wxEXPAND | wxALL, 0);
 
-        // //显示取消打印按钮
-        // Button* m_cancel_button = new Button(m_panel_control_temperature, wxString("cancel print"), "device_cancel_print", 0, FromDIP(18));
-        // m_cancel_button->SetFont(wxFont(wxFontInfo(16)));
-        // m_cancel_button->SetBorderWidth(0);
-        // m_cancel_button->SetBackgroundColor(wxColour(255,255,255));
-        // m_cancel_button->SetBorderColor(wxColour(255,255,255));
-        // m_cancel_button->SetTextColor(wxColour(51,51,51));
-        // m_cancel_button->SetMinSize((wxSize(FromDIP(158), FromDIP(29))));
-        // m_cancel_button->SetCornerRadius(0);
-        // bSizer_control_print->Add(m_cancel_button, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+        //显示底部温度控件
+        wxWindowID bottom_id = wxWindow::NewControlId();
+        m_tempCtrl_bottom = new TempInput(m_panel_control_temperature, bottom_id, wxString("--"), wxString("--"), wxString("device_bottom_temperature"), wxString("device_bottom_temperature"), wxDefaultPosition,
+                                        wxDefaultSize, wxALIGN_CENTER);
 
+        m_tempCtrl_bottom->SetMinTemp(20);
+        m_tempCtrl_bottom->SetMaxTemp(120);
+        m_tempCtrl_bottom->SetMinSize((wxSize(FromDIP(106), FromDIP(29))));
+        m_tempCtrl_bottom->SetBorderWidth(0);
+        //StateColor tempinput_text_colour(std::make_pair(wxColour(171, 172, 172), (int) StateColor::Disabled), std::make_pair(wxColour(48,58,60), (int) StateColor::Normal));
+        //m_tempCtrl_bottom->SetTextColor(tempinput_text_colour);
+        //StateColor tempinput_border_colour(std::make_pair(*wxWHITE, (int)StateColor::Disabled), std::make_pair(wxColour(0, 150, 136), (int)StateColor::Focused),
+        //                                std::make_pair(wxColour(0, 150, 136), (int)StateColor::Hovered),std::make_pair(*wxWHITE, (int)StateColor::Normal));
+        m_tempCtrl_bottom->SetBorderColor(tempinput_border_colour);
+        bSizer_control_temperature->Add(m_tempCtrl_bottom, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+
+        //间距
+        auto m_panel_separotor_temp1 = new wxPanel(m_panel_control_temperature, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(6), -1), wxTAB_TRAVERSAL);
+        m_panel_separotor_temp1->SetBackgroundColour(wxColour(240,240,240));
+        bSizer_control_temperature->Add(m_panel_separotor_temp1, 0, wxEXPAND | wxALL, 0);
+
+        //显示中间温度控件
+        wxWindowID bottom_mid = wxWindow::NewControlId();
+        m_tempCtrl_mid = new TempInput(m_panel_control_temperature, bottom_mid, wxString("--"), wxString("--"), wxString("device_mid_temperature"), wxString("device_mid_temperature"), wxDefaultPosition,
+                                        wxDefaultSize, wxALIGN_CENTER);
+
+        m_tempCtrl_mid->SetMinTemp(20);
+        m_tempCtrl_mid->SetMaxTemp(120);
+        m_tempCtrl_mid->SetMinSize((wxSize(FromDIP(106), FromDIP(29))));
+        m_tempCtrl_mid->SetBorderWidth(0);
+        //StateColor tempinput_text_colour(std::make_pair(wxColour(171, 172, 172), (int) StateColor::Disabled), std::make_pair(wxColour(48,58,60), (int) StateColor::Normal));
+        //m_tempCtrl_mid->SetTextColor(tempinput_text_colour);
+        //StateColor tempinput_border_colour(std::make_pair(*wxWHITE, (int)StateColor::Disabled), std::make_pair(wxColour(0, 150, 136), (int)StateColor::Focused),
+        //                                std::make_pair(wxColour(0, 150, 136), (int)StateColor::Hovered),std::make_pair(*wxWHITE, (int)StateColor::Normal));
+        m_tempCtrl_mid->SetBorderColor(tempinput_border_colour);
+        bSizer_control_temperature->Add(m_tempCtrl_mid, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+
+//***温度布局添加至垂直布局
+        m_panel_control_temperature->SetSizer(bSizer_control_temperature);
+        m_panel_control_temperature->Layout();
+        bSizer_control_temperature->Fit(m_panel_control_temperature);
+
+        bSizer_right->Add(m_panel_control_temperature,0, wxALL | wxEXPAND, 0);
+
+//***添加温度布局和灯布局之间的间隔
+        auto m_panel_separotor6 = new wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+        m_panel_separotor6->SetBackgroundColour(wxColour(240,240,240));
+        m_panel_separotor6->SetMinSize(wxSize(-1, FromDIP(10)));
+        m_panel_separotor6->SetMaxSize(wxSize(-1, FromDIP(10)));
+        bSizer_right->Add(m_panel_separotor6, 0, wxEXPAND, 0);
+
+//***灯控制布局
+        wxBoxSizer *bSizer_control_lamp = new wxBoxSizer(wxHORIZONTAL);
+        auto m_panel_control_lamp = new wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(-1, FromDIP(30)), wxTAB_TRAVERSAL);
+        m_panel_control_lamp->SetBackgroundColour(wxColour(255,255,255));
+
+        //显示文件信息按钮
+        m_device_info_button = new Button(m_panel_control_lamp, wxString(""), "device_file_info", 0, FromDIP(18));
+        m_device_info_button->SetFont(wxFont(wxFontInfo(16)));
+        m_device_info_button->SetBorderWidth(0);
+        m_device_info_button->SetBackgroundColor(wxColour(255,255,255));
+        m_device_info_button->SetBorderColor(wxColour(255,255,255));
+        //m_device_info_button->SetTextColor(wxColour(51,51,51));
+        m_device_info_button->SetMinSize((wxSize(FromDIP(108), FromDIP(29))));
+        m_device_info_button->SetCornerRadius(0);
+        bSizer_control_lamp->Add(m_device_info_button, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+
+        //显示灯控制按钮
+        m_lamp_control_button = new Button(m_panel_control_lamp, wxString(""), "device_lamp_control", 0, FromDIP(18));
+        m_lamp_control_button->SetFont(wxFont(wxFontInfo(16)));
+        m_lamp_control_button->SetBorderWidth(0);
+        m_lamp_control_button->SetBackgroundColor(wxColour(255,255,255));
+        m_lamp_control_button->SetBorderColor(wxColour(255,255,255));
+        //m_lamp_control_button->SetTextColor(wxColour(51,51,51));
+        m_lamp_control_button->SetMinSize((wxSize(FromDIP(108), FromDIP(29))));
+        m_lamp_control_button->SetCornerRadius(0);
+        bSizer_control_lamp->Add(m_lamp_control_button, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+
+        //显示过滤按钮
+        m_filter_button = new Button(m_panel_control_lamp, wxString(""), "device_filter", 0, FromDIP(18));
+        m_filter_button->SetFont(wxFont(wxFontInfo(16)));
+        m_filter_button->SetBorderWidth(0);
+        m_filter_button->SetBackgroundColor(wxColour(255,255,255));
+        m_filter_button->SetBorderColor(wxColour(255,255,255));
+        //m_filter_button->SetTextColor(wxColour(51,51,51));
+        m_filter_button->SetMinSize((wxSize(FromDIP(108), FromDIP(29))));
+        m_filter_button->SetCornerRadius(0);
+        bSizer_control_lamp->Add(m_filter_button, 0, wxALIGN_CENTER_VERTICAL | wxBOTTOM, FromDIP(4));
+
+//***灯控制布局添加至垂直布局
+        m_panel_control_lamp->SetSizer(bSizer_control_lamp);
+        m_panel_control_lamp->Layout();
+        bSizer_control_lamp->Fit(m_panel_control_lamp);
+
+        bSizer_right->Add(m_panel_control_lamp,0, wxALL | wxEXPAND, 0);
+
+//***
 
 //
 

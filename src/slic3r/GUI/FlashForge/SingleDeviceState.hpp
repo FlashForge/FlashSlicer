@@ -11,6 +11,7 @@
 #include "slic3r/GUI/wxMediaCtrl2.h"
 #include "slic3r/GUI/MediaPlayCtrl.h"
 #include "slic3r/GUI/Widgets/ProgressBar.hpp"
+#include "slic3r/GUI/Widgets/TempInput.hpp"
 //#include "slic3r/GUI/Widgets/StaticLine.hpp"
 
 namespace Slic3r { 
@@ -78,6 +79,20 @@ protected:
     ProgressBar* m_progress_bar;
 
     Label* m_material_weight_label;
+
+    Button* m_print_button;
+    Button* m_cancel_button;
+
+//temperature 
+    TempInput* m_tempCtrl_top;
+    TempInput* m_tempCtrl_bottom;
+    TempInput* m_tempCtrl_mid;
+
+    Button* m_device_info_button;
+    Button* m_lamp_control_button;
+    Button* m_filter_button;
+
+
 };
 
 
