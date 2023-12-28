@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "FlashNetwork.h"
 
 namespace Slic3r { namespace GUI {
 
@@ -14,6 +15,7 @@ enum ComErrno {
     COM_OK,
     COM_ERROR,
     COM_UNINITIALIZED,
+    COM_VERIFY_LAN_DEV_FAILED,
 };
 
 enum ComConnectMode {
@@ -28,7 +30,9 @@ struct com_token_info_t {
 };
 
 struct com_dev_data_t {
-    
+    com_dev_data_t() : devDetail(nullptr) {
+    }
+    fnet_dev_detail_t *devDetail;
 };
 
 }} // namespace Slic3r::GUI

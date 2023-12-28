@@ -22,13 +22,14 @@ public:
     decltype(&fnet_getVersion) getVersion;
     decltype(&fnet_getLanDevList) getLanDevList;
     decltype(&fnet_freeLanDevInfos) freeLanDevInfos;
+    decltype(&fnet_getLanDevDetail) getLanDevDetail;
     decltype(&fnet_getTokenByPassword) getTokenByPassword;
     decltype(&fnet_refreshToken) refreshToken;
     decltype(&fnet_freeTokenInfo) freeTokenInfo;
     decltype(&fnet_getWanDevList) getWanDevList;
     decltype(&fnet_freeWanDevList) freeWanDevList;
-    decltype(&fnet_getWanDevStatus) getWanDevStatus;
-    decltype(&fnet_freeWanDevStatus) freeWanDevStatus;
+    decltype(&fnet_getWanDevDetail) getWanDevDetail;
+    decltype(&fnet_freeDevDetail) freeDevDetail;
 
 public:
     FlashNetworkIntfc(const char *libraryPath);
