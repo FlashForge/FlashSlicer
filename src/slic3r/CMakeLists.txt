@@ -448,6 +448,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/BonjourDialog.cpp
     GUI/BedShapeDialog.hpp
     GUI/BedShapeDialog.cpp
+    GUI/TitleDialog.hpp
+    GUI/TitleDialog.cpp
+    GUI/ImageButton.hpp
+    GUI/ImageButton.cpp
     Utils/json_diff.hpp
     Utils/json_diff.cpp
     GUI/KBShortcutsDialog.hpp

@@ -158,7 +158,7 @@ void SendToPrinterDialog::on_rename_enter()
 }
 
 SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
-    : DPIDialog(static_cast<wxWindow *>(wxGetApp().mainframe), wxID_ANY, _L("Send to Printer SD card"), wxDefaultPosition, wxDefaultSize, wxCAPTION | wxCLOSE_BOX)
+    : TitleDialog(static_cast<wxWindow *>(wxGetApp().mainframe), _L("Send to Printer SD card"))
     , m_plater(plater), m_export_3mf_cancel(false)
 {
 #ifdef __WINDOWS__
@@ -172,17 +172,17 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     SetFont(wxGetApp().normal_font());
 
     // icon
-    std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
-    SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
+    //std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
+    //SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
     Freeze();
     SetBackgroundColour(m_colour_def_color);
 
-    m_sizer_main = new wxBoxSizer(wxVERTICAL);
+    m_sizer_main = MainSizer();//new wxBoxSizer(wxVERTICAL);
 
     m_sizer_main->SetMinSize(wxSize(0, -1));
     m_line_top = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
-    m_line_top->SetBackgroundColour(wxColour(166, 169, 170));
+    m_line_top->SetBackgroundColour(wxColour(255, 0, 0));
 
     m_scrollable_region       = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     m_sizer_scrollable_region = new wxBoxSizer(wxVERTICAL); 
@@ -513,7 +513,7 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(13));
 
     show_print_failed_info(false);
-    SetSizer(m_sizer_main);
+    //SetSizer(m_sizer_main);
     Layout();
     Fit();
     Thaw();

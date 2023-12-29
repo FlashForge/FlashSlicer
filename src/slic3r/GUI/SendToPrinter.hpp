@@ -38,11 +38,12 @@
 #include "Widgets/ScrolledWindow.hpp"
 #include <wx/simplebook.h>
 #include <wx/hashmap.h>
+#include "TitleDialog.hpp"
 
 namespace Slic3r {
 namespace GUI {
 
-class SendToPrinterDialog : public DPIDialog
+class SendToPrinterDialog : public TitleDialog
 {
 private:
 	void init_bind();
