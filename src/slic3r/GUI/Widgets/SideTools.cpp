@@ -24,7 +24,6 @@ namespace Slic3r { namespace GUI {
     m_arrow_img    = ScalableBitmap(this, "monitor_arrow", 14);
 
     m_none_printing_img = ScalableBitmap(this, "tab_monitor_active", 24);
-    m_none_arrow_img    = ScalableBitmap(this, "monitor_none_arrow", 14);
     m_none_add_img      = ScalableBitmap(this, "monitor_none_add", 14);
 
     m_wifi_none_img     = ScalableBitmap(this, "monitor_signal_no", 18);
@@ -141,9 +140,6 @@ void SideToolsPanel::doRender(wxDC &dc)
         dc.DrawBitmap(m_none_printing_img.bmp(), left, (size.y - m_none_printing_img.GetBmpSize().y) / 2);
 
         left += (m_none_printing_img.GetBmpSize().x + FromDIP(15));
-        dc.DrawBitmap(m_none_arrow_img.bmp(), left, (size.y - m_none_arrow_img.GetBmpSize().y) / 2);
-
-        left += (m_none_arrow_img.GetBmpSize().x + FromDIP(6));
         dc.SetFont(::Label::Body_14);
         dc.SetBackgroundMode(wxTRANSPARENT);
         dc.SetTextForeground(*wxWHITE);
