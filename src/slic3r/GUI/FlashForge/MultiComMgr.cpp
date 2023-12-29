@@ -90,7 +90,9 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
         QueueEvent(event.Clone());
     });
     comPtr->Bind(COM_DEV_DETAIL_UPDATE_EVENT, [this](const ComDevDetailUpdateEvent &event) {
-        m_datMap.at(event.id).devDetail = event.devDetail;
+        fnet_dev_detail_t *&devDetail = m_datMap.at(event.id).devDetail;
+        m_networkIntfc->freeDevDetail(devDetail);
+        devDetail = event.devDetail;
         QueueEvent(event.Clone());
     });
     comPtr->connect();
