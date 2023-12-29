@@ -177,8 +177,10 @@ MonitorPanel::~MonitorPanel()
     m_device_list_panel = new DeviceListPanel(m_tabpanel);
     m_tabpanel->AddPage(m_device_list_panel, _L("Device List"), "", true);
 
-    m_status_info_panel        = new StatusPanel(m_tabpanel);
-    m_tabpanel->AddPage(m_status_info_panel, _L("Status"), "", false);
+    //m_status_info_panel        = new StatusPanel(m_tabpanel);
+    //m_tabpanel->AddPage(m_status_info_panel, _L("Device Status"), "", false);
+    m_status_info_panel_page   = new SingleDeviceState(m_tabpanel);
+    m_tabpanel->AddPage(m_status_info_panel_page, _L("Device Status"), "", false);
 
     m_media_file_panel = new MediaFilePanel(m_tabpanel);
     //m_tabpanel->AddPage(m_media_file_panel, _L("SD Card"), "", false);
@@ -200,7 +202,7 @@ void MonitorPanel::set_default()
     last_conn_type = "undefined";
 
     /* reset status panel*/
-    m_status_info_panel->set_default();
+    //m_status_info_panel->set_default();
 
     /* reset side tool*/
     //m_bitmap_wifi_signal->SetBitmap(wxNullBitmap);
@@ -224,7 +226,7 @@ wxWindow* MonitorPanel::create_side_tools()
 
 void MonitorPanel::on_sys_color_changed()
 {
-    m_status_info_panel->on_sys_color_changed();
+    //m_status_info_panel->on_sys_color_changed();
     m_upgrade_panel->on_sys_color_changed();
     m_media_file_panel->Rescale();
 }
@@ -238,7 +240,8 @@ void MonitorPanel::msw_rescale()
     m_tabpanel->Rescale();
     //m_status_add_machine_panel->msw_rescale();
     m_device_list_panel->msw_rescale();
-    m_status_info_panel->msw_rescale();
+    //m_status_info_panel->msw_rescale();
+    m_status_info_panel_page->msw_rescale();
     m_media_file_panel->Rescale();
     m_upgrade_panel->msw_rescale();
     m_hms_panel->msw_rescale();
@@ -351,8 +354,8 @@ void MonitorPanel::update_all()
         }
     }
 
-    m_status_info_panel->obj = obj;
-    m_status_info_panel->m_media_play_ctrl->SetMachineObject(obj);
+    //m_status_info_panel->obj = obj;
+    //m_status_info_panel->m_media_play_ctrl->SetMachineObject(obj);
     m_upgrade_panel->update(obj);
     m_media_file_panel->SetMachineObject(obj);
     m_side_tools->update_status(obj);
@@ -380,9 +383,9 @@ void MonitorPanel::update_all()
     show_status(MONITOR_NORMAL);
 
 
-    if (m_status_info_panel->IsShown()) {
-        m_status_info_panel->update(obj);
-    }
+    // if (m_status_info_panel->IsShown()) {
+    //     m_status_info_panel->update(obj);
+    // }
 
     if (m_hms_panel->IsShown()) {
         m_hms_panel->update(obj);
@@ -471,7 +474,7 @@ void MonitorPanel::show_status(int status)
 Freeze();
     // update panels
     if (m_side_tools) { m_side_tools->show_status(status); };
-    m_status_info_panel->show_status(status);
+    //m_status_info_panel->show_status(status);
     m_hms_panel->show_status(status);
     m_upgrade_panel->show_status(status);
     m_media_file_panel->Enable(status == MonitorStatus::MONITOR_NORMAL);

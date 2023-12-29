@@ -143,9 +143,9 @@ set(SLIC3R_GUI_SOURCES
     GUI/GLSelectionRectangle.hpp
     GUI/Gizmos/GizmoObjectManipulation.cpp
     GUI/Gizmos/GizmoObjectManipulation.hpp
-	GUI/FlashForge/ComCommand.hpp
-	GUI/FlashForge/ComCommandQue.cpp
-	GUI/FlashForge/ComCommandQue.hpp
+    GUI/FlashForge/ComCommand.hpp
+    GUI/FlashForge/ComCommandQue.cpp
+    GUI/FlashForge/ComCommandQue.hpp
 	GUI/FlashForge/ComConnection.cpp
 	GUI/FlashForge/ComConnection.hpp
     GUI/FlashForge/DeviceListPanel.cpp
@@ -156,18 +156,20 @@ set(SLIC3R_GUI_SOURCES
 	GUI/FlashForge/FreeInDestructor.h
 	GUI/FlashForge/LoginDialog.cpp
     GUI/FlashForge/LoginDialog.hpp
-    GUI/FlashForge/MultiComDef.hpp
     GUI/FlashForge/MultiComEvent.cpp
-	GUI/FlashForge/MultiComEvent.hpp
+    GUI/FlashForge/MultiComEvent.hpp
+    GUI/FlashForge/MultiComDef.hpp
     GUI/FlashForge/MultiComMgr.cpp
     GUI/FlashForge/MultiComMgr.hpp
     GUI/FlashForge/MultiComUtils.cpp
     GUI/FlashForge/MultiComUtils.hpp
     GUI/FlashForge/Singleton.hpp
-	GUI/FlashForge/WaitEvent.cpp
-	GUI/FlashForge/WaitEvent.hpp
-	GUI/FlashForge/WanDevUpdateThd.cpp
-	GUI/FlashForge/WanDevUpdateThd.hpp
+    GUI/FlashForge/WaitEvent.cpp
+    GUI/FlashForge/WaitEvent.hpp
+    GUI/FlashForge/SingleDeviceState.cpp
+    GUI/FlashForge/SingleDeviceState.hpp
+    GUI/FlashForge/WanDevUpdateThd.cpp
+    GUI/FlashForge/WanDevUpdateThd.hpp
     GUI/GLModel.hpp
     GUI/GLModel.cpp
     GUI/GLTexture.hpp
