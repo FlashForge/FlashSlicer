@@ -45,6 +45,44 @@ private:
     wxListBox   *m_listBox;
 };
 
+class MachineItemPanel : public wxPanel
+{
+public:
+    MachineItemPanel(wxWindow *parent, int connectId = -1);
+
+private:
+    void initControl();
+    void setPanelBoxSizer();
+
+    void mouseDown(wxMouseEvent &event);
+    void mouseReleased(wxMouseEvent &event);
+    void mouseCaptureLost(wxMouseCaptureLostEvent &event);
+    void onEnterPanel(wxMouseEvent &event);
+    void onLeavePanel(wxMouseEvent &event);
+
+    void sendButtonEvent();
+
+    DECLARE_EVENT_TABLE()
+
+private:
+    wxStaticText *m_staticText_name;
+    wxStaticBitmap *m_staticBitmap_Icon;
+    wxStaticText   *m_staticText_position;
+    wxStaticText   *m_staticText_status;
+
+private:
+    int  m_connectId;
+    bool m_hovered   = false;
+    bool m_pressed   = false;
+    bool m_canFocus  = true;
+};
+
+class DevicePanel : public wxPanel
+{
+public:
+    DevicePanel(wxWindow *parent);
+};
+
 class DeviceListPanel : public wxPanel
 {
 private:
@@ -58,6 +96,8 @@ private:
     wxButton*       m_btn_mode;
     wxStaticBitmap* m_bitmap_no_device;
     wxStaticText*   m_staticText_no_device;
+    wxBoxSizer     *m_noDevice_sizer;
+    DevicePanel    *m_machinePanel;
 
 public:
     DeviceListPanel(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, 
@@ -74,6 +114,8 @@ private:
 
     void on_comboBox_position_clicked(wxMouseEvent &event);
     void on_comboBox_status_clicked(wxMouseEvent &event);
+    void onModelBtnClicked(wxCommandEvent &event);
+
 };
 
 } // GUI
