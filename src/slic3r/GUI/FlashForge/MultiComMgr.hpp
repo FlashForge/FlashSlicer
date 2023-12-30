@@ -53,6 +53,8 @@ private:
 
     void onConnectionExit(const ComConnectionExitEvent &event);
 
+    void onDevDetailUpdate(const ComDevDetailUpdateEvent &event);
+
 private:
     int                                      m_idNum;
     std::list<com_ptr_t>                     m_comPtrs;

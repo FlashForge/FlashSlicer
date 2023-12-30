@@ -55,6 +55,10 @@ void ComConnection::setAccessToken(const std::string &accessToken)
 
 void ComConnection::putCommand(const ComCommandPtr &command, int priority/* =3 */)
 {
+    ComSendGcode *sendGcode = dynamic_cast<ComSendGcode *>(command.get());
+    if (sendGcode != nullptr) {
+        sendGcode->setConectionData(m_id, this);
+    }
     m_commandQue.pushBack(command, priority, false);
 }
 

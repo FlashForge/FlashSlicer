@@ -14,7 +14,7 @@
 #define MAX_DEVICE_SN_LEN 128
 #define MAX_DEVICE_NAME_LEN 128
 
-typedef void (*fnet_progress_call_back_t)(double now, double total, void *data);
+typedef void (*fnet_progress_call_back_t)(long long now, long long total, void *data);
 
 #pragma pack(push, 4)
 

@@ -49,9 +49,27 @@ struct ComDevDetailUpdateEvent : public wxCommandEvent
     fnet_dev_detail_t *devDetail;
 };
 
+struct ComSendGcodeProgressEvent : public wxCommandEvent
+{
+    ComSendGcodeProgressEvent(wxEventType type, com_id_t _id, int _commandId,
+        double _now, double _total) 
+        : wxCommandEvent(type), id(_id), commandId(_commandId), now(_now), total(_total)
+    {
+    }
+    ComSendGcodeProgressEvent *Clone() const
+    {
+        return new ComSendGcodeProgressEvent(GetEventType(), id, commandId, now, total);
+    }
+    com_id_t id;
+    int commandId;
+    double now;
+    double total;
+};
+
 wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT, ComConnectionReadyEvent);
 wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, ComConnectionExitEvent);
 wxDECLARE_EVENT(COM_DEV_DETAIL_UPDATE_EVENT, ComDevDetailUpdateEvent);
+wxDECLARE_EVENT(COM_SEND_GCODE_PROGRESS_EVENT, ComSendGcodeProgressEvent);
 
 }} // namespace Slic3r::GUI
 

@@ -1,8 +1,10 @@
 #ifndef slic3r_GUI_ComCommand_hpp_
 #define slic3r_GUI_ComCommand_hpp_
 
+#include <wx/event.h>
 #include "FlashNetworkIntfc.h"
 #include "MultiComDef.hpp"
+#include "MultiComEvent.hpp"
 #include "MultiComUtils.hpp"
 
 namespace Slic3r { namespace GUI {
@@ -31,7 +33,7 @@ public:
     virtual ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &accessToken,
         const std::string &deviceId) = 0;
 
-private:
+protected:
     int m_commandId;
 };
 
@@ -71,6 +73,9 @@ public:
     ComSendGcode(const std::string &gcodeFileName, const std::string &thumbFileName,
         bool printNow, bool levelingBeforePrint, int commandId = -1)
         : ComCommand(commandId)
+        , m_progress(0)
+        , m_comId(ComInvalidId)
+        , m_evtHandler(nullptr)
         , m_gcodeFileName(gcodeFileName)
         , m_thumbFileName(thumbFileName)
     {
@@ -78,8 +83,8 @@ public:
         m_sendGcodeData.thumbFileName = m_thumbFileName.c_str();
         m_sendGcodeData.printNow = printNow;
         m_sendGcodeData.levelingBeforePrint = levelingBeforePrint;
-        m_sendGcodeData.callback = nullptr;
-        m_sendGcodeData.callbackData = nullptr;
+        m_sendGcodeData.callback = callback;
+        m_sendGcodeData.callbackData = this;
     }
     ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &ip,
         unsigned int port, const std::string &serialNumber, const std::string &checkCode)
@@ -93,13 +98,28 @@ public:
     {
         return COM_ERROR;
     }
-    void setCallback(fnet_progress_call_back_t callback, void *callbackData)
+    void setConectionData(com_id_t comId, wxEvtHandler *evtHandler)
     {
-        m_sendGcodeData.callback = callback;
-        m_sendGcodeData.callbackData = callbackData;
+        m_comId = comId;
+        m_evtHandler = evtHandler;
     }
 
 private:
+    static void callback(long long now, long long total, void *callbackData)
+    {
+        double progress = (double)now / total;
+        ComSendGcode *inst = (ComSendGcode *) callbackData;
+        if (progress - inst->m_progress > 0.025 && inst->m_evtHandler != nullptr) {
+            inst->m_evtHandler->QueueEvent(new ComSendGcodeProgressEvent(
+                COM_SEND_GCODE_PROGRESS_EVENT, inst->m_comId, inst->m_commandId, now, total));
+            inst->m_progress = progress;
+        }
+    }
+
+private:
+    double m_progress;
+    com_id_t m_comId;
+    wxEvtHandler *m_evtHandler;
     std::string m_gcodeFileName;
     std::string m_thumbFileName;
     fnet_send_gcode_data_t m_sendGcodeData;
