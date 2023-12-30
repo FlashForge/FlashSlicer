@@ -11,11 +11,21 @@
 #define FNET_API
 #endif
 
+#define MAX_DEVICE_SN_LEN 128
+#define MAX_DEVICE_NAME_LEN 128
+
+typedef void (*fnet_progress_call_back_t)(double now, double total, void *data);
 
 #pragma pack(push, 4)
 
-#define MAX_DEVICE_SN_LEN 128
-#define MAX_DEVICE_NAME_LEN 128
+typedef struct fnet_send_gcode_data {
+    const char *gcodeFileName;  // utf-8
+    const char *thumbFileName;  // utf-8, wan only
+    int printNow;               // 1 true, 0 false
+    int levelingBeforePrint;    // 1 true, 0 false
+    fnet_progress_call_back_t callback;
+    void *callbackData;
+} fnet_send_gcode_data_t;
 
 typedef struct fnet_lan_dev_info {
     char serialNumber[MAX_DEVICE_SN_LEN];
@@ -121,6 +131,9 @@ FNET_API int fnet_getLanDevDetail(const char *ip, unsigned short port, const cha
     const char *checkCode, fnet_dev_detail_t **detail);
 
 FNET_API void fnet_freeDevDetail(fnet_dev_detail_t *detail);
+
+FNET_API int fnet_lanDevSendGcode(const char *ip, unsigned short port, const char *serialNumber,
+    const char *checkCode, const fnet_send_gcode_data_t *sendGcodeData);
 
 FNET_API int fnet_getTokenByPassword(const char *userName, const char *password,
     fnet_token_info_t **tokenInfo);

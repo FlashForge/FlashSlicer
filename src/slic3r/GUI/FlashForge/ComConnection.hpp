@@ -37,6 +37,8 @@ public:
 
     void setAccessToken(const std::string &accessToken);
 
+    void putCommand(const ComCommandPtr &command, int priority = 3);
+
 private:
     void run();
 

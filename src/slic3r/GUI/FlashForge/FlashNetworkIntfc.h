@@ -22,6 +22,7 @@ public:
     decltype(&fnet_getVersion) getVersion;
     decltype(&fnet_getLanDevList) getLanDevList;
     decltype(&fnet_freeLanDevInfos) freeLanDevInfos;
+    decltype(&fnet_lanDevSendGcode) lanDevSendGcode;
     decltype(&fnet_getLanDevDetail) getLanDevDetail;
     decltype(&fnet_getTokenByPassword) getTokenByPassword;
     decltype(&fnet_refreshToken) refreshToken;

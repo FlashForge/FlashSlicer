@@ -26,6 +26,7 @@ FlashNetworkIntfc::FlashNetworkIntfc(const char *libraryPath)
     INIT_FUNC_PTR(getVersion, fnet_getVersion);
     INIT_FUNC_PTR(getLanDevList, fnet_getLanDevList);
     INIT_FUNC_PTR(freeLanDevInfos, fnet_freeLanDevInfos);
+    INIT_FUNC_PTR(lanDevSendGcode, fnet_lanDevSendGcode);
     INIT_FUNC_PTR(getLanDevDetail, fnet_getLanDevDetail);
     INIT_FUNC_PTR(getTokenByPassword, fnet_getTokenByPassword);
     INIT_FUNC_PTR(refreshToken, fnet_refreshToken);
@@ -34,7 +35,7 @@ FlashNetworkIntfc::FlashNetworkIntfc(const char *libraryPath)
     INIT_FUNC_PTR(freeWanDevList, fnet_freeWanDevList);
     INIT_FUNC_PTR(getWanDevDetail, fnet_getWanDevDetail);
     INIT_FUNC_PTR(freeDevDetail, fnet_freeDevDetail);
-    if (initlize() == 0) {
+    if (initlize() == FNET_OK) {
         m_isOk = true;
     }
 }

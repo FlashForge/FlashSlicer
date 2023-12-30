@@ -63,7 +63,7 @@ com_id_list_t MultiComMgr::getReadyDevList()
     return idList;
 }
 
-const com_dev_data_t &MultiComMgr::devData(com_id_t &id, bool *valid /* = nullptr */)
+const com_dev_data_t &MultiComMgr::devData(com_id_t id, bool *valid /* = nullptr */)
 {
     auto it = m_ptrMap.left.find(id);
     if (valid != nullptr) {
@@ -74,6 +74,16 @@ const com_dev_data_t &MultiComMgr::devData(com_id_t &id, bool *valid /* = nullpt
     } else {
         return m_datMap.at(it->get_left());
     }
+}
+
+bool MultiComMgr::putCommand(com_id_t id, const ComCommandPtr &command)
+{
+    auto it = m_ptrMap.left.find(id);
+    if (it == m_ptrMap.left.end()) {
+        return false;
+    }
+    m_ptrMap.left.at(id)->putCommand(command);
+    return true;
 }
 
 void MultiComMgr::initConnection(const com_ptr_t &comPtr)

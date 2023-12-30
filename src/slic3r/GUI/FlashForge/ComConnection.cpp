@@ -53,6 +53,11 @@ void ComConnection::setAccessToken(const std::string &accessToken)
     m_accessToken = accessToken;
 }
 
+void ComConnection::putCommand(const ComCommandPtr &command, int priority/* =3 */)
+{
+    m_commandQue.pushBack(command, priority, false);
+}
+
 void ComConnection::run()
 {
     ComGetDevDetail getDevDetail;
