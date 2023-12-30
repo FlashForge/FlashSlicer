@@ -32,22 +32,22 @@ struct ComConnectionReadyEvent : public ComEvent
 
 struct ComConnectionExitEvent : public ComEvent
 {
-    ComConnectionExitEvent(wxEventType type, com_id_t _id, ComErrno _exitCode)
+    ComConnectionExitEvent(wxEventType type, com_id_t _id, ComErrno _ret)
         : ComEvent(type, _id, 0)
-        , exitCode(_exitCode)
+        , ret(_ret)
     {
     }
     ComConnectionExitEvent *Clone() const
     {
-        return new ComConnectionExitEvent(GetEventType(), id, exitCode);
+        return new ComConnectionExitEvent(GetEventType(), id, ret);
     }
-    ComErrno exitCode;
+    ComErrno ret;
 };
 
 struct ComDevDetailUpdateEvent : public ComEvent
 {
     ComDevDetailUpdateEvent(wxEventType type,  com_id_t _id, int _commandId, fnet_dev_detail_t *_devDetail)
-        : ComEvent(type, id, _commandId)
+        : ComEvent(type, _id, _commandId)
         , devDetail(_devDetail)
     {
     }
@@ -74,10 +74,25 @@ struct ComSendGcodeProgressEvent : public ComEvent
     double total;
 };
 
+struct ComSendGcodeFinishEvent : public ComEvent
+{
+    ComSendGcodeFinishEvent(wxEventType type, com_id_t _id, int _commandId, ComErrno _ret)
+        : ComEvent(type, _id, _commandId)
+        , ret(_ret)
+    {
+    }
+    ComSendGcodeFinishEvent *Clone() const
+    {
+        return new ComSendGcodeFinishEvent(GetEventType(), id, commandId, ret);
+    }
+    ComErrno ret;
+};
+
 wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT, ComConnectionReadyEvent);
 wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, ComConnectionExitEvent);
 wxDECLARE_EVENT(COM_DEV_DETAIL_UPDATE_EVENT, ComDevDetailUpdateEvent);
 wxDECLARE_EVENT(COM_SEND_GCODE_PROGRESS_EVENT, ComSendGcodeProgressEvent);
+wxDECLARE_EVENT(COM_SEND_GCODE_FINISH_EVENT, ComSendGcodeFinishEvent);
 
 }} // namespace Slic3r::GUI
 

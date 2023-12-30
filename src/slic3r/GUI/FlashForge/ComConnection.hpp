@@ -46,7 +46,7 @@ private:
 
     std::string getAccessToken();
 
-    void processCommand(ComCommand *command);
+    void processCommand(ComCommand *command, ComErrno ret);
 
 private:
     com_id_t                        m_id;

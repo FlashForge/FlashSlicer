@@ -65,19 +65,19 @@ void ComConnection::putCommand(const ComCommandPtr &command, int priority/* =3 *
 void ComConnection::run()
 {
     ComGetDevDetail getDevDetail;
-    ComErrno exitCode;
+    ComErrno ret;
     if (m_connectMode == COM_CONNECT_LAN) {
-        exitCode = getDevDetail.exec(m_networkIntfc, m_ip, m_port, m_serialNumber, m_checkCode);
+        ret = getDevDetail.exec(m_networkIntfc, m_ip, m_port, m_serialNumber, m_checkCode);
     } else {
-        exitCode = getDevDetail.exec(m_networkIntfc, m_accessToken, m_deviceId);
+        ret = getDevDetail.exec(m_networkIntfc, m_accessToken, m_deviceId);
     }
-    if (exitCode != COM_OK) {
-        QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, m_id, exitCode));
+    if (ret != COM_OK) {
+        QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, m_id, ret));
         return;
     }
     QueueEvent(new ComConnectionReadyEvent(COM_CONNECTION_READY_EVENT, m_id));
-    exitCode = commandLoop();
-    QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, m_id, exitCode));
+    ret = commandLoop();
+    QueueEvent(new ComConnectionExitEvent(COM_CONNECTION_EXIT_EVENT, m_id, ret));
 }
 
 ComErrno ComConnection::commandLoop()
@@ -92,8 +92,8 @@ ComErrno ComConnection::commandLoop()
             } else {
                 ret = frontCommand->exec(m_networkIntfc, m_accessToken, m_deviceId);
             }
+            processCommand(frontCommand.get(), ret);
             if (ret == COM_OK) {
-                processCommand(frontCommand.get());
                 errorCnt = 0;
             } else if (ret == COM_VERIFY_LAN_DEV_FAILED || ++errorCnt > 5) {
                 return ret;
@@ -113,12 +113,19 @@ std::string ComConnection::getAccessToken()
     return m_accessToken;
 }
 
-void ComConnection::processCommand(ComCommand *command)
+void ComConnection::processCommand(ComCommand *command, ComErrno ret)
 {
-    ComGetDevDetail *getDevDetail = dynamic_cast<ComGetDevDetail *>(command);
-    if (getDevDetail != nullptr) {
-        QueueEvent(new ComDevDetailUpdateEvent(COM_DEV_DETAIL_UPDATE_EVENT, m_id,
-            getDevDetail->commandId(), getDevDetail->devDetail()));
+    ComSendGcode *sendGcode = dynamic_cast<ComSendGcode *>(command);
+    if (sendGcode != nullptr) {
+        QueueEvent(new ComSendGcodeFinishEvent(
+            COM_SEND_GCODE_FINISH_EVENT, m_id, sendGcode->commandId(), ret));
+    }
+    if (ret == COM_OK) {
+        ComGetDevDetail *getDevDetail = dynamic_cast<ComGetDevDetail *>(command);
+        if (getDevDetail != nullptr) {
+            QueueEvent(new ComDevDetailUpdateEvent(COM_DEV_DETAIL_UPDATE_EVENT, m_id,
+                getDevDetail->commandId(), getDevDetail->devDetail()));
+        }
     }
 }
 
