@@ -52,7 +52,6 @@ private:
     ScalableBitmap  m_arrow_img;
 
     ScalableBitmap  m_none_printing_img;
-    ScalableBitmap  m_none_arrow_img;
     ScalableBitmap  m_none_add_img;
 
     ScalableBitmap  m_wifi_none_img;

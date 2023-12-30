@@ -48,6 +48,7 @@
 #include "slic3r/GUI/HMSPanel.hpp"
 #include "slic3r/GUI/AmsWidgets.hpp"
 #include "slic3r/GUI/FlashForge/DeviceListPanel.hpp"
+#include "slic3r/GUI/FlashForge/SingleDeviceState.hpp"
 #include "Widgets/SideTools.hpp"
 #include "SelectMachine.hpp"
 
@@ -82,6 +83,7 @@ private:
     AddMachinePanel*    m_status_add_machine_panel;
 	DeviceListPanel* 	m_device_list_panel;
     StatusPanel*        m_status_info_panel;
+    SingleDeviceState*  m_status_info_panel_page;
     MediaFilePanel*     m_media_file_panel;
     UpgradePanel*       m_upgrade_panel;
     HMSPanel*           m_hms_panel;
