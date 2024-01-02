@@ -2,7 +2,7 @@
 #define slic3r_GUI_TitleDialog_hpp_
 #include <wx/window.h>
 #include "GUI_Utils.hpp"
-#include "ImageButton.hpp"
+//#include "ImageButton.hpp"
 
 
 namespace Slic3r::GUI {
@@ -33,8 +33,8 @@ private:
     wxString    m_title;
     wxPoint     m_dragStartMouse;
     wxPoint     m_dragStartWindow;
-    wxStaticText* m_titleLbl;
-    ImageButton* m_closeBtn;
+    wxStaticText*   m_titleLbl;
+    wxBitmapButton* m_closeBtn;
 };
 
 
@@ -47,8 +47,12 @@ public:
     void SetTitleBackgroundColor(const wxColour& color);
 
     wxBoxSizer* MainSizer();
+
+protected:    
+    void OnPaint(wxPaintEvent& event);
     
 protected:
+    int             m_borderRadius;
     TitleBar*       m_titleBar;
     wxBoxSizer*     m_mainSizer;
 };
