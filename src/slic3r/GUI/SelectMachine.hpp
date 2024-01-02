@@ -202,8 +202,6 @@ public:
 private:
     int                               m_my_devices_count{0};
     int                               m_other_devices_count{0};
-    wxWindow*                         m_placeholder_panel{nullptr};
-    wxHyperlinkCtrl*                  m_hyperlink{nullptr};
     wxBoxSizer *                      m_sizer_body{nullptr};
     wxBoxSizer *                      m_sizer_my_devices{nullptr};
     wxBoxSizer *                      m_sizer_other_devices{nullptr};
@@ -437,7 +435,6 @@ public:
     void Enable_Send_Button(bool en);
     void on_dpi_changed(const wxRect& suggested_rect) override;
     void update_user_machine_list();
-    void update_lan_machine_list();
     void stripWhiteSpace(std::string& str);
     void update_ams_status_msg(wxString msg, bool is_warning = false);
     void update_priner_status_msg(wxString msg, bool is_warning = false);

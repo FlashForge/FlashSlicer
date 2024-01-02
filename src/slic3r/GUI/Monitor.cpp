@@ -102,8 +102,6 @@ AddMachinePanel::~AddMachinePanel() {
     SetDoubleBuffered(true);
 #endif //__WINDOWS__
 
-    init_bitmap();
-
     init_tabpanel();
 
     m_main_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -130,16 +128,6 @@ MonitorPanel::~MonitorPanel()
     if (m_refresh_timer)
         m_refresh_timer->Stop();
     delete m_refresh_timer;
-}
-
- void MonitorPanel::init_bitmap()
-{
-    m_signal_strong_img = create_scaled_bitmap("monitor_signal_strong", nullptr, 24);
-    m_signal_middle_img = create_scaled_bitmap("monitor_signal_middle", nullptr, 24);
-    m_signal_weak_img = create_scaled_bitmap("monitor_signal_weak", nullptr, 24);
-    m_signal_no_img   = create_scaled_bitmap("monitor_signal_no", nullptr, 24);
-    m_printer_img = create_scaled_bitmap("monitor_printer", nullptr, 26);
-    m_arrow_img = create_scaled_bitmap("monitor_arrow",nullptr, 14);
 }
 
  void MonitorPanel::init_timer()
@@ -233,8 +221,6 @@ void MonitorPanel::on_sys_color_changed()
 
 void MonitorPanel::msw_rescale()
 {
-    init_bitmap();
-
     /* side_tool rescale */
     m_side_tools->msw_rescale();
     m_tabpanel->Rescale();
