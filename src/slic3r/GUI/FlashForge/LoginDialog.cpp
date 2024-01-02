@@ -30,37 +30,22 @@ namespace GUI {
 
     void CountdownButton::OnTimer(wxTimerEvent& event)
     {
-        std::thread t([this]()
+        // 更新倒计时
+        m_countdown--;
+        if (m_countdown > 0)
         {
-            // 执行更新文本的操作
-            //wxCallAfter([this]()
-            {
-				// 更新倒计时
-                m_countdown--;
-                //
-                wxGetApp().reset_to_active();
-                SetFocus();
-                wxWindow* parent = m_parent->GetParent();
-                if(parent){
-                    parent->SetFocus();
-                }
-            if (m_countdown > 0)
-            {
-                // 更新按钮上的文本
-                SetLabel(wxString::Format("%d second", m_countdown));
-            }
-            else
-            {
-                // 停止定时器
-                m_timer.Stop();
-                m_countdown = 60;
+            // 更新按钮上的文本
+            SetLabel(wxString::Format("%d second", m_countdown));
+        }
+        else
+        {
+            // 停止定时器
+            m_timer.Stop();
+            m_countdown = 60;
 
-                // 恢复按钮上原来的文本
-                SetLabel("Get Code");
-            }
-            };
-        });
-        t.detach();
+            // 恢复按钮上原来的文本
+            SetLabel("Get Code");
+        }
     }
 
     void CountdownButton::OnButtonClick(wxCommandEvent& event)
@@ -355,10 +340,10 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     m_get_code_button->SetWindowStyleFlag(wxBORDER_NONE); //去除边框线
     m_get_code_button->SetMinSize(wxSize(114,54));
     m_get_code_button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event){
-        //m_get_code_button->startTimer();
-        m_get_code_button->OnButtonClick(event);
+        m_get_code_button->startTimer();
+        //m_get_code_button->OnButtonClick(event);
     });
-    Bind(EVT_UPDATE_TEXT_LOGIN, &LoginDialog::OnUpdateText, this);
+    //Bind(EVT_UPDATE_TEXT_LOGIN, &LoginDialog::OnUpdateText, this);
 
 
     //adjust layout
