@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Bambu GCode viewer
-Exec=orca-slicer --gcodeviewer %F
-Icon=OrcaSlicer-gcodeviewer
+Name=Flash GCode viewer
+Exec=flash-slicer --gcodeviewer %F
+Icon=FlashSlicer-gcodeviewer
 Terminal=false
 Type=Application
 MimeType=text/x.gcode;
