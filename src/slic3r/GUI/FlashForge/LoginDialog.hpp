@@ -5,49 +5,32 @@
 #include <wx/intl.h>
 
 #include "slic3r/GUI/GUI_Utils.hpp"
+#include "slic3r/GUI/Widgets/Button.hpp"
 //#include "slic3r/GUI/Widgets/StaticLine.hpp"
 
 namespace Slic3r { 
 namespace GUI {
 
-class CountdownButton : public wxButton
+//wxDEFINE_EVENT(EVT_SET_FINISH_MAPPING, wxCommandEvent);
+wxDECLARE_EVENT(EVT_UPDATE_TEXT_LOGIN, wxCommandEvent);
+
+class CountdownButton : public Button
 {
 public:
-    CountdownButton(wxWindow* parent, wxWindowID id, const wxString& label, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0)
-        : wxButton(parent, id, label, pos, size, style), m_countdown(60)
-    {
-        // 创建一个 wxTimer 对象，并将其绑定到当前控件上
-        m_timer.Bind(wxEVT_TIMER, &CountdownButton::OnTimer, this);
-
-    }
+    CountdownButton(wxWindow* parent, wxString text, wxString icon = "", long style = 0, int iconSize = 0, wxWindowID btn_id = wxID_ANY);
     void startTimer(){
         // 启动定时器，每秒钟更新一次按钮上的文本
         m_timer.Start(1000);
     }
-
+    void OnButtonClick(wxCommandEvent& event);
+    //void OnUpdateText(wxCommandEvent& event);
 private:
-    void OnTimer(wxTimerEvent& event)
-    {
-        // 更新倒计时
-        m_countdown--;
-
-        if (m_countdown > 0)
-        {
-            // 更新按钮上的文本
-            SetLabel(wxString::Format("%d second", m_countdown));
-        }
-        else
-        {
-            // 停止定时器
-            m_timer.Stop();
-
-            // 恢复按钮上原来的文本
-            SetLabel("Get Code");
-        }
-    }
+    void OnTimer(wxTimerEvent& event);
 
     wxTimer m_timer;
     int m_countdown;
+    wxWindow* m_parent;
+    wxMutex m_mutex;
 };
 
 class VerifycodeTextCtrl : public wxPanel
@@ -83,23 +66,7 @@ private:
 class UsrnameTextCtrl : public wxPanel
 {
 public:
-    UsrnameTextCtrl(wxBitmap usrnamebitmap,wxWindow *parent, wxWindowID id = wxID_ANY)
-        : wxPanel(parent, id)
-    {
-        // 创建账号输入框和人像图标
-        m_usr_staticbitmap = new wxStaticBitmap(this, wxID_ANY,usrnamebitmap);
-        m_user_name_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
-        m_user_name_text_ctrl->SetHint("Phone Number / email");
-        m_user_name_text_ctrl->SetMinSize(wxSize(295,33));
-
-        // 创建垂直布局并添加控件
-        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
-        hbox->Add(m_usr_staticbitmap,wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT, 5));
-        hbox->Add(m_user_name_text_ctrl, wxSizerFlags().Expand().Border(wxTOP, 12));
-
-        // 设置面板的布局
-        SetSizerAndFit(hbox);
-    }
+    UsrnameTextCtrl(wxBitmap usrnamebitmap,wxWindow *parent, wxWindowID id = wxID_ANY);
 
     wxString GetValue(){
         return m_user_name_text_ctrl->GetValue();
@@ -113,61 +80,14 @@ private:
 class PasswordTextCtrl : public wxPanel
 {
 public:
-    PasswordTextCtrl(wxBitmap lockbitmap,wxBitmap eyeoffbitmapBtn,wxBitmap eyeonbitmapBtn,wxWindow *parent, wxWindowID id = wxID_ANY)
-        : wxPanel(parent, id)
-    {
-        m_eye_off_bitmap = eyeoffbitmapBtn;
-        m_eye_on_bitmap = eyeonbitmapBtn;
-
-        // 创建密码输入框和眼睛图标按钮
-        m_lock_staticbitmap = new wxStaticBitmap(this, wxID_ANY,lockbitmap);
-        m_password_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD | wxTE_LEFT | wxBORDER_NONE);
-        m_password_text_ctrl->SetHint("Password");
-        m_password_text_ctrl->SetMinSize(wxSize(241,33));
-        m_showPassword_staticbitmap = new wxStaticBitmap(this, wxID_ANY,eyeoffbitmapBtn);
-
-        // 设置眼睛图标按钮的大小和工具提示文本
-        m_showPassword_staticbitmap->SetSize(wxSize(20, 16));
-        m_showPassword_staticbitmap->SetToolTip(wxT("Show password"));
-
-        // 创建垂直布局并添加控件
-        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
-        hbox->Add(m_lock_staticbitmap,wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT, 5));
-        hbox->Add(m_password_text_ctrl, wxSizerFlags().Expand().Border(wxTOP, 12));
-        hbox->Add(m_showPassword_staticbitmap, wxSizerFlags().Center().Border(wxLEFT | wxRIGHT, 5));
-
-        // 设置面板的布局
-        SetSizerAndFit(hbox);
-
-        // 连接信号和槽函数
-        m_showPassword_staticbitmap->Bind(wxEVT_LEFT_UP, [this](wxMouseEvent& e){OnShowPasswordButtonClicked(e);});
-    }
+    PasswordTextCtrl(wxBitmap lockbitmap,wxBitmap eyeoffbitmapBtn,wxBitmap eyeonbitmapBtn,wxWindow *parent, wxWindowID id = wxID_ANY);
 
     wxString GetValue(){
         return m_password_text_ctrl->GetValue();
     }
 
 private:
-    void OnShowPasswordButtonClicked(wxMouseEvent& event)
-    {
-        if (m_password_text_ctrl->GetWindowStyleFlag() & wxTE_PASSWORD) {
-            // 如果密码输入框当前为密码模式，则切换为明文模式
-            m_password_text_ctrl->SetWindowStyleFlag(wxTE_PROCESS_ENTER);
-            m_password_text_ctrl->SetWindowStyle(wxTE_PROCESS_ENTER);
-            m_password_text_ctrl->SetValue(m_password_text_ctrl->GetValue());
-            m_showPassword_staticbitmap->SetBitmap(m_eye_on_bitmap);
-            m_showPassword_staticbitmap->SetToolTip(wxT("Hide password"));
-            m_password_text_ctrl->Refresh();
-        } else {
-            // 如果密码输入框当前为明文模式，则切换为密码模式
-            m_password_text_ctrl->SetWindowStyleFlag(wxTE_PASSWORD);
-            m_password_text_ctrl->SetWindowStyle(wxTE_PASSWORD);
-            m_password_text_ctrl->SetValue(m_password_text_ctrl->GetValue());
-            m_showPassword_staticbitmap->SetBitmap(m_eye_off_bitmap);
-            m_showPassword_staticbitmap->SetToolTip(wxT("Show password"));
-            m_password_text_ctrl->Refresh();
-        }
-    }
+    void OnShowPasswordButtonClicked(wxMouseEvent& event);
 
 private:
     wxTextCtrl*      m_password_text_ctrl;
@@ -181,6 +101,7 @@ class LoginDialog : public DPIDialog
 {
 public:
     LoginDialog();
+    void OnUpdateText(wxCommandEvent& event);
 
 protected:
     void on_dpi_changed(const wxRect &suggested_rect) override;
