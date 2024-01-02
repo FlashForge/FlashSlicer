@@ -96,7 +96,9 @@ public:
     ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &accessToken,
         const std::string &deviceId)
     {
-        return COM_ERROR;
+        int ret = networkIntfc->wanDevSendGcode(
+            accessToken.c_str(), deviceId.c_str(), &m_sendGcodeData);
+        return MultiComUtils::networkIntfcRet2ComErrno(ret);
     }
     void setConectionData(com_id_t comId, wxEvtHandler *evtHandler)
     {
