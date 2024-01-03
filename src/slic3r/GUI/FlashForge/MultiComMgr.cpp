@@ -6,7 +6,7 @@ namespace Slic3r { namespace GUI {
 MultiComMgr::MultiComMgr()
     : m_idNum(0)
 {
-    m_datMap.emplace(ComInvalidId, com_dev_data_t());
+    m_datMap.emplace(ComInvalidId, com_dev_data_t{COM_CONNECT_LAN, nullptr});
 }
 
 bool MultiComMgr::initalize(const std::string &newtworkDllPath)
@@ -90,7 +90,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 {
     m_comPtrs.push_back(comPtr);
     m_ptrMap.insert(com_ptr_map_val_t(comPtr->id(), comPtr.get()));
-    m_datMap.emplace(comPtr->id(), com_dev_data_t());
+    m_datMap.emplace(comPtr->id(), com_dev_data_t{comPtr->connectMode(), nullptr});
     m_serialNumberSet.insert(comPtr->serialNumber());
 
     comPtr->Bind(COM_CONNECTION_READY_EVENT, [this](const ComConnectionReadyEvent &event) {
