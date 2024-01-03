@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/nowide/convert.hpp>
+#include <nlohmann/json.hpp>
 
 #include <wx/stdpaths.h>
 #include <wx/imagpng.h>
@@ -48,6 +49,7 @@
 #include <wx/splash.h>
 #include <wx/fontutil.h>
 #include <wx/glcanvas.h>
+#include <wx/socket.h>
 
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Model.hpp"
@@ -137,6 +139,7 @@
 #endif
 
 using namespace std::literals;
+using json = nlohmann::json;
 namespace pt = boost::property_tree;
 
 namespace Slic3r {
@@ -3466,6 +3469,24 @@ void GUI_App::ShowUserLogin(bool show)
 {
     // BBS: User Login Dialog
     if(show){
+        wxIPV4address addr;
+        addr.Hostname(wxGetHostName());
+        addr.Service(0);
+        wxString ip = addr.IPAddress();
+        bool isDomestic = ip.StartsWith("10.") ||
+                  ip.StartsWith("172.") ||
+                  ip.StartsWith("192.") ||
+                  ip.StartsWith("202.") ||
+                  ip.StartsWith("203.") ||
+                  ip.StartsWith("210.") ||
+                  ip.StartsWith("211.") ||
+                  ip.StartsWith("219.") ||
+                  ip.StartsWith("220.") ||
+                  ip.StartsWith("221.") ||
+                  ip.StartsWith("222.");
+        if(!isDomestic){
+            return;
+        }
         try{
             if(!m_login_dlg){
                 m_login_dlg = new LoginDialog();
@@ -3500,6 +3521,7 @@ void GUI_App::ShowUserLogin(bool show)
     // } else {
     //     if (login_dlg)
     //         login_dlg->EndModal(wxID_OK);
+    // }
     // }
 }
 
@@ -3698,6 +3720,7 @@ void GUI_App::request_login(bool show_user_info)
 
 void GUI_App::get_login_info()
 {
+    return;
     if (m_agent) {
         if (m_agent->is_user_login()) {
             std::string login_cmd = m_agent->build_login_cmd();
@@ -3828,7 +3851,7 @@ std::string GUI_App::handle_web_request(std::string cmd)
             }
             else if (command_str.compare("homepage_logout") == 0) {
                 CallAfter([this] {
-                    wxGetApp().request_user_logout();
+                    wxGetApp().handle_login_out();
                 });
             }
             else if (command_str.compare("homepage_modeldepot") == 0) {
@@ -3966,6 +3989,40 @@ std::string GUI_App::handle_web_request(std::string cmd)
         return "";
     }
     return "";
+}
+
+void GUI_App::handle_login_result(std::string url, std::string name)
+{
+    // 原始的JSON字符串
+    std::string jsonStr = R"({
+        "command": "studio_userlogin",
+        "data": {
+            "avatar": "https://public-cdn.bambulab.cn/default/avatar.png",
+            "name": "ShanZhu"
+        },
+        "sequence_id": "10001"
+    })";
+
+    // 将JSON字符串解析为JSON对象
+    json jsonObj = json::parse(jsonStr);
+
+    // 替换"avatar"的值
+    jsonObj["data"]["avatar"] = "https://public-cdn.bambulab.cn/default/avatar.png";
+    jsonObj["data"]["name"] = name;
+
+    // 将JSON对象转换为字符串
+    std::string newJsonStr = jsonObj.dump();
+
+    wxString strJS = wxString::Format("window.postMessage(%s)", newJsonStr);
+    GUI::wxGetApp().run_script(strJS);
+}
+
+void GUI_App::handle_login_out()
+{
+    // 原始的JSON字符串
+    std::string jsonStr = R"({"command":"studio_useroffline","sequence_id":"10001"})";
+    wxString strJS = wxString::Format("window.postMessage(%s)", jsonStr);
+    GUI::wxGetApp().run_script(strJS);
 }
 
 void GUI_App::handle_script_message(std::string msg)
