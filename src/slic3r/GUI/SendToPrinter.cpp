@@ -172,7 +172,7 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     SetFont(wxGetApp().normal_font());
 
     // icon
-    //std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
+    //std::string icon_path = (boost::format("%1%/images/FlashSlicerTitle.ico") % resources_dir()).str();
     //SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
     Freeze();
@@ -192,9 +192,9 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
 
     sizer_thumbnail = new wxBoxSizer(wxVERTICAL);
     m_thumbnailPanel = new ThumbnailPanel(m_panel_image);
-    m_thumbnailPanel->SetSize(wxSize(FromDIP(256), FromDIP(256)));
-    m_thumbnailPanel->SetMinSize(wxSize(FromDIP(256), FromDIP(256)));
-    m_thumbnailPanel->SetMaxSize(wxSize(FromDIP(256), FromDIP(256)));
+    m_thumbnailPanel->SetSize(wxSize(FromDIP(108), FromDIP(117)));
+    m_thumbnailPanel->SetMinSize(wxSize(FromDIP(108), FromDIP(117)));
+    m_thumbnailPanel->SetMaxSize(wxSize(FromDIP(108), FromDIP(117)));
     sizer_thumbnail->Add(m_thumbnailPanel, 0, wxEXPAND, 0);
     m_panel_image->SetSizer(sizer_thumbnail);
     m_panel_image->Layout();
@@ -403,19 +403,12 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     Bind(EVT_UPDATE_USER_MACHINE_LIST, &SendToPrinterDialog::update_printer_combobox, this);
     Bind(EVT_PRINT_JOB_CANCEL, &SendToPrinterDialog::on_print_job_cancel, this);
 
-
-    m_sizer_scrollable_region->Add(m_panel_image, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    m_sizer_scrollable_region->Add(0, 0, 0, wxTOP, FromDIP(10));
-    m_sizer_scrollable_region->Add(m_sizer_basic, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-	m_scrollable_region->SetSizer(m_sizer_scrollable_region);
-	m_scrollable_region->Layout();
-
     //file name
     //rename normal
-    m_rename_switch_panel = new wxSimplebook(this);
-    m_rename_switch_panel->SetSize(wxSize(FromDIP(420), FromDIP(25)));
-    m_rename_switch_panel->SetMinSize(wxSize(FromDIP(420), FromDIP(25)));
-    m_rename_switch_panel->SetMaxSize(wxSize(FromDIP(420), FromDIP(25)));
+    m_rename_switch_panel = new wxSimplebook(m_scrollable_region);
+    m_rename_switch_panel->SetSize(wxSize(FromDIP(320), FromDIP(25)));
+    m_rename_switch_panel->SetMinSize(wxSize(FromDIP(320), FromDIP(25)));
+    m_rename_switch_panel->SetMaxSize(wxSize(FromDIP(320), FromDIP(25)));
 
     m_rename_normal_panel = new wxPanel(m_rename_switch_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     m_rename_normal_panel->SetBackgroundColour(*wxWHITE);
@@ -430,9 +423,9 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_rename_button->SetBackgroundColor(*wxWHITE);
     m_rename_button->SetBackgroundColour(*wxWHITE);
 
-    rename_sizer_h->Add(m_rename_text, 0, wxALIGN_CENTER, 0);
-    rename_sizer_h->Add(m_rename_button, 0, wxALIGN_CENTER, 0);
-    rename_sizer_v->Add(rename_sizer_h, 1, wxALIGN_CENTER, 0);
+    rename_sizer_h->Add(m_rename_text, 0, wxALIGN_LEFT, 0);
+    rename_sizer_h->Add(m_rename_button, 0, wxALIGN_LEFT, 0);
+    rename_sizer_v->Add(rename_sizer_h, 1, wxALIGN_LEFT, 0);
     m_rename_normal_panel->SetSizer(rename_sizer_v);
     m_rename_normal_panel->Layout();
     rename_sizer_v->Fit(m_rename_normal_panel);
@@ -444,17 +437,16 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
 
     m_rename_input = new ::TextInput(m_rename_edit_panel, wxEmptyString, wxEmptyString, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
     m_rename_input->GetTextCtrl()->SetFont(::Label::Body_13);
-    m_rename_input->SetSize(wxSize(FromDIP(380), FromDIP(24)));
-    m_rename_input->SetMinSize(wxSize(FromDIP(380), FromDIP(24)));
-    m_rename_input->SetMaxSize(wxSize(FromDIP(380), FromDIP(24)));
+    m_rename_input->SetSize(wxSize(FromDIP(320), FromDIP(24)));
+    m_rename_input->SetMinSize(wxSize(FromDIP(320), FromDIP(24)));
+    m_rename_input->SetMaxSize(wxSize(FromDIP(320), FromDIP(24)));
     m_rename_input->Bind(wxEVT_TEXT_ENTER, [this](auto& e) {on_rename_enter();});
     m_rename_input->Bind(wxEVT_KILL_FOCUS, [this](auto& e) {
         if (!m_rename_input->HasFocus() && !m_rename_text->HasFocus())
             on_rename_enter();
         else
             e.Skip(); });
-    rename_edit_sizer_v->Add(m_rename_input, 1, wxALIGN_CENTER, 0);
-
+    rename_edit_sizer_v->Add(m_rename_input, 1, wxALIGN_LEFT, 0);
 
     m_rename_edit_panel->SetSizer(rename_edit_sizer_v);
     m_rename_edit_panel->Layout();
@@ -463,6 +455,9 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_rename_button->Bind(wxEVT_BUTTON, &SendToPrinterDialog::on_rename_click, this);
     m_rename_switch_panel->AddPage(m_rename_normal_panel, wxEmptyString, true);
     m_rename_switch_panel->AddPage(m_rename_edit_panel, wxEmptyString, false);
+
+    // 
+
 
     Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& e) {
         if (e.GetKeyCode() == WXK_ESCAPE) {
@@ -495,12 +490,33 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
         e.Skip();
         });
 
-    m_sizer_main->Add(m_line_top, 0, wxEXPAND, 0);
+    wxBoxSizer* scrollableRigthSizer = new wxBoxSizer(wxVERTICAL);
+    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
+    scrollableRigthSizer->Add(m_rename_switch_panel, 0, wxALIGN_LEFT, 0);
+    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
+    scrollableRigthSizer->Add(m_sizer_basic, 0, wxALIGN_LEFT, 0);
+    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
+
+    wxBoxSizer* scrollableTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    scrollableTopSizer->Add(m_panel_image, 0, wxALIGN_CENTER_VERTICAL, 0);    
+    scrollableTopSizer->Add(0, 0, 0, wxLEFT, FromDIP(10));
+    scrollableTopSizer->Add(scrollableRigthSizer, 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT, 0);
+
+    m_sizer_scrollable_region->Add(scrollableTopSizer, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+    //m_sizer_scrollable_region->Add(0, 0, 0, wxTOP, FromDIP(10));
+    //m_sizer_scrollable_region->Add(m_sizer_basic, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+	m_scrollable_region->SetSizer(m_sizer_scrollable_region);
+	m_scrollable_region->Layout();
+
+
+
+
+    //m_sizer_main->Add(m_line_top, 0, wxEXPAND, 0);
     m_sizer_main->Add(0, 0, 0, wxTOP, FromDIP(10));
     m_sizer_main->Add(m_scrollable_region, 0, wxALIGN_CENTER_HORIZONTAL, 0);
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(6));
-    m_sizer_main->Add(m_rename_switch_panel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(6));
+    //m_sizer_main->Add(m_rename_switch_panel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+    //m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(6));
     m_sizer_main->Add(m_line_materia, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
     m_sizer_main->Add(m_sizer_printer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
@@ -1278,7 +1294,7 @@ void SendToPrinterDialog::set_default()
                 image.SetAlpha((int) c, (int) r, px[3]);
             }
         }
-        image  = image.Rescale(FromDIP(256), FromDIP(256));
+        image  = image.Rescale(FromDIP(108), FromDIP(117));
         m_thumbnailPanel->set_thumbnail(image);
     }
     

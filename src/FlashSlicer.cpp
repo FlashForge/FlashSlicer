@@ -66,7 +66,7 @@ using namespace nlohmann;
 
 #include "libslic3r/Orient.hpp"
 
-#include "OrcaSlicer.hpp"
+#include "FlashSlicer.hpp"
 //BBS: add exception handler for win32
 #include <wx/stdpaths.h>
 #ifdef WIN32
@@ -371,7 +371,7 @@ int CLI::run(int argc, char **argv)
         boost::nowide::cerr << text.c_str() << std::endl;
         return CLI_ENVIRONMENT_ERROR;
     }
-    BOOST_LOG_TRIVIAL(info) << "Current OraSlicer Version "<< SoftFever_VERSION << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Current OraSlicer Version "<< FlashForge_VERSION << std::endl;
 
     /*BOOST_LOG_TRIVIAL(info) << "begin to setup params, argc=" << argc << std::endl;
     for (int index=0; index < argc; index++)
@@ -1813,7 +1813,7 @@ int CLI::run(int argc, char **argv)
             //FIXME check for mixing the FFF / SLA parameters.
             // or better save fff_print_config vs. sla_print_config
             //m_print_config.save(m_config.opt_string("save"));
-            m_print_config.save_to_json(m_config.opt_string(opt_key), std::string("project_settings"), std::string("project"), std::string(SoftFever_VERSION));
+            m_print_config.save_to_json(m_config.opt_string(opt_key), std::string("project_settings"), std::string("project"), std::string(FlashForge_VERSION));
         } else if (opt_key == "info") {
             // --info works on unrepaired model
             for (Model &model : m_models) {
@@ -2838,7 +2838,7 @@ bool CLI::setup(int argc, char **argv)
 void CLI::print_help(bool include_print_options, PrinterTechnology printer_technology) const
 {
     boost::nowide::cout
-        << SLIC3R_APP_KEY <<"-"<< SoftFever_VERSION << ":"
+        << SLIC3R_APP_KEY <<"-"<< FlashForge_VERSION << ":"
         << std::endl
         << "Usage: orca-slicer [ OPTIONS ] [ file.3mf/file.stl ... ]" << std::endl
         << std::endl

@@ -27,10 +27,15 @@ public:
     decltype(&fnet_getTokenByPassword) getTokenByPassword;
     decltype(&fnet_refreshToken) refreshToken;
     decltype(&fnet_freeTokenInfo) freeTokenInfo;
+    decltype(&fnet_getUserProfile) getUserProfile;
+    decltype(&fnet_freeUserProfile) freeUserProfile;
+    decltype(&fnet_downloadFile) downloadFile;
+    decltype(&fnet_freeFileData) freeFileData;
     decltype(&fnet_getWanDevList) getWanDevList;
     decltype(&fnet_freeWanDevList) freeWanDevList;
     decltype(&fnet_getWanDevDetail) getWanDevDetail;
     decltype(&fnet_freeDevDetail) freeDevDetail;
+    decltype(&fnet_wanDevSendGcode) wanDevSendGcode;
 
 public:
     FlashNetworkIntfc(const char *libraryPath);

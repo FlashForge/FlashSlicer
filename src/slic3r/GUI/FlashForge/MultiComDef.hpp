@@ -16,6 +16,7 @@ enum ComErrno {
     COM_ERROR,
     COM_UNINITIALIZED,
     COM_VERIFY_LAN_DEV_FAILED,
+    COM_DEVICE_IS_BUSY,
 };
 
 enum ComConnectMode {
