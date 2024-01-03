@@ -8,6 +8,7 @@
 #include "slic3r/GUI/Widgets/Button.hpp"
 //#include "slic3r/GUI/Widgets/TextInput.hpp"
 //#include "slic3r/GUI/Widgets/StaticLine.hpp"
+#include "slic3r/GUI/FlashForge/MultiComDef.hpp"
 
 namespace Slic3r { 
 namespace GUI {
@@ -81,11 +82,7 @@ class PasswordTextCtrl : public wxPanel
 public:
     PasswordTextCtrl(wxBitmap lockbitmap,wxBitmap eyeoffbitmapBtn,wxBitmap eyeonbitmapBtn,wxWindow *parent, wxWindowID id = wxID_ANY);
 
-    wxString GetValue(){
-        return m_password_text_ctrl->GetValue();
-    }
-
-    void OnTextCtrlChanged(wxCommandEvent& event);
+    wxString GetValue();
 
 private:
     void OnShowPasswordButtonClicked(wxMouseEvent& event);
@@ -105,6 +102,8 @@ class LoginDialog : public DPIDialog
 public:
     LoginDialog();
 
+    static com_token_info_t GetLoginToken();
+
 protected:
     void on_dpi_changed(const wxRect &suggested_rect) override;
 
@@ -117,6 +116,8 @@ private:
 
     void onUsrNameOrPasswordChangedPage2(wxCommandEvent& event);
     void onAgreeCheckBoxChangedPage2(wxCommandEvent& event);
+
+    void onPage2Login(wxCommandEvent& event);
 
 private:
     wxStaticText* m_error_label {nullptr};
@@ -140,6 +141,8 @@ private:
 
     //StaticLine* m_staticLine_verify{nullptr};
     //StaticLine* m_staticLine_password{nullptr};
+    
+    static com_token_info_t  m_token_info;
 
 };
 } // namespace GUI
