@@ -21,6 +21,9 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
     }
     m_userDataUpdateThd.reset(new UserDataUpdateThd(m_networkIntfc.get()));
     m_userDataUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
+    m_userDataUpdateThd->Bind(COM_GET_USER_PROFILE_EVENT, [this](const ComGetUserProfileEvent &event) {
+        QueueEvent(event.Clone());
+    });
     return true;
 }
 

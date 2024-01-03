@@ -1,6 +1,7 @@
 #ifndef slic3r_GUI_WanDevUpdateThd_hpp_
 #define slic3r_GUI_WanDevUpdateThd_hpp_
 
+#include <atomic>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <wx/event.h>
@@ -39,10 +40,16 @@ public:
 private:
     void run();
 
+    void updateUserProfile(const std::string &accessToken);
+
+    void updateWanDev(const std::string &accessToken);
+
 private:
+    std::string              m_oldAccessToken;
     std::string              m_accessToken;
     boost::mutex             m_tokenMutex;
-    WaitEvent                m_exitEvent;
+    WaitEvent                m_loopWaitEvent;
+    std::atomic<bool>        m_exitThread;
     boost::thread            m_thread;
     fnet::FlashNetworkIntfc *m_networkIntfc;
 };

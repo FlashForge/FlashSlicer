@@ -6,9 +6,9 @@
 
 namespace Slic3r { namespace GUI {
 
-struct ComEvent : public wxCommandEvent
+struct ComConnectionEvent : public wxCommandEvent
 {
-    ComEvent(wxEventType type, com_id_t _id, int _commandId)
+    ComConnectionEvent(wxEventType type, com_id_t _id, int _commandId)
         : wxCommandEvent(type)
         , id(_id)
         , commandId(_commandId)
@@ -18,10 +18,10 @@ struct ComEvent : public wxCommandEvent
     int commandId;
 };
 
-struct ComConnectionReadyEvent : public ComEvent
+struct ComConnectionReadyEvent : public ComConnectionEvent
 {
     ComConnectionReadyEvent(wxEventType type, com_id_t _id)
-        : ComEvent(type, _id, 0)
+        : ComConnectionEvent(type, _id, 0)
     {
     }
     ComConnectionReadyEvent *Clone() const
@@ -30,10 +30,10 @@ struct ComConnectionReadyEvent : public ComEvent
     }
 };
 
-struct ComConnectionExitEvent : public ComEvent
+struct ComConnectionExitEvent : public ComConnectionEvent
 {
     ComConnectionExitEvent(wxEventType type, com_id_t _id, ComErrno _ret)
-        : ComEvent(type, _id, 0)
+        : ComConnectionEvent(type, _id, 0)
         , ret(_ret)
     {
     }
@@ -44,10 +44,10 @@ struct ComConnectionExitEvent : public ComEvent
     ComErrno ret;
 };
 
-struct ComDevDetailUpdateEvent : public ComEvent
+struct ComDevDetailUpdateEvent : public ComConnectionEvent
 {
     ComDevDetailUpdateEvent(wxEventType type,  com_id_t _id, int _commandId, fnet_dev_detail_t *_devDetail)
-        : ComEvent(type, _id, _commandId)
+        : ComConnectionEvent(type, _id, _commandId)
         , devDetail(_devDetail)
     {
     }
@@ -58,10 +58,10 @@ struct ComDevDetailUpdateEvent : public ComEvent
     fnet_dev_detail_t *devDetail;
 };
 
-struct ComSendGcodeProgressEvent : public ComEvent
+struct ComSendGcodeProgressEvent : public ComConnectionEvent
 {
     ComSendGcodeProgressEvent(wxEventType type, com_id_t _id, int _commandId, double _now, double _total) 
-        : ComEvent(type, _id, _commandId)
+        : ComConnectionEvent(type, _id, _commandId)
         , now(_now)
         , total(_total)
     {
@@ -74,10 +74,10 @@ struct ComSendGcodeProgressEvent : public ComEvent
     double total;
 };
 
-struct ComSendGcodeFinishEvent : public ComEvent
+struct ComSendGcodeFinishEvent : public ComConnectionEvent
 {
     ComSendGcodeFinishEvent(wxEventType type, com_id_t _id, int _commandId, ComErrno _ret)
-        : ComEvent(type, _id, _commandId)
+        : ComConnectionEvent(type, _id, _commandId)
         , ret(_ret)
     {
     }
@@ -88,11 +88,28 @@ struct ComSendGcodeFinishEvent : public ComEvent
     ComErrno ret;
 };
 
+struct ComGetUserProfileEvent : public wxCommandEvent
+{
+    ComGetUserProfileEvent(wxEventType type, const com_user_profile_t &_userProfile, ComErrno _ret)
+        : wxCommandEvent(type)
+        , userProfile(_userProfile)
+        , ret(_ret)
+    {
+    }
+    ComGetUserProfileEvent *Clone() const
+    {
+        return new ComGetUserProfileEvent(GetEventType(), userProfile, ret);
+    }
+    com_user_profile_t userProfile;
+    ComErrno ret;
+};
+
 wxDECLARE_EVENT(COM_CONNECTION_READY_EVENT, ComConnectionReadyEvent);
 wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, ComConnectionExitEvent);
 wxDECLARE_EVENT(COM_DEV_DETAIL_UPDATE_EVENT, ComDevDetailUpdateEvent);
 wxDECLARE_EVENT(COM_SEND_GCODE_PROGRESS_EVENT, ComSendGcodeProgressEvent);
 wxDECLARE_EVENT(COM_SEND_GCODE_FINISH_EVENT, ComSendGcodeFinishEvent);
+wxDECLARE_EVENT(COM_GET_USER_PROFILE_EVENT, ComGetUserProfileEvent);
 
 }} // namespace Slic3r::GUI
 
