@@ -21,6 +21,7 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
     }
     m_userDataUpdateThd.reset(new UserDataUpdateThd(m_networkIntfc.get()));
     m_userDataUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
+    m_userDataUpdateThd->Bind(COM_WAN_DEV_MAINTAIN_EVENT, &MultiComMgr::onWanDevMaintian, this);
     m_userDataUpdateThd->Bind(COM_GET_USER_PROFILE_EVENT, [this](const ComGetUserProfileEvent &event) {
         QueueEvent(event.Clone());
     });
@@ -50,12 +51,12 @@ void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string 
     initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, networkIntfc())));
 }
 
-void MultiComMgr::setWanDevToken(const std::string &accessToken)
+void MultiComMgr::setWanDevToken(const std::string &userName, const std::string &accessToken)
 {
     if (networkIntfc() == nullptr) {
         return;
     }
-    m_userDataUpdateThd->setToken(accessToken);
+    m_userDataUpdateThd->setToken(userName, accessToken);
 }
 
 void MultiComMgr::removeWanDev()
@@ -63,9 +64,11 @@ void MultiComMgr::removeWanDev()
     if (networkIntfc() == nullptr) {
         return;
     }
-    m_userDataUpdateThd->setToken("");
+    m_userDataUpdateThd->clearToken();
     for (auto &comPtr : m_comPtrs) {
-        comPtr.get()->disconnect(0);
+        if (comPtr->connectMode() == COM_CONNECT_WAN) {
+            comPtr.get()->disconnect(0);
+        }
     }
 }
 
@@ -123,9 +126,23 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     comPtr->connect();
 }
 
+void MultiComMgr::onWanDevMaintian(const ComWanDevMaintainEvent &event)
+{
+    if (event.ret != COM_OK) {
+        for (auto &comPtr : m_comPtrs) {
+            if (comPtr->connectMode() == COM_CONNECT_WAN) {
+                comPtr.get()->disconnect(0);
+            }
+        }
+    }
+    QueueEvent(event.Clone());
+}
+
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
 {
-    if (m_userDataUpdateThd->getAccessToken() != event.accessToken) {
+    std::string userName, accessToken;
+    m_userDataUpdateThd->getToken(userName, accessToken);
+    if (accessToken != event.accessToken) {
         return;
     }
     fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);

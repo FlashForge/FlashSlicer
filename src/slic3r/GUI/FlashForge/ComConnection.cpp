@@ -36,7 +36,7 @@ void ComConnection::connect()
 
 void ComConnection::disconnect(unsigned int waitMilliseconds/*= -1*/)
 {
-    m_exitEvent.set(true);
+    m_exitThread = true;
     if (waitMilliseconds > 0) {
         m_thread->try_join_for(boost::chrono::milliseconds(waitMilliseconds));
     }
@@ -83,7 +83,7 @@ void ComConnection::run()
 ComErrno ComConnection::commandLoop()
 {
     int errorCnt = 0;
-    while (!m_exitEvent.get()) {
+    while (!m_exitThread) {
         ComCommandPtr frontCommand = m_commandQue.popFront(100);
         if (frontCommand.get() != nullptr) {
             ComErrno ret;
@@ -93,10 +93,12 @@ ComErrno ComConnection::commandLoop()
                 ret = frontCommand->exec(m_networkIntfc, m_accessToken, m_deviceId);
             }
             processCommand(frontCommand.get(), ret);
-            if (ret == COM_OK || ret == COM_DEVICE_IS_BUSY) {
-                errorCnt = 0;
-            } else if (ret == COM_VERIFY_LAN_DEV_FAILED || ++errorCnt > 5) {
-                return ret;
+            if (m_connectMode == COM_CONNECT_LAN) {
+                if (ret == COM_OK || ret == COM_DEVICE_IS_BUSY) {
+                    errorCnt = 0;
+                } else if (ret == COM_VERIFY_LAN_DEV_FAILED || ++errorCnt > 5) {
+                    return ret;
+                }
             }
         }
         if ((clock() - m_getDetailClock) / (double)CLOCKS_PER_SEC > 5) {

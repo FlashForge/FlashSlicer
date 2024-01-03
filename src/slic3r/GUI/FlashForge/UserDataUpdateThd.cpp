@@ -21,59 +21,95 @@ void UserDataUpdateThd::exit()
     m_thread.join();
 }
 
-std::string UserDataUpdateThd::getAccessToken()
+void UserDataUpdateThd::getToken(std::string &userName, std::string &accessToken)
 {
     boost::mutex::scoped_lock lock(m_tokenMutex);
-    return m_accessToken;
+    userName = m_userName;
+    accessToken = m_accessToken;
 }
 
-void UserDataUpdateThd::setToken(const std::string &accessToken)
+void UserDataUpdateThd::setToken(const std::string &userName, const std::string &accessToken)
 {
     boost::mutex::scoped_lock lock(m_tokenMutex);
+    m_userName = userName;
     m_accessToken = accessToken;
     m_loopWaitEvent.set(true);
 }
 
+void UserDataUpdateThd::clearToken()
+{
+    boost::mutex::scoped_lock lock(m_tokenMutex);
+    m_userName.clear();
+    m_accessToken.clear();
+    m_oldUserName.clear();
+}
+
 void UserDataUpdateThd::run()
 {
+    std::string oldUserName, userName, accessToken;
     while (!m_exitThread) {
         m_loopWaitEvent.set(false);
-        std::string accessToken = getAccessToken();
+        getUserData(oldUserName, userName, accessToken);
         if (!accessToken.empty()) {
-            updateWanDev(accessToken);
-            updateUserProfile(accessToken);
+            bool isFirstUpdate = oldUserName != userName;
+            if (isFirstUpdate && updateUserProfile(accessToken) == COM_OK) {
+                setOldUserName(userName);
+            }
+            ComErrno ret = updateWanDev(accessToken);
+            if (ret != COM_OK) {
+                QueueEvent(new ComWanDevMaintainEvent(COM_WAN_DEV_MAINTAIN_EVENT, ret));
+                clearToken();
+            } else if (isFirstUpdate) {
+                QueueEvent(new ComWanDevMaintainEvent(COM_WAN_DEV_MAINTAIN_EVENT, ret));
+            }
         }
         m_loopWaitEvent.waitTrue(5000);
     }
 }
 
-void UserDataUpdateThd::updateUserProfile(const std::string &accessToken)
+ComErrno UserDataUpdateThd::updateUserProfile(const std::string &accessToken)
 {
-    if (accessToken == m_oldAccessToken) {
-        return;
-    }
     fnet_user_profile_t *fnetProfile;
     int fnetRet = m_networkIntfc->getUserProfile(accessToken.c_str(), &fnetProfile);
     ComErrno ret = MultiComUtils::networkIntfcRet2ComErrno(fnetRet);
-    if (ret != COM_OK) {
-        QueueEvent(new ComGetUserProfileEvent(COM_GET_USER_PROFILE_EVENT, com_user_profile_t(), ret));
-        return;
-    }
-    fnet::FreeInDestructor freeProfile(fnetProfile, m_networkIntfc->freeUserProfile);
     com_user_profile_t userProfile;
-    userProfile.nickname = fnetProfile->nickname;
-    userProfile.headImgUrl = fnetProfile->headImgUrl;
+    if (ret == COM_OK) {
+        userProfile.nickname = fnetProfile->nickname;
+        userProfile.headImgUrl = fnetProfile->headImgUrl;
+        fnet::FreeInDestructor freeProfile(fnetProfile, m_networkIntfc->freeUserProfile);
+    }
     QueueEvent(new ComGetUserProfileEvent(COM_GET_USER_PROFILE_EVENT, userProfile, ret));
-    m_oldAccessToken = accessToken;
+    return ret;
 }
 
-void UserDataUpdateThd::updateWanDev(const std::string &accessToken)
+ComErrno UserDataUpdateThd::updateWanDev(const std::string &accessToken)
 {
-    int devCnt;
-    fnet_wan_dev_info_t *devInfos;
-    if (m_networkIntfc->getWanDevList(accessToken.c_str(), &devInfos, &devCnt) == 0) {
-        QueueEvent(new WanDevUpdateEvent(WAN_DEV_UPDATE_EVENT, accessToken, devInfos, devCnt));
+    int fnetRet = FNET_OK;
+    for (int i = 0; i < 5 && !m_exitThread; ++i) {
+        int devCnt;
+        fnet_wan_dev_info_t *devInfos;
+        fnetRet = m_networkIntfc->getWanDevList(accessToken.c_str(), &devInfos, &devCnt);
+        if (fnetRet == FNET_OK) {
+            QueueEvent(new WanDevUpdateEvent(WAN_DEV_UPDATE_EVENT, accessToken, devInfos, devCnt));
+            break;
+        }
     }
+    return MultiComUtils::networkIntfcRet2ComErrno(fnetRet);
+}
+
+void UserDataUpdateThd::getUserData(std::string &oldUserName, std::string &userName,
+    std::string &accessToken)
+{
+    boost::mutex::scoped_lock lock(m_tokenMutex);
+    oldUserName = m_oldUserName;
+    userName = m_userName;
+    accessToken = m_accessToken;
+}
+
+void UserDataUpdateThd::setOldUserName(const std::string &oldUserName)
+{
+    boost::mutex::scoped_lock lock(m_tokenMutex);
+    m_oldUserName = oldUserName;
 }
 
 }} // namespace Slic3r::GUI

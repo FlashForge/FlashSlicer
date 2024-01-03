@@ -88,6 +88,20 @@ struct ComSendGcodeFinishEvent : public ComConnectionEvent
     ComErrno ret;
 };
 
+struct ComWanDevMaintainEvent : public wxCommandEvent
+{
+    ComWanDevMaintainEvent(wxEventType type, ComErrno _ret)
+        : wxCommandEvent(type)
+        , ret(_ret)
+    {
+    }
+    ComWanDevMaintainEvent *Clone() const
+    {
+        return new ComWanDevMaintainEvent(GetEventType(), ret);
+    }
+    ComErrno ret;
+};
+
 struct ComGetUserProfileEvent : public wxCommandEvent
 {
     ComGetUserProfileEvent(wxEventType type, const com_user_profile_t &_userProfile, ComErrno _ret)
@@ -109,6 +123,7 @@ wxDECLARE_EVENT(COM_CONNECTION_EXIT_EVENT, ComConnectionExitEvent);
 wxDECLARE_EVENT(COM_DEV_DETAIL_UPDATE_EVENT, ComDevDetailUpdateEvent);
 wxDECLARE_EVENT(COM_SEND_GCODE_PROGRESS_EVENT, ComSendGcodeProgressEvent);
 wxDECLARE_EVENT(COM_SEND_GCODE_FINISH_EVENT, ComSendGcodeFinishEvent);
+wxDECLARE_EVENT(COM_WAN_DEV_MAINTAIN_EVENT, ComWanDevMaintainEvent);
 wxDECLARE_EVENT(COM_GET_USER_PROFILE_EVENT, ComGetUserProfileEvent);
 
 }} // namespace Slic3r::GUI

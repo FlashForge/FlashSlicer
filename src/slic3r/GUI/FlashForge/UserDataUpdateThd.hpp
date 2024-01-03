@@ -6,6 +6,7 @@
 #include <boost/thread/thread.hpp>
 #include <wx/event.h>
 #include "FlashNetworkIntfc.h"
+#include "MultiComDef.hpp"
 #include "WaitEvent.hpp"
 
 namespace Slic3r { namespace GUI {
@@ -33,19 +34,26 @@ public:
 
     void exit();
 
-    std::string getAccessToken();
+    void getToken(std::string &userName, std::string &accessToken);
 
-    void setToken(const std::string &accessToken);
+    void setToken(const std::string &userName, const std::string &accessToken);
+
+    void clearToken();
 
 private:
     void run();
 
-    void updateUserProfile(const std::string &accessToken);
+    ComErrno updateUserProfile(const std::string &accessToken);
 
-    void updateWanDev(const std::string &accessToken);
+    ComErrno updateWanDev(const std::string &accessToken);
+
+    void getUserData(std::string &oldUserName, std::string &userName, std::string &accessToken);
+
+    void setOldUserName(const std::string &oldUserName);
 
 private:
-    std::string              m_oldAccessToken;
+    std::string              m_oldUserName;
+    std::string              m_userName;
     std::string              m_accessToken;
     boost::mutex             m_tokenMutex;
     WaitEvent                m_loopWaitEvent;

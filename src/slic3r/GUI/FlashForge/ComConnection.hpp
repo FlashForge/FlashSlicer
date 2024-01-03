@@ -2,6 +2,7 @@
 #define slic3r_GUI_ComConnection_hpp_
 
 #include <ctime>
+#include <atomic>
 #include <memory>
 #include <string>
 #include <boost/thread/mutex.hpp>
@@ -59,7 +60,7 @@ private:
     std::string                     m_deviceId;
     clock_t                         m_getDetailClock;
     boost::mutex                    m_tokenMutex;
-    WaitEvent                       m_exitEvent;
+    std::atomic<bool>               m_exitThread;
     ComCommandQue                   m_commandQue;
     fnet::FlashNetworkIntfc        *m_networkIntfc;
     std::unique_ptr<boost::thread>  m_thread;
