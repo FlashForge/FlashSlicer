@@ -26,6 +26,9 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
 
 void MultiComMgr::uninitalize()
 {
+    if (networkIntfc() == nullptr) {
+        return;
+    }
     m_userDataUpdateThd->exit();
     m_userDataUpdateThd.reset(nullptr);
     m_networkIntfc.reset(nullptr);
@@ -38,16 +41,25 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 
 void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, m_networkIntfc.get())));
+    if (networkIntfc() == nullptr) {
+        return;
+    }
+    initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, networkIntfc())));
 }
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)
 {
+    if (networkIntfc() == nullptr) {
+        return;
+    }
     m_userDataUpdateThd->setToken(accessToken);
 }
 
 void MultiComMgr::removeWanDev()
 {
+    if (networkIntfc() == nullptr) {
+        return;
+    }
     m_userDataUpdateThd->setToken("");
     for (auto &comPtr : m_comPtrs) {
         comPtr.get()->disconnect(0);
