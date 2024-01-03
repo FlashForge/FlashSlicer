@@ -19,15 +19,15 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
         m_networkIntfc.reset(nullptr);
         return false;
     }
-    m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
-    m_wanDevUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
+    m_userDataUpdateThd.reset(new UserDataUpdateThd(m_networkIntfc.get()));
+    m_userDataUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
     return true;
 }
 
 void MultiComMgr::uninitalize()
 {
-    m_wanDevUpdateThd->exit();
-    m_wanDevUpdateThd.reset(nullptr);
+    m_userDataUpdateThd->exit();
+    m_userDataUpdateThd.reset(nullptr);
     m_networkIntfc.reset(nullptr);
 }
 
@@ -43,12 +43,12 @@ void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string 
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)
 {
-    m_wanDevUpdateThd->setToken(accessToken);
+    m_userDataUpdateThd->setToken(accessToken);
 }
 
 void MultiComMgr::removeWanDev()
 {
-    m_wanDevUpdateThd->setToken("");
+    m_userDataUpdateThd->setToken("");
     for (auto &comPtr : m_comPtrs) {
         comPtr.get()->disconnect(0);
     }
@@ -110,7 +110,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
 {
-    if (m_wanDevUpdateThd->getAccessToken() != event.accessToken) {
+    if (m_userDataUpdateThd->getAccessToken() != event.accessToken) {
         return;
     }
     fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);

@@ -9,7 +9,8 @@
 
 namespace Slic3r { namespace GUI {
 
-struct WanDevUpdateEvent : public wxCommandEvent {
+struct WanDevUpdateEvent : public wxCommandEvent
+{
     WanDevUpdateEvent(wxEventType _type, const std::string &_accessToken,
         fnet_wan_dev_info_t *_devInfos, int _devCnt)
     {
@@ -24,10 +25,10 @@ struct WanDevUpdateEvent : public wxCommandEvent {
 };
 wxDECLARE_EVENT(WAN_DEV_UPDATE_EVENT, WanDevUpdateEvent);
 
-class WanDevUpdateThd : public wxEvtHandler
+class UserDataUpdateThd : public wxEvtHandler
 {
 public:
-    WanDevUpdateThd(fnet::FlashNetworkIntfc *networkIntfc);
+    UserDataUpdateThd(fnet::FlashNetworkIntfc *networkIntfc);
 
     void exit();
 
