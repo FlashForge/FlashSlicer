@@ -23,8 +23,8 @@ namespace Slic3r { namespace GUI {
     m_printing_img = ScalableBitmap(this, "printer", 16);
     m_arrow_img    = ScalableBitmap(this, "monitor_arrow", 14);
 
-    m_none_printing_img = ScalableBitmap(this, "tab_monitor_active", 24);
-    m_none_add_img      = ScalableBitmap(this, "monitor_none_add", 14);
+    m_none_printing_img = ScalableBitmap(this, "monitor_device", 24);
+    m_none_add_img      = ScalableBitmap(this, "monitor_device_add", 14);
 
     m_wifi_none_img     = ScalableBitmap(this, "monitor_signal_no", 18);
     m_wifi_weak_img     = ScalableBitmap(this, "monitor_signal_weak", 18);
@@ -144,7 +144,7 @@ void SideToolsPanel::doRender(wxDC &dc)
         dc.SetBackgroundMode(wxTRANSPARENT);
         dc.SetTextForeground(*wxWHITE);
 
-        wxString no_printer_str = _L("No printer");
+        /*wxString no_printer_str = _L("No printer");
         auto sizet = dc.GetTextExtent(no_printer_str);
         auto left_add_bitmap = size.x - FromDIP(30) - m_wifi_none_img.GetBmpSize().x - m_none_add_img.GetBmpSize().x;
         auto size_width = left_add_bitmap - left;
@@ -161,9 +161,9 @@ void SideToolsPanel::doRender(wxDC &dc)
             }
 
             no_printer_str = temp_str + L("...");
-        }
+        }*/
 
-        dc.DrawText(no_printer_str, wxPoint(left, (size.y - sizet.y) / 2));
+        //dc.DrawText(no_printer_str, wxPoint(left, (size.y - sizet.y) / 2));
 
         left = size.x - FromDIP(30) - m_wifi_none_img.GetBmpSize().x;
         dc.DrawBitmap(m_none_add_img.bmp(), left, (size.y - m_none_add_img.GetBmpSize().y) / 2);

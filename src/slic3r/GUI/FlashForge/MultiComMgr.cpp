@@ -11,8 +11,12 @@ MultiComMgr::MultiComMgr()
 
 bool MultiComMgr::initalize(const std::string &newtworkDllPath)
 {
+    if (networkIntfc() != nullptr) {
+        return false;
+    }
     m_networkIntfc.reset(new fnet::FlashNetworkIntfc(newtworkDllPath.c_str()));
     if (!m_networkIntfc->isOk()) {
+        m_networkIntfc.reset(nullptr);
         return false;
     }
     m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
@@ -59,7 +63,7 @@ com_id_list_t MultiComMgr::getReadyDevList()
     return idList;
 }
 
-const com_dev_data_t &MultiComMgr::devData(com_id_t &id, bool *valid /* = nullptr */)
+const com_dev_data_t &MultiComMgr::devData(com_id_t id, bool *valid /* = nullptr */)
 {
     auto it = m_ptrMap.left.find(id);
     if (valid != nullptr) {
@@ -72,6 +76,16 @@ const com_dev_data_t &MultiComMgr::devData(com_id_t &id, bool *valid /* = nullpt
     }
 }
 
+bool MultiComMgr::putCommand(com_id_t id, const ComCommandPtr &command)
+{
+    auto it = m_ptrMap.left.find(id);
+    if (it == m_ptrMap.left.end()) {
+        return false;
+    }
+    m_ptrMap.left.at(id)->putCommand(command);
+    return true;
+}
+
 void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 {
     m_comPtrs.push_back(comPtr);
@@ -79,30 +93,19 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
     m_datMap.emplace(comPtr->id(), com_dev_data_t());
     m_serialNumberSet.insert(comPtr->serialNumber());
 
-    comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
-
     comPtr->Bind(COM_CONNECTION_READY_EVENT, [this](const ComConnectionReadyEvent &event) {
         m_readyIdSet.insert(event.id);
         QueueEvent(event.Clone());
     });
-    comPtr->Bind(COM_DEV_DETAIL_UPDATE_EVENT, [this](const ComDevDetailUpdateEvent &event) {
-        m_datMap.at(event.id).devDetail = event.devDetail;
+    comPtr->Bind(COM_SEND_GCODE_PROGRESS_EVENT, [this](const ComSendGcodeProgressEvent &event) {
         QueueEvent(event.Clone());
     });
+    comPtr->Bind(COM_SEND_GCODE_FINISH_EVENT, [this](const ComSendGcodeFinishEvent &event) {
+        QueueEvent(event.Clone());
+    });
+    comPtr->Bind(COM_CONNECTION_EXIT_EVENT, &MultiComMgr::onConnectionExit, this);
+    comPtr->Bind(COM_DEV_DETAIL_UPDATE_EVENT, &MultiComMgr::onDevDetailUpdate, this);
     comPtr->connect();
-}
-
-void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
-{
-    ComConnection *comConnection = m_ptrMap.left.at(event.id);
-    comConnection->joinThread();
-    m_networkIntfc->freeDevDetail(m_datMap.at(event.id).devDetail);
-    m_readyIdSet.erase(event.id);
-    m_serialNumberSet.erase(comConnection->serialNumber());
-    m_datMap.erase(event.id);
-    m_ptrMap.left.erase(event.id);
-    m_comPtrs.remove_if([comConnection](auto &ptr) { return ptr.get() == comConnection; });
-    QueueEvent(event.Clone());
 }
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
@@ -129,6 +132,27 @@ void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
                 m_idNum++, event.accessToken, event.devInfos[i], m_networkIntfc.get())));
         }
     }
+}
+
+void MultiComMgr::onConnectionExit(const ComConnectionExitEvent &event)
+{
+    ComConnection *comConnection = m_ptrMap.left.at(event.id);
+    comConnection->joinThread();
+    m_networkIntfc->freeDevDetail(m_datMap.at(event.id).devDetail);
+    m_readyIdSet.erase(event.id);
+    m_serialNumberSet.erase(comConnection->serialNumber());
+    m_datMap.erase(event.id);
+    m_ptrMap.left.erase(event.id);
+    m_comPtrs.remove_if([comConnection](auto &ptr) { return ptr.get() == comConnection; });
+    QueueEvent(event.Clone());
+}
+
+void MultiComMgr::onDevDetailUpdate(const ComDevDetailUpdateEvent &event)
+{
+    fnet_dev_detail_t *&devDetail = m_datMap.at(event.id).devDetail;
+    m_networkIntfc->freeDevDetail(devDetail);
+    devDetail = event.devDetail;
+    QueueEvent(event.Clone());
 }
 
 }} // namespace Slic3r::GUI

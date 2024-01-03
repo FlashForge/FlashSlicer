@@ -11,11 +11,21 @@
 #define FNET_API
 #endif
 
+#define MAX_DEVICE_SN_LEN 128
+#define MAX_DEVICE_NAME_LEN 128
+
+typedef void (*fnet_progress_call_back_t)(long long now, long long total, void *data);
 
 #pragma pack(push, 4)
 
-#define MAX_DEVICE_SN_LEN 128
-#define MAX_DEVICE_NAME_LEN 128
+typedef struct fnet_send_gcode_data {
+    const char *gcodeFileName;  // utf-8
+    const char *thumbFileName;  // utf-8, wan only
+    int printNow;               // 1 true, 0 false
+    int levelingBeforePrint;    // 1 true, 0 false
+    fnet_progress_call_back_t callback;
+    void *callbackData;
+} fnet_send_gcode_data_t;
 
 typedef struct fnet_lan_dev_info {
     char serialNumber[MAX_DEVICE_SN_LEN];
@@ -27,11 +37,21 @@ typedef struct fnet_lan_dev_info {
     unsigned short connectMode; // 0 lan mode, 1 wan mode
 } fnet_lan_dev_info_t;
 
+typedef struct fnet_file_data {
+    char *data;
+    unsigned int size;
+} fnet_file_data_t;
+
 typedef struct fnet_token_info {
     int expiresIn;
     char *accessToken;
     char *refreshToken;
 } fnet_token_info_t;
+
+typedef struct fnet_user_profile {
+    char *nickname;
+    char *headImgUrl;
+} fnet_user_profile_t;
 
 typedef struct fnet_wan_dev_info {
     char *devId;
@@ -102,6 +122,7 @@ typedef struct fnet_dev_detail {
 #define FNET_OK 0
 #define FNET_ERROR -1
 #define FNET_VERIFY_LAN_DEV_FAILED 1
+#define FNET_DIVICE_IS_BUSY 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -122,12 +143,24 @@ FNET_API int fnet_getLanDevDetail(const char *ip, unsigned short port, const cha
 
 FNET_API void fnet_freeDevDetail(fnet_dev_detail_t *detail);
 
+FNET_API int fnet_lanDevSendGcode(const char *ip, unsigned short port, const char *serialNumber,
+    const char *checkCode, const fnet_send_gcode_data_t *sendGcodeData);
+
+FNET_API int fnet_downloadFile(const char *url, fnet_file_data_t **fileData,
+    fnet_progress_call_back_t callback, void *callbackData);
+
+FNET_API void fnet_freeFileData(fnet_file_data_t *fileData);
+
 FNET_API int fnet_getTokenByPassword(const char *userName, const char *password,
     fnet_token_info_t **tokenInfo);
 
 FNET_API int fnet_refreshToken(const char *refreshToken, fnet_token_info_t **tokenInfo);
 
 FNET_API void fnet_freeTokenInfo(fnet_token_info_t *tokenInfo);
+
+FNET_API int fnet_getUserProfile(const char *accessToken, fnet_user_profile_t **profile);
+
+FNET_API void fnet_freeUserProfile(fnet_user_profile_t *profile);
 
 FNET_API int fnet_getWanDevList(const char *accessToken, fnet_wan_dev_info_t **infos,
     int *devCnt);
@@ -136,6 +169,9 @@ FNET_API void fnet_freeWanDevList(fnet_wan_dev_info_t *infos, int devCnt);
 
 FNET_API int fnet_getWanDevDetail(const char *accessToken, const char *devId,
     fnet_dev_detail_t **detail);
+
+FNET_API int fnet_wanDevSendGcode(const char *accessToken, const char *devId,
+    const fnet_send_gcode_data_t *sendGcodeData);
 
 #ifdef __cplusplus
 }

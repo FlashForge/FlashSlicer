@@ -97,14 +97,6 @@ private:
     wxBoxSizer *    m_side_tools_sizer;
     SelectMachinePopup m_select_machine;
 
-	/* images */
-    wxBitmap m_signal_strong_img;
-    wxBitmap m_signal_middle_img;
-    wxBitmap m_signal_weak_img;
-    wxBitmap m_signal_no_img;
-    wxBitmap m_printer_img;
-    wxBitmap m_arrow_img;
-
     int last_wifi_signal = -1;
     int last_status;
     bool m_initialized { false };

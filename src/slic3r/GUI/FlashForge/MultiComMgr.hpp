@@ -36,7 +36,9 @@ public:
 
     com_id_list_t getReadyDevList();
 
-    const com_dev_data_t &devData(com_id_t &id, bool *valid = nullptr);
+    const com_dev_data_t &devData(com_id_t id, bool *valid = nullptr);
+
+    bool putCommand(com_id_t id, const ComCommandPtr &command);
 
 private:
     typedef std::shared_ptr<ComConnection> com_ptr_t;
@@ -50,6 +52,8 @@ private:
     void onWanDevUpdated(const WanDevUpdateEvent &event);
 
     void onConnectionExit(const ComConnectionExitEvent &event);
+
+    void onDevDetailUpdate(const ComDevDetailUpdateEvent &event);
 
 private:
     int                                      m_idNum;

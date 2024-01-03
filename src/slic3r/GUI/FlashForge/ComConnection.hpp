@@ -37,6 +37,8 @@ public:
 
     void setAccessToken(const std::string &accessToken);
 
+    void putCommand(const ComCommandPtr &command, int priority = 3);
+
 private:
     void run();
 
@@ -44,7 +46,7 @@ private:
 
     std::string getAccessToken();
 
-    void processCommand(ComCommand *command);
+    void processCommand(ComCommand *command, ComErrno ret);
 
 private:
     com_id_t                        m_id;
