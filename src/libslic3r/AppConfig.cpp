@@ -38,7 +38,7 @@ using namespace nlohmann;
 
 namespace Slic3r {
 
-static const std::string VERSION_CHECK_URL = "https://api.github.com/repos/softfever/OrcaSlicer/releases/latest";
+static const std::string VERSION_CHECK_URL = "http://update.cn.sz3dp.com:20080/3dapp/public/FlashSlicer/appInfo.json";
 static const std::string MODELS_STR = "models";
 
 const std::string AppConfig::SECTION_FILAMENTS = "filaments";

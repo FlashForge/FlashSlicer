@@ -4310,20 +4310,21 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             std::stringstream json_stream(body);
             boost::property_tree::read_json(json_stream, root);
 
-            bool i_am_pre = false;
+            //bool i_am_pre = false;
             // at least two number, use '.' as separator. can be followed by -Az23 for prereleased and +Az42 for
             // metadata
             std::regex matcher("[0-9]+\\.[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9]+)?(\\+[A-Za-z0-9]+)?");
 
             Semver current_version = get_version(FlashForge_VERSION, matcher);
-            Semver best_pre(1, 0, 0);
-            Semver best_release(1, 0, 0);
-            std::string best_pre_url;
-            std::string best_release_url;
-            std::string best_release_content;
-            std::string best_pre_content;
+            //Semver best_pre(1, 0, 0);
+            //Semver best_release(1, 0, 0);
+            //std::string best_pre_url;
+            //std::string best_release_url;
+            //std::string best_release_content;
+            //std::string best_pre_content;
             const std::regex reg_num("([0-9]+)");
-            std::string tag = root.get<std::string>("tag_name");
+
+            /*std::string tag = root.get<std::string>("tag_name");
             if (tag[0] == 'v')
             tag.erase(0, 1);
             for (std::regex_iterator it = std::sregex_iterator(tag.begin(), tag.end(), reg_num);
@@ -4366,11 +4367,52 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             version_info.url = i_am_pre ? best_pre_url : best_release_url;
             version_info.version_str = i_am_pre ? best_pre.to_string() : best_release.to_string_sf();
             version_info.description = i_am_pre ? best_pre_content : best_release_content;
-            version_info.force_upgrade = false;
+            version_info.force_upgrade = false;*/
 
-            wxCommandEvent *evt = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
-            evt->SetString((i_am_pre ? best_pre : best_release).to_string());
-            GUI::wxGetApp().QueueEvent(evt);
+            std::string win64Ver = root.get<std::string>("general.win64Ver");
+            std::string win64Url = root.get<std::string>("general.win64Url");
+            std::string mac64Ver = root.get<std::string>("general.win64Ver");
+            std::string mac64Url = root.get<std::string>("general.win64Url");
+            std::vector<std::string> introUrls;
+            auto urls = root.get_child("general.introUrl");
+            for (auto it = urls.begin(); it != urls.end(); ++it) {
+                introUrls.push_back(it->second.get_value<std::string>());
+            }
+            Semver latest_version = get_version(win64Ver, matcher);
+            if (current_version == latest_version) {
+                if (by_user) {
+                    wxMessageBox(_L("Already the newest version!"), _L("Info"), wxOK | wxICON_INFORMATION);
+                }
+            }
+            else if (current_version < latest_version) {
+                wxString    languageCode = current_language_code();
+                wxString    chinese("zh_CN"), english("en_US");
+                wxString    language = languageCode.CmpNoCase(chinese) == 0 ? chinese : english;
+                std::string destUrl;
+                for (auto &url : introUrls) {
+                    if (url.find(language.ToStdString()) != std::string::npos) {
+                        destUrl = url;
+                        break;
+                    }
+                }
+                Http::get(destUrl)
+                    .on_complete([&](std::string body, unsigned status) {
+                        if (body.find("APP_INTRO") != std::string::npos) {
+                            auto pos = body.find(":") + 1;
+                            if (pos != std::string::npos) {
+                                version_info.description = body.substr(pos);
+                            }
+                            version_info.url           = win64Url;
+                            version_info.version_str   = win64Ver;
+                            version_info.force_upgrade = false;
+                            wxCommandEvent *evt        = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
+                            // evt->SetString((i_am_pre ? best_pre : best_release).to_string());
+                            evt->SetString(latest_version.to_string());
+                            GUI::wxGetApp().QueueEvent(evt);
+                        }
+                    })
+                    .perform_sync();
+            }
           } catch (...) {
           }
         })
