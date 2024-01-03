@@ -11,12 +11,12 @@
 
 #include <wx/clipbrd.h>
 
+#include <regex>
+
 namespace Slic3r {
 namespace GUI {
 
     wxDEFINE_EVENT(EVT_UPDATE_TEXT_LOGIN, wxCommandEvent);
-
-    static bool verify_btn_clicked = false;
 
     CountdownButton::CountdownButton(wxWindow* parent, wxString text, wxString icon /*= ""*/, long style /*= 0*/, int iconSize /*= 0*/, wxWindowID btn_id /*= wxID_ANY*/)
         : Button(parent,text,icon,style,iconSize,btn_id)
@@ -48,35 +48,31 @@ namespace GUI {
         }
     }
 
-    void CountdownButton::OnButtonClick(wxCommandEvent& event)
-    {
-        std::thread t([this]()
-        {
-            wxMutexLocker locker(m_mutex);
-            while (true)
-            {
-                if(m_countdown <= 0){
-                    m_countdown = 60;
-                    break;
-                }
-                m_countdown --;
-                //Sleep(1000);
-                 wxThread::Sleep(1000);
-                 {
-                    wxCommandEvent* updateEvent = new wxCommandEvent(EVT_UPDATE_TEXT_LOGIN, wxID_ANY);
-                    updateEvent->SetString(wxString::Format("%d second", m_countdown));
-                    wxPostEvent(this->GetParent()->GetParent(), *updateEvent);
-                 }
-            }
-        });
-        t.detach();
-    }
+    //增加正则过滤
+    // 邮箱正则表达式
+    const std::regex emailRegex(R"(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)");
 
-    // void CountdownButton::OnUpdateText(wxCommandEvent& event)
-    // {
-    //     this->SetLabel(event.GetString());
-    //     event.Skip();
-    // }
+    // 手机号码正则表达式
+    const std::regex phoneRegex(R"(\b1[3456789]\d{9}\b)");
+
+    // 邮箱和手机号码过滤器
+    class EmailPhoneValidator : public wxTextValidator
+    {
+    public:
+        EmailPhoneValidator() : wxTextValidator(wxFILTER_INCLUDE_CHAR_LIST) {}
+
+        wxString IsValid(const wxString& value) const override
+        {
+            if (std::regex_match(value.ToStdString(), emailRegex) || std::regex_match(value.ToStdString(), phoneRegex))
+            {
+                return value;
+            }
+            else
+            {
+                return wxEmptyString;
+            }
+        }
+    };
 
     UsrnameTextCtrl::UsrnameTextCtrl(wxBitmap usrnamebitmap,wxWindow *parent, wxWindowID id /*= wxID_ANY*/)
                     : wxPanel(parent, id)
@@ -86,9 +82,9 @@ namespace GUI {
         m_user_name_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
         m_user_name_text_ctrl->SetHint("Phone Number / email");
         m_user_name_text_ctrl->SetMinSize(wxSize(295,33));
-        wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
-        validator.SetCharIncludes("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$|^1[3456789]\\d{9}$|[A-Za-z0-9@._-]");
-        m_user_name_text_ctrl->SetValidator(validator);
+        // wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
+        // validator.SetCharIncludes("^[\w\.-]+@[\w\.-]+\.\w+$|^1[3-9]\d{9}$");
+        // m_user_name_text_ctrl->SetValidator(validator);
 
         // 创建垂直布局并添加控件
         wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
@@ -107,20 +103,14 @@ namespace GUI {
 
         // 创建密码输入框和眼睛图标按钮
         m_lock_staticbitmap = new wxStaticBitmap(this, wxID_ANY,lockbitmap);
-        m_password_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
-        m_password_text_ctrl->SetWindowStyle(m_password_text_ctrl->GetWindowStyle() & wxTE_PASSWORD);
+        m_password_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD | wxTE_PROCESS_ENTER | wxTE_LEFT | wxBORDER_NONE);
         m_password_text_ctrl->SetHint("Password");
         m_password_text_ctrl->SetMinSize(wxSize(241,33));
-        //m_password_text_ctrl->SetValidator(wxTextValidator(wxFILTER_REGEX, "^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"));
 
-        //wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
-        //validator.SetCharIncludes("^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$");
-        //m_password_text_ctrl->SetValidator(validator);
         m_showPassword_staticbitmap = new wxStaticBitmap(this, wxID_ANY,eyeoffbitmapBtn);
 
         // 设置眼睛图标按钮的大小和工具提示文本
         m_showPassword_staticbitmap->SetSize(wxSize(20, 16));
-        m_showPassword_staticbitmap->SetToolTip(wxT("Show password"));
 
         // 创建垂直布局并添加控件
         wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
@@ -133,31 +123,75 @@ namespace GUI {
 
         // 连接信号和槽函数
         m_showPassword_staticbitmap->Bind(wxEVT_LEFT_UP, [this](wxMouseEvent& e){OnShowPasswordButtonClicked(e);});
+
+		m_plain_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_LEFT | wxBORDER_NONE);
+        m_plain_text_ctrl->Hide();
+    }
+
+    void PasswordTextCtrl::OnTextCtrlChanged(wxCommandEvent& event)
+    {
+        if (!m_encrypt) {
+            wxString password = m_password_text_ctrl->GetValue();
+            m_password_text_ctrl->Hide();
+            // 如果密码输入框为明文模式
+            m_password_text_ctrl->Refresh();
+            m_password_text_ctrl->SetWindowStyle(wxTE_PROCESS_ENTER);
+            m_password_text_ctrl->SetValue(password);
+            m_password_text_ctrl->Show();
+            m_showPassword_staticbitmap->SetBitmap(m_eye_on_bitmap);
+            m_password_text_ctrl->Refresh();
+            m_password_text_ctrl->Update();
+        } else {
+            m_password_text_ctrl->Hide();
+            m_password_text_ctrl->Refresh();
+            m_password_text_ctrl->SetWindowStyle( wxTE_PASSWORD);
+            // 如果密码输入框当前为明文模式，则切换为密码模式
+            m_password_text_ctrl->SetValue(m_password_text_ctrl->GetValue());
+            m_password_text_ctrl->Show();
+            m_showPassword_staticbitmap->SetBitmap(m_eye_off_bitmap);
+            m_password_text_ctrl->Refresh();
+            m_password_text_ctrl->Update();
+        }  
     }
 
     void PasswordTextCtrl::OnShowPasswordButtonClicked(wxMouseEvent& event)
     {
-        if (m_password_text_ctrl->GetWindowStyleFlag() & wxTE_PASSWORD) {
+        if (m_encrypt) {
+            m_encrypt = false;
             wxString password = m_password_text_ctrl->GetValue();
             // 如果密码输入框当前为密码模式，则切换为明文模式
-            //m_password_text_ctrl->SetWindowStyleFlag(wxTE_PROCESS_ENTER);
-            m_password_text_ctrl->SetWindowStyle(m_password_text_ctrl->GetWindowStyle() & ~wxTE_PASSWORD);
-            //m_password_text_ctrl->SetValue(m_password_text_ctrl->GetValue());
-            m_password_text_ctrl->SetValue("");
-            m_password_text_ctrl->SetValue("8888");
+            m_password_text_ctrl->SetWindowStyle(wxTE_PROCESS_ENTER | wxTE_LEFT | wxBORDER_NONE);
+            m_password_text_ctrl->SetValue(password);
             m_showPassword_staticbitmap->SetBitmap(m_eye_on_bitmap);
-            //m_showPassword_staticbitmap->SetToolTip(wxT("Hide password"));
             m_password_text_ctrl->Refresh();
             m_password_text_ctrl->Update();
+        //替换为明文控件
+            m_password_text_ctrl->Hide();
+		    wxPoint point = m_password_text_ctrl->GetPosition();
+            wxSize size = m_password_text_ctrl->GetSize();
+            m_plain_text_ctrl->SetPosition(point);
+            m_plain_text_ctrl->SetSize(size);
+            m_plain_text_ctrl->SetValue(wxEmptyString);
+            m_plain_text_ctrl->SetValue(password);
+            m_plain_text_ctrl->Show();
         } else {
+            m_encrypt = true;
+            m_password_text_ctrl->Refresh();
+            m_password_text_ctrl->SetWindowStyle(wxTE_PASSWORD | wxTE_LEFT | wxBORDER_NONE);
+            //MarkedText();
             // 如果密码输入框当前为明文模式，则切换为密码模式
-            //m_password_text_ctrl->SetWindowStyleFlag(wxTE_PASSWORD);
-            //m_password_text_ctrl->SetWindowStyle(wxTE_PASSWORD);
             m_password_text_ctrl->SetValue(m_password_text_ctrl->GetValue());
             m_showPassword_staticbitmap->SetBitmap(m_eye_off_bitmap);
-            //m_showPassword_staticbitmap->SetToolTip(wxT("Show password"));
             m_password_text_ctrl->Refresh();
             m_password_text_ctrl->Update();
+
+        //替换为密文控件
+            wxString plain_text = m_plain_text_ctrl->GetValue();
+            m_plain_text_ctrl->Hide();
+            m_password_text_ctrl->SetValue(wxEmptyString);
+            m_password_text_ctrl->SetValue(plain_text);
+            m_password_text_ctrl->Show();
+
         }
     }
 
@@ -265,21 +299,6 @@ LoginDialog::LoginDialog()
     SetSizerAndFit(sizer_frame);
 }
 
-void LoginDialog::OnUpdateText(wxCommandEvent& event)
-{
-    wxWindow* focusWindow = wxWindow::FindFocus();
-    if(focusWindow != nullptr){
-            SetFocus();
-    }
-    if(m_get_code_button){
-        m_get_code_button->SetLabel(event.GetString());
-        if(event.GetString() == "1"){
-            verify_btn_clicked = true;
-        }
-    }
-    event.Skip();
-}
-
 void LoginDialog::on_dpi_changed(const wxRect &suggested_rect)
 {
     const int& em = em_unit();
@@ -341,7 +360,6 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     m_get_code_button->SetMinSize(wxSize(114,54));
     m_get_code_button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event){
         m_get_code_button->startTimer();
-        //m_get_code_button->OnButtonClick(event);
     });
     //Bind(EVT_UPDATE_TEXT_LOGIN, &LoginDialog::OnUpdateText, this);
 
@@ -478,6 +496,7 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     wxStaticBoxSizer* verify_border_sizer = new wxStaticBoxSizer(wxVERTICAL, parent, wxEmptyString);
     verify_border_sizer->SetMinSize(wxSize(190,45));
     verify_border_sizer->Add(m_password);
+    
     //add border
     verify_border_sizer->GetStaticBox()->SetSizeHints(-1, -1, -1, 100);
 

@@ -6,6 +6,7 @@
 
 #include "slic3r/GUI/GUI_Utils.hpp"
 #include "slic3r/GUI/Widgets/Button.hpp"
+//#include "slic3r/GUI/Widgets/TextInput.hpp"
 //#include "slic3r/GUI/Widgets/StaticLine.hpp"
 
 namespace Slic3r { 
@@ -22,15 +23,13 @@ public:
         // 启动定时器，每秒钟更新一次按钮上的文本
         m_timer.Start(1000);
     }
-    void OnButtonClick(wxCommandEvent& event);
-    //void OnUpdateText(wxCommandEvent& event);
+
 private:
     void OnTimer(wxTimerEvent& event);
 
     wxTimer m_timer;
     int m_countdown;
     wxWindow* m_parent;
-    wxMutex m_mutex;
 };
 
 class VerifycodeTextCtrl : public wxPanel
@@ -86,22 +85,25 @@ public:
         return m_password_text_ctrl->GetValue();
     }
 
+    void OnTextCtrlChanged(wxCommandEvent& event);
+
 private:
     void OnShowPasswordButtonClicked(wxMouseEvent& event);
 
 private:
-    wxTextCtrl*      m_password_text_ctrl;
+    wxTextCtrl*      m_password_text_ctrl{nullptr};
+    wxTextCtrl*      m_plain_text_ctrl{nullptr};
     wxBitmap         m_eye_off_bitmap;
     wxBitmap         m_eye_on_bitmap;
-    wxStaticBitmap*  m_lock_staticbitmap;
-    wxStaticBitmap*  m_showPassword_staticbitmap;
+    wxStaticBitmap*  m_lock_staticbitmap{nullptr};
+    wxStaticBitmap*  m_showPassword_staticbitmap{nullptr};
+    bool             m_encrypt = true;
 };
 
 class LoginDialog : public DPIDialog
 {
 public:
     LoginDialog();
-    void OnUpdateText(wxCommandEvent& event);
 
 protected:
     void on_dpi_changed(const wxRect &suggested_rect) override;
