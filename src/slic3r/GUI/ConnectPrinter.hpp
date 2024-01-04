@@ -19,6 +19,7 @@
 #include "Widgets/Button.hpp"
 #include "Widgets/TextInput.hpp"
 #include "DeviceManager.hpp"
+#include "FlashForge/DeviceData.hpp"
 
 namespace Slic3r { namespace GUI {
 class ConnectPrinterDialog : public DPIDialog
@@ -30,11 +31,9 @@ protected:
     TextInput *     m_textCtrl_code;
     Button *        m_button_confirm;
     wxStaticText*   m_staticText_hints;
-    wxStaticBitmap* m_bitmap_diagram;
-    wxBitmap        m_diagram_bmp;
-    wxImage         m_diagram_img;
 
     MachineObject*  m_obj{ nullptr };
+    DeviceObject*   m_devObj {nullptr};
     wxString        m_input_access_code;
 public:
     ConnectPrinterDialog(wxWindow *      parent,
@@ -48,8 +47,8 @@ public:
 
     void go_connect_printer(bool need) {m_need_connect = need;};
     void end_modal(wxStandardID id);
-    void init_bitmap();
     void set_machine_object(MachineObject* obj);
+    void set_device_object(DeviceObject* devObj);
     void on_input_enter(wxCommandEvent& evt);
     void on_button_confirm(wxCommandEvent &event); 
     void on_dpi_changed(const wxRect &suggested_rect) override;

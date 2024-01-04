@@ -13,7 +13,7 @@
 #include "MultiComDef.hpp"
 #include "MultiComEvent.hpp"
 #include "Singleton.hpp"
-#include "WanDevUpdateThd.hpp"
+#include "UserDataUpdateThd.hpp"
 
 namespace Slic3r { namespace GUI {
 
@@ -62,7 +62,7 @@ private:
     std::map<com_id_t, com_dev_data_t>       m_datMap;
     std::set<com_id_t>                       m_readyIdSet;
     std::set<std::string>                    m_serialNumberSet;
-    std::unique_ptr<WanDevUpdateThd>         m_wanDevUpdateThd;
+    std::unique_ptr<UserDataUpdateThd>       m_userDataUpdateThd;
     std::unique_ptr<fnet::FlashNetworkIntfc> m_networkIntfc;
 };
 
