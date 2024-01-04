@@ -1,4 +1,5 @@
 #include "UserDataUpdateThd.hpp"
+#include <ctime>
 #include <boost/bind/bind.hpp>
 #include "FreeInDestructor.h"
 #include "MultiComEvent.hpp"
@@ -48,36 +49,45 @@ void UserDataUpdateThd::run()
 {
     std::string oldUserName, userName, accessToken;
     while (!m_exitThread) {
+        clock_t startClock = clock();
         m_loopWaitEvent.set(false);
-        getUserData(oldUserName, userName, accessToken);
+        getTokenPrivate(oldUserName, userName, accessToken);
         if (!accessToken.empty()) {
-            bool isFirstUpdate = oldUserName != userName;
-            if (isFirstUpdate && updateUserProfile(accessToken) == COM_OK) {
-                setOldUserName(userName);
+            if (oldUserName != userName) {
+                updateUserProfile(accessToken);
             }
             ComErrno ret = updateWanDev(accessToken);
             if (ret != COM_OK) {
                 QueueEvent(new ComWanDevMaintainEvent(COM_WAN_DEV_MAINTAIN_EVENT, ret));
                 clearToken();
-            } else if (isFirstUpdate) {
+            } else if (oldUserName != userName) {
                 QueueEvent(new ComWanDevMaintainEvent(COM_WAN_DEV_MAINTAIN_EVENT, ret));
             }
+            setOldUserName(userName);
         }
-        m_loopWaitEvent.waitTrue(5000);
+        int elapsedTime = (clock() - startClock) / CLOCKS_PER_SEC;
+        m_loopWaitEvent.waitTrue(std::max(5000 - elapsedTime, 100));
     }
 }
 
 ComErrno UserDataUpdateThd::updateUserProfile(const std::string &accessToken)
 {
-    fnet_user_profile_t *fnetProfile;
-    int fnetRet = m_networkIntfc->getUserProfile(accessToken.c_str(), &fnetProfile);
-    ComErrno ret = MultiComUtils::fnetRet2ComErrno(fnetRet);
+    int fnetRet = FNET_OK;
+    int tryCnt = 3;
     com_user_profile_t userProfile;
-    if (ret == COM_OK) {
-        userProfile.nickname = fnetProfile->nickname;
-        userProfile.headImgUrl = fnetProfile->headImgUrl;
+    for (int i = 0; i < tryCnt; ++i) {
+        fnet_user_profile_t *fnetProfile;
+        int fnetRet = m_networkIntfc->getUserProfile(accessToken.c_str(), &fnetProfile);
         fnet::FreeInDestructor freeProfile(fnetProfile, m_networkIntfc->freeUserProfile);
+        if (fnetRet == FNET_OK) {
+            userProfile.nickname = fnetProfile->nickname;
+            userProfile.headImgUrl = fnetProfile->headImgUrl;
+            break;
+        } else if (i + 1 < tryCnt) {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
+        }
     }
+    ComErrno ret = MultiComUtils::fnetRet2ComErrno(fnetRet);
     QueueEvent(new ComGetUserProfileEvent(COM_GET_USER_PROFILE_EVENT, userProfile, ret));
     return ret;
 }
@@ -85,19 +95,22 @@ ComErrno UserDataUpdateThd::updateUserProfile(const std::string &accessToken)
 ComErrno UserDataUpdateThd::updateWanDev(const std::string &accessToken)
 {
     int fnetRet = FNET_OK;
-    for (int i = 0; i < 5 && !m_exitThread; ++i) {
+    int tryCnt = 5;
+    for (int i = 0; i < tryCnt && !m_exitThread; ++i) {
         int devCnt;
         fnet_wan_dev_info_t *devInfos;
         fnetRet = m_networkIntfc->getWanDevList(accessToken.c_str(), &devInfos, &devCnt);
         if (fnetRet == FNET_OK) {
             QueueEvent(new WanDevUpdateEvent(WAN_DEV_UPDATE_EVENT, accessToken, devInfos, devCnt));
             break;
+        } else if (i + 1 < tryCnt) {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
         }
     }
     return MultiComUtils::fnetRet2ComErrno(fnetRet);
 }
 
-void UserDataUpdateThd::getUserData(std::string &oldUserName, std::string &userName,
+void UserDataUpdateThd::getTokenPrivate(std::string &oldUserName, std::string &userName,
     std::string &accessToken)
 {
     boost::mutex::scoped_lock lock(m_tokenMutex);

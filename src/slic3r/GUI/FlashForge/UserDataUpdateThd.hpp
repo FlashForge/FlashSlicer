@@ -47,7 +47,8 @@ private:
 
     ComErrno updateWanDev(const std::string &accessToken);
 
-    void getUserData(std::string &oldUserName, std::string &userName, std::string &accessToken);
+    void getTokenPrivate(std::string &oldUserName, std::string &userName,
+        std::string &accessToken);
 
     void setOldUserName(const std::string &oldUserName);
 
