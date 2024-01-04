@@ -6462,7 +6462,7 @@ void Plater::priv::update_plugin_when_launch(wxCommandEvent &event)
 
 void Plater::priv::show_install_plugin_hint(wxCommandEvent &event)
 {
-    notification_manager->bbl_show_plugin_install_notification(into_u8(_L("Network Plug-in is not detected. Network related features are unavailable.")));
+    //notification_manager->bbl_show_plugin_install_notification(into_u8(_L("Network Plug-in is not detected. Network related features are unavailable.")));
 }
 
 void Plater::priv::show_preview_only_hint(wxCommandEvent &event)
