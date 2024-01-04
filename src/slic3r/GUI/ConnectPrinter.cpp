@@ -82,15 +82,6 @@ ConnectPrinterDialog::ConnectPrinterDialog(wxWindow *parent, wxWindowID id, cons
 
     sizer_top->Add(0, FromDIP(25));
 
-    wxBoxSizer *sizer_diagram;
-    sizer_diagram = new wxBoxSizer(wxHORIZONTAL);
-
-    m_bitmap_diagram = new wxStaticBitmap(this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxSize(FromDIP(340), -1), 0);
-    m_bitmap_diagram->SetBitmap(m_diagram_img);
-    sizer_diagram->Add(m_bitmap_diagram);
-
-    sizer_top->Add(sizer_diagram);
-
     sizer_top->Add(0, FromDIP(40), 0, wxEXPAND, 0);
 
     main_sizer->Add(sizer_top);
@@ -112,52 +103,14 @@ void ConnectPrinterDialog::end_modal(wxStandardID id)
     EndModal(id);
 }
 
-void ConnectPrinterDialog::init_bitmap()
-{
-    AppConfig *config = get_app_config();
-    std::string language = config->get("language");
-
-    if (m_obj) {
-        if (m_obj->printer_type == "C11" || m_obj->printer_type == "C12") {
-            m_diagram_bmp = create_scaled_bitmap("input_accesscode_help2", nullptr, 190);
-        }
-        else if (m_obj->printer_type == "BL-P001" || m_obj->printer_type == "BL-P002" || m_obj->printer_type == "C13") {
-            if (language == "zh_CN") {
-                m_diagram_bmp = create_scaled_bitmap("input_access_code_cn", nullptr, 190);
-            }
-            else {
-                m_diagram_bmp = create_scaled_bitmap("input_access_code_en", nullptr, 190);
-            }
-        }
-        else if (m_obj->printer_type == "N1") {
-            if (language == "zh_CN") {
-                m_diagram_bmp = create_scaled_bitmap("input_access_code_n1_cn", nullptr, 250);
-            }
-            else {
-                m_diagram_bmp = create_scaled_bitmap("input_access_code_n1_en", nullptr, 250);
-            }
-        }
-    }
-    else {
-        if (language == "zh_CN") {
-            m_diagram_bmp = create_scaled_bitmap("input_access_code_cn", nullptr, 190);
-        }
-        else {
-            m_diagram_bmp = create_scaled_bitmap("input_access_code_en", nullptr, 190);
-        }
-    }
-    m_diagram_img = m_diagram_bmp.ConvertToImage();
-    auto bmp_size = m_diagram_bmp.GetSize();
-    float scale = (float)FromDIP(340) / (float)bmp_size.x;
-    m_diagram_img.Rescale(FromDIP(340), bmp_size.y * scale);
-    m_bitmap_diagram->SetBitmap(m_diagram_img);
-    Fit();
-}
-
 void ConnectPrinterDialog::set_machine_object(MachineObject* obj)
 {
     m_obj = obj;
-    init_bitmap();
+}
+
+void ConnectPrinterDialog::set_device_object(DeviceObject* devObj)
+{
+    m_devObj = devObj;
 }
 
 void ConnectPrinterDialog::on_input_enter(wxCommandEvent& evt)
@@ -175,19 +128,17 @@ void ConnectPrinterDialog::on_button_confirm(wxCommandEvent &event)
             return;
         }
     }
-    if (m_obj) {
-        m_obj->set_user_access_code(code.ToStdString());
-        if (m_need_connect) {
+    if (m_devObj) {
+        m_devObj->set_user_access_code(code.ToStdString());
+        /*if (m_need_connect) {
             wxGetApp().getDeviceManager()->set_selected_machine(m_obj->dev_id);
-        }
+        }*/
     }
     EndModal(wxID_OK);
 }
 
 void ConnectPrinterDialog::on_dpi_changed(const wxRect &suggested_rect)
 {
-    init_bitmap();
-    m_bitmap_diagram->SetBitmap(m_diagram_img);
     m_textCtrl_code->GetTextCtrl()->SetSize(wxSize(-1, FromDIP(22)));
     m_textCtrl_code->GetTextCtrl()->SetMinSize(wxSize(-1, FromDIP(22)));
 

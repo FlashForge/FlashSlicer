@@ -107,6 +107,9 @@ MachineObjectPanel::MachineObjectPanel(wxWindow *parent, wxWindowID id, const wx
     wxPanel::Create(parent, id, pos, SELECT_MACHINE_ITEM_SIZE, style, name);
     Bind(wxEVT_PAINT, &MachineObjectPanel::OnPaint, this);
 
+    m_info = nullptr;
+    m_devInfo = nullptr;
+
     SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
 
     m_unbind_img        = ScalableBitmap(this, "unbind", 18);
@@ -216,8 +219,8 @@ void MachineObjectPanel::doRender(wxDC &dc)
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.SetTextForeground(StateColor::darkModeColorFor(SELECT_MACHINE_GREY900));
     wxString dev_name = "";
-    if (m_info) {
-        dev_name = from_u8(m_info->dev_name);
+    if (m_devInfo) {
+        dev_name = from_u8(m_devInfo->get_dev_name());
 
          /*if (m_state == PrinterState::IN_LAN) {
              dev_name += _L("(LAN)");
@@ -274,6 +277,13 @@ void MachineObjectPanel::doRender(wxDC &dc)
 void MachineObjectPanel::update_machine_info(MachineObject *info, bool is_my_devices)
 {
     m_info = info;
+    m_is_my_devices = is_my_devices;
+    Refresh();
+}
+
+void MachineObjectPanel::update_device_info(DeviceObject *info, bool is_my_devices /* = false*/)
+{
+    m_devInfo = info;
     m_is_my_devices = is_my_devices;
     Refresh();
 }
@@ -359,6 +369,9 @@ SelectMachinePopup::SelectMachinePopup(wxWindow *parent)
     SetDoubleBuffered(true);
 #endif //__WINDOWS__
 
+    m_free_device_list.clear();
+    m_bind_machine_list.clear();
+    m_test_string_list.clear();
 
     SetSize(SELECT_MACHINE_POPUP_SIZE);
     SetMinSize(SELECT_MACHINE_POPUP_SIZE);
@@ -522,27 +535,43 @@ void SelectMachinePopup::on_timer(wxTimerEvent &event)
 
 void SelectMachinePopup::update_other_devices()
 {
-    DeviceManager* dev = wxGetApp().getDeviceManager();
-    if (!dev) return;
-    m_free_machine_list = dev->get_local_machine_list();
+    for (auto &deviceInfo : m_free_device_list) {
+        delete deviceInfo.second;
+    }
+    m_free_device_list.clear();
+
+    std::vector<fnet_lan_dev_info> devInfos;
+    MultiComUtils::getLanDevList(devInfos);
+    for (auto &elem : devInfos) {
+        m_free_device_list.insert(std::make_pair(elem.serialNumber, new DeviceObject(&elem)));
+    }
+    if (devInfos.empty()) {
+        return;
+    }
+
+    /*DeviceManager *dev = wxGetApp().getDeviceManager();
+    if (!dev)
+        return;
+    m_free_machine_list = dev->get_local_machine_list();*/
 
     BOOST_LOG_TRIVIAL(trace) << "SelectMachinePopup update_other_devices start";
     this->Freeze();
     m_scrolledWindow->Freeze();
     int i = 0;
 
-    for (auto &elem : m_free_machine_list) {
-        MachineObject *     mobj = elem.second;
+    for (auto &elem : m_free_device_list) {
+        DeviceObject* deviceObj = elem.second;
+        //MachineObject *     mobj = elem.second;
         /* do not show printer bind state is empty */
-        if (!mobj->is_avaliable()) continue;
+        //if (!mobj->is_avaliable()) continue;
 
-        if (!wxGetApp().is_user_login() && !mobj->is_lan_mode_printer())
+        if (!wxGetApp().is_user_login() && !deviceObj->is_lan_mode_printer())
             continue;
 
         /* do not show printer in my list */
-        auto it = m_bind_machine_list.find(mobj->dev_id);
+        /*auto it = m_bind_machine_list.find(mobj->dev_id);
         if (it != m_bind_machine_list.end())
-            continue;
+            continue;*/
 
         MachineObjectPanel* op = nullptr;
         if (i < m_other_list_machine_panel.size()) {
@@ -563,10 +592,11 @@ void SelectMachinePopup::update_other_devices()
         }
         i++;
 
-        op->update_machine_info(mobj);
+        //op->update_machine_info(mobj);
+        op->update_device_info(deviceObj);
 
-        if (mobj->is_lan_mode_printer()) {
-            if (mobj->has_access_right()) {
+        if (deviceObj->is_lan_mode_printer()) {
+            if (deviceObj->has_access_right()) {
                 op->set_printer_state(PrinterState::IN_LAN);
             } else {
                 op->set_printer_state(PrinterState::LOCK);
@@ -574,7 +604,7 @@ void SelectMachinePopup::update_other_devices()
         } else {
             op->show_edit_printer_name(false);
             op->show_printer_bind(true, PrinterBindState::ALLOW_BIND);
-            if (mobj->is_in_printing()) {
+            if (deviceObj->is_in_printing()) {
                 op->set_printer_state(PrinterState::BUSY);
             } else {
                 op->SetToolTip(_L("Online"));
@@ -582,24 +612,26 @@ void SelectMachinePopup::update_other_devices()
             }
         }
 
-        op->Bind(EVT_CONNECT_LAN_PRINT, [this, mobj](wxCommandEvent &e) {
-            if (mobj) {
-                if (mobj->is_lan_mode_printer()) {
+        op->Bind(EVT_CONNECT_LAN_PRINT, [this, deviceObj](wxCommandEvent &e) {
+            if (deviceObj) {
+                if (deviceObj->is_lan_mode_printer()) {
                     ConnectPrinterDialog dlg(wxGetApp().mainframe, wxID_ANY, _L("Input access code"));
-                    dlg.set_machine_object(mobj);
-                    if (dlg.ShowModal() == wxID_OK) {
+                    //dlg.set_machine_object(mobj);
+                    dlg.set_device_object(deviceObj);
+                    /*if (dlg.ShowModal() == wxID_OK) {
                         wxGetApp().mainframe->jump_to_monitor(mobj->dev_id);
-                    }
+                    }*/
                 }
             }
         });
 
-        op->Bind(EVT_BIND_MACHINE, [this, mobj](wxCommandEvent &e) {
-            BindMachineDialog dlg;
+        op->Bind(EVT_BIND_MACHINE, [this, deviceObj](wxCommandEvent &e) {
+            int test = 0;
+            /*BindMachineDialog dlg;
             dlg.update_machine_info(mobj);
             int dlg_result = wxID_CANCEL;
             dlg_result     = dlg.ShowModal();
-            if (dlg_result == wxID_OK) { wxGetApp().mainframe->jump_to_monitor(mobj->dev_id); }
+            if (dlg_result == wxID_OK) { wxGetApp().mainframe->jump_to_monitor(mobj->dev_id); }*/
         });
     }
 

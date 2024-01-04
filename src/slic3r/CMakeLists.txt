@@ -14,6 +14,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/Button.hpp
     GUI/Widgets/CheckBox.cpp
     GUI/Widgets/CheckBox.hpp
+    GUI/Widgets/FFCheckBox.cpp
+    GUI/Widgets/FFCheckBox.hpp
+    GUI/Widgets/FFButton.hpp
+    GUI/Widgets/FFButton.cpp
     GUI/Widgets/RadioBox.hpp
     GUI/Widgets/RadioBox.cpp
     GUI/Widgets/ProgressDialog.hpp
@@ -148,6 +152,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/FlashForge/ComCommandQue.hpp
 	GUI/FlashForge/ComConnection.cpp
 	GUI/FlashForge/ComConnection.hpp
+	GUI/FlashForge/DeviceData.cpp
+	GUI/FlashForge/DeviceData.hpp
     GUI/FlashForge/DeviceListPanel.cpp
     GUI/FlashForge/DeviceListPanel.hpp
     GUI/FlashForge/FlashNetwork.h
