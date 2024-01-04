@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/nowide/convert.hpp>
+#include <nlohmann/json.hpp>
 
 #include <wx/stdpaths.h>
 #include <wx/imagpng.h>
@@ -48,6 +49,7 @@
 #include <wx/splash.h>
 #include <wx/fontutil.h>
 #include <wx/glcanvas.h>
+#include <wx/socket.h>
 
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Model.hpp"
@@ -137,6 +139,7 @@
 #endif
 
 using namespace std::literals;
+using json = nlohmann::json;
 namespace pt = boost::property_tree;
 
 namespace Slic3r {
@@ -575,7 +578,7 @@ private:
 // #if BBL_INTERNAL_TESTING
             // version = _L("Internal Version") + " " + std::string(SLIC3R_VERSION);
 // #else
-            // version = _L("") + " " + std::string(SoftFever_VERSION);
+            // version = _L("") + " " + std::string(FlashForge_VERSION);
 // #endif
 
             // credits infornation
@@ -1767,7 +1770,7 @@ void GUI_App::remove_old_networking_plugins()
 
 int GUI_App::updating_bambu_networking()
 {
-    DownloadProgressDialog dlg(_L("Downloading Bambu Network Plug-in"));
+    DownloadProgressDialog dlg(_L("Downloading FlashForge Network Plug-in"));
     dlg.ShowModal();
     return 0;
 }
@@ -2338,7 +2341,7 @@ bool GUI_App::on_init_inner()
     }
 #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current OrcaSlicer Version %1%")%SoftFever_VERSION;
+    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current OrcaSlicer Version %1%")%FlashForge_VERSION;
     // Enable this to get the default Win32 COMCTRL32 behavior of static boxes.
 //    wxSystemOptions::SetOption("msw.staticbox.optimized-paint", 0);
     // Enable this to disable Windows Vista themes for all wxNotebooks. The themes seem to lead to terrible
@@ -3455,7 +3458,7 @@ void GUI_App::ShowDownNetPluginDlg() {
         });
         if (iter != dialogStack.end())
             return;
-        DownloadProgressDialog dlg(_L("Downloading Bambu Network Plug-in"));
+        DownloadProgressDialog dlg(_L("Downloading FlashForge Network Plug-in"));
         dlg.ShowModal();
     } catch (std::exception &e) {
         ;
@@ -3466,6 +3469,24 @@ void GUI_App::ShowUserLogin(bool show)
 {
     // BBS: User Login Dialog
     if(show){
+        wxIPV4address addr;
+        addr.Hostname(wxGetHostName());
+        addr.Service(0);
+        wxString ip = addr.IPAddress();
+        bool isDomestic = ip.StartsWith("10.") ||
+                  ip.StartsWith("172.") ||
+                  ip.StartsWith("192.") ||
+                  ip.StartsWith("202.") ||
+                  ip.StartsWith("203.") ||
+                  ip.StartsWith("210.") ||
+                  ip.StartsWith("211.") ||
+                  ip.StartsWith("219.") ||
+                  ip.StartsWith("220.") ||
+                  ip.StartsWith("221.") ||
+                  ip.StartsWith("222.");
+        if(!isDomestic){
+            return;
+        }
         try{
             if(!m_login_dlg){
                 m_login_dlg = new LoginDialog();
@@ -3500,6 +3521,7 @@ void GUI_App::ShowUserLogin(bool show)
     // } else {
     //     if (login_dlg)
     //         login_dlg->EndModal(wxID_OK);
+    // }
     // }
 }
 
@@ -3698,6 +3720,7 @@ void GUI_App::request_login(bool show_user_info)
 
 void GUI_App::get_login_info()
 {
+    return;
     if (m_agent) {
         if (m_agent->is_user_login()) {
             std::string login_cmd = m_agent->build_login_cmd();
@@ -3828,7 +3851,7 @@ std::string GUI_App::handle_web_request(std::string cmd)
             }
             else if (command_str.compare("homepage_logout") == 0) {
                 CallAfter([this] {
-                    wxGetApp().request_user_logout();
+                    wxGetApp().handle_login_out();
                 });
             }
             else if (command_str.compare("homepage_modeldepot") == 0) {
@@ -3966,6 +3989,40 @@ std::string GUI_App::handle_web_request(std::string cmd)
         return "";
     }
     return "";
+}
+
+void GUI_App::handle_login_result(std::string url, std::string name)
+{
+    // 原始的JSON字符串
+    std::string jsonStr = R"({
+        "command": "studio_userlogin",
+        "data": {
+            "avatar": "https://public-cdn.bambulab.cn/default/avatar.png",
+            "name": "ShanZhu"
+        },
+        "sequence_id": "10001"
+    })";
+
+    // 将JSON字符串解析为JSON对象
+    json jsonObj = json::parse(jsonStr);
+
+    // 替换"avatar"的值
+    jsonObj["data"]["avatar"] = "https://public-cdn.bambulab.cn/default/avatar.png";
+    jsonObj["data"]["name"] = name;
+
+    // 将JSON对象转换为字符串
+    std::string newJsonStr = jsonObj.dump();
+
+    wxString strJS = wxString::Format("window.postMessage(%s)", newJsonStr);
+    GUI::wxGetApp().run_script(strJS);
+}
+
+void GUI_App::handle_login_out()
+{
+    // 原始的JSON字符串
+    std::string jsonStr = R"({"command":"studio_useroffline","sequence_id":"10001"})";
+    wxString strJS = wxString::Format("window.postMessage(%s)", jsonStr);
+    GUI::wxGetApp().run_script(strJS);
 }
 
 void GUI_App::handle_script_message(std::string msg)
@@ -4310,20 +4367,21 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             std::stringstream json_stream(body);
             boost::property_tree::read_json(json_stream, root);
 
-            bool i_am_pre = false;
+            //bool i_am_pre = false;
             // at least two number, use '.' as separator. can be followed by -Az23 for prereleased and +Az42 for
             // metadata
             std::regex matcher("[0-9]+\\.[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9]+)?(\\+[A-Za-z0-9]+)?");
 
-            Semver current_version = get_version(SoftFever_VERSION, matcher);
-            Semver best_pre(1, 0, 0);
-            Semver best_release(1, 0, 0);
-            std::string best_pre_url;
-            std::string best_release_url;
-            std::string best_release_content;
-            std::string best_pre_content;
+            Semver current_version = get_version(FlashForge_VERSION, matcher);
+            //Semver best_pre(1, 0, 0);
+            //Semver best_release(1, 0, 0);
+            //std::string best_pre_url;
+            //std::string best_release_url;
+            //std::string best_release_content;
+            //std::string best_pre_content;
             const std::regex reg_num("([0-9]+)");
-            std::string tag = root.get<std::string>("tag_name");
+
+            /*std::string tag = root.get<std::string>("tag_name");
             if (tag[0] == 'v')
             tag.erase(0, 1);
             for (std::regex_iterator it = std::sregex_iterator(tag.begin(), tag.end(), reg_num);
@@ -4366,11 +4424,52 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             version_info.url = i_am_pre ? best_pre_url : best_release_url;
             version_info.version_str = i_am_pre ? best_pre.to_string() : best_release.to_string_sf();
             version_info.description = i_am_pre ? best_pre_content : best_release_content;
-            version_info.force_upgrade = false;
+            version_info.force_upgrade = false;*/
 
-            wxCommandEvent *evt = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
-            evt->SetString((i_am_pre ? best_pre : best_release).to_string());
-            GUI::wxGetApp().QueueEvent(evt);
+            std::string win64Ver = root.get<std::string>("general.win64Ver");
+            std::string win64Url = root.get<std::string>("general.win64Url");
+            std::string mac64Ver = root.get<std::string>("general.win64Ver");
+            std::string mac64Url = root.get<std::string>("general.win64Url");
+            std::vector<std::string> introUrls;
+            auto urls = root.get_child("general.introUrl");
+            for (auto it = urls.begin(); it != urls.end(); ++it) {
+                introUrls.push_back(it->second.get_value<std::string>());
+            }
+            Semver latest_version = get_version(win64Ver, matcher);
+            if (current_version == latest_version) {
+                if (by_user) {
+                    wxMessageBox(_L("Already the newest version!"), _L("Info"), wxOK | wxICON_INFORMATION);
+                }
+            }
+            else if (current_version < latest_version) {
+                wxString    languageCode = current_language_code();
+                wxString    chinese("zh_CN"), english("en_US");
+                wxString    language = languageCode.CmpNoCase(chinese) == 0 ? chinese : english;
+                std::string destUrl;
+                for (auto &url : introUrls) {
+                    if (url.find(language.ToStdString()) != std::string::npos) {
+                        destUrl = url;
+                        break;
+                    }
+                }
+                Http::get(destUrl)
+                    .on_complete([&](std::string body, unsigned status) {
+                        if (body.find("APP_INTRO") != std::string::npos) {
+                            auto pos = body.find(":") + 1;
+                            if (pos != std::string::npos) {
+                                version_info.description = body.substr(pos);
+                            }
+                            version_info.url           = win64Url;
+                            version_info.version_str   = win64Ver;
+                            version_info.force_upgrade = false;
+                            wxCommandEvent *evt        = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
+                            // evt->SetString((i_am_pre ? best_pre : best_release).to_string());
+                            evt->SetString(latest_version.to_string());
+                            GUI::wxGetApp().QueueEvent(evt);
+                        }
+                    })
+                    .perform_sync();
+            }
           } catch (...) {
           }
         })
@@ -4518,7 +4617,7 @@ std::string GUI_App::format_display_version()
 {
     if (!version_display.empty()) return version_display;
 
-    version_display = SoftFever_VERSION;
+    version_display = FlashForge_VERSION;
     return version_display;
 }
 

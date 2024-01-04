@@ -93,7 +93,7 @@ ComErrno ComConnection::commandLoop()
                 ret = frontCommand->exec(m_networkIntfc, m_accessToken, m_deviceId);
             }
             processCommand(frontCommand.get(), ret);
-            if (ret == COM_OK) {
+            if (ret == COM_OK || ret == COM_DEVICE_IS_BUSY) {
                 errorCnt = 0;
             } else if (ret == COM_VERIFY_LAN_DEV_FAILED || ++errorCnt > 5) {
                 return ret;

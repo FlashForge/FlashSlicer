@@ -107,6 +107,9 @@ MachineObjectPanel::MachineObjectPanel(wxWindow *parent, wxWindowID id, const wx
     wxPanel::Create(parent, id, pos, SELECT_MACHINE_ITEM_SIZE, style, name);
     Bind(wxEVT_PAINT, &MachineObjectPanel::OnPaint, this);
 
+    m_info = nullptr;
+    m_devInfo = nullptr;
+
     SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
 
     m_unbind_img        = ScalableBitmap(this, "unbind", 18);
@@ -197,7 +200,7 @@ void MachineObjectPanel::render(wxDC &dc)
 
 void MachineObjectPanel::doRender(wxDC &dc)
 {
-    auto   left = 10;
+    auto   left = 20;
     wxSize size = GetSize();
     dc.SetPen(*wxTRANSPARENT_PEN);
 
@@ -216,12 +219,12 @@ void MachineObjectPanel::doRender(wxDC &dc)
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.SetTextForeground(StateColor::darkModeColorFor(SELECT_MACHINE_GREY900));
     wxString dev_name = "";
-    if (m_info) {
-        dev_name = from_u8(m_info->dev_name);
+    if (m_devInfo) {
+        dev_name = from_u8(m_devInfo->get_dev_name());
 
-         if (m_state == PrinterState::IN_LAN) {
+         /*if (m_state == PrinterState::IN_LAN) {
              dev_name += _L("(LAN)");
-         }
+         }*/
     }
     auto        sizet        = dc.GetTextExtent(dev_name);
     auto        text_end     = 0;
@@ -274,6 +277,13 @@ void MachineObjectPanel::doRender(wxDC &dc)
 void MachineObjectPanel::update_machine_info(MachineObject *info, bool is_my_devices)
 {
     m_info = info;
+    m_is_my_devices = is_my_devices;
+    Refresh();
+}
+
+void MachineObjectPanel::update_device_info(DeviceObject *info, bool is_my_devices /* = false*/)
+{
+    m_devInfo = info;
     m_is_my_devices = is_my_devices;
     Refresh();
 }
@@ -359,6 +369,9 @@ SelectMachinePopup::SelectMachinePopup(wxWindow *parent)
     SetDoubleBuffered(true);
 #endif //__WINDOWS__
 
+    m_free_device_list.clear();
+    m_bind_machine_list.clear();
+    m_test_string_list.clear();
 
     SetSize(SELECT_MACHINE_POPUP_SIZE);
     SetMinSize(SELECT_MACHINE_POPUP_SIZE);
@@ -390,11 +403,14 @@ SelectMachinePopup::SelectMachinePopup(wxWindow *parent)
 #endif
     auto own_title        = create_title_panel(_L("My Device"));
     m_sizer_my_devices    = new wxBoxSizer(wxVERTICAL);
+    auto seperate_line = new wxPanel(m_scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(SELECT_MACHINE_ITEM_SIZE.x, FromDIP(1)), wxTAB_TRAVERSAL);
+    seperate_line->SetBackgroundColour(SELECT_MACHINE_GREY400);
     auto other_title      = create_title_panel(_L("Other Device"));
     m_sizer_other_devices = new wxBoxSizer(wxVERTICAL);
 
     m_sizxer_scrolledWindow->Add(own_title, 0, wxEXPAND | wxLEFT, FromDIP(15));
     m_sizxer_scrolledWindow->Add(m_sizer_my_devices, 0, wxEXPAND, 0);
+    m_sizxer_scrolledWindow->Add(seperate_line, 0, wxALL | wxALIGN_CENTER, 0);
     m_sizxer_scrolledWindow->Add(other_title, 0, wxEXPAND | wxLEFT, FromDIP(15));
     m_sizxer_scrolledWindow->Add(m_sizer_other_devices, 0, wxEXPAND, 0);
 
@@ -493,27 +509,19 @@ bool SelectMachinePopup::Show(bool show) {
 
 wxWindow *SelectMachinePopup::create_title_panel(wxString text)
 {
-    auto m_panel_title_own = new wxWindow(m_scrolledWindow, wxID_ANY, wxDefaultPosition, SELECT_MACHINE_ITEM_SIZE, wxTAB_TRAVERSAL);
-    m_panel_title_own->SetBackgroundColour(*wxWHITE);
+    auto panel_title = new wxWindow(m_scrolledWindow, wxID_ANY, wxDefaultPosition, SELECT_MACHINE_ITEM_SIZE, wxTAB_TRAVERSAL);
+    panel_title->SetBackgroundColour(*wxWHITE);
 
-    wxBoxSizer *m_sizer_title_own = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *sizer_title = new wxBoxSizer(wxHORIZONTAL);
 
-    auto m_title_own = new wxStaticText(m_panel_title_own, wxID_ANY, text, wxDefaultPosition, wxDefaultSize, 0);
-    m_title_own->Wrap(-1);
-    m_sizer_title_own->Add(m_title_own, 0, wxALIGN_CENTER, 0);
+    auto titleStaticText = new wxStaticText(panel_title, wxID_ANY, text, wxDefaultPosition, wxDefaultSize, 0);
+    titleStaticText->Wrap(-1);
+    sizer_title->Add(titleStaticText, 0, wxALIGN_CENTER, 0);
+    sizer_title->Add(0, 0, 0, wxLEFT, FromDIP(10));
 
-    wxBoxSizer *m_sizer_line_own = new wxBoxSizer(wxHORIZONTAL);
-
-    auto m_panel_line_own = new wxPanel(m_panel_title_own, wxID_ANY, wxDefaultPosition, wxSize(SELECT_MACHINE_ITEM_SIZE.x, FromDIP(1)), wxTAB_TRAVERSAL);
-    m_panel_line_own->SetBackgroundColour(SELECT_MACHINE_GREY400);
-
-    m_sizer_line_own->Add(m_panel_line_own, 0, wxALIGN_CENTER, 0);
-    m_sizer_title_own->Add(0, 0, 0, wxLEFT, FromDIP(10));
-    m_sizer_title_own->Add(m_sizer_line_own, 1, wxEXPAND | wxRIGHT, FromDIP(10));
-
-    m_panel_title_own->SetSizer(m_sizer_title_own);
-    m_panel_title_own->Layout();
-    return m_panel_title_own;
+    panel_title->SetSizer(sizer_title);
+    panel_title->Layout();
+    return panel_title;
 }
 
 void SelectMachinePopup::on_timer(wxTimerEvent &event)
@@ -527,27 +535,43 @@ void SelectMachinePopup::on_timer(wxTimerEvent &event)
 
 void SelectMachinePopup::update_other_devices()
 {
-    DeviceManager* dev = wxGetApp().getDeviceManager();
-    if (!dev) return;
-    m_free_machine_list = dev->get_local_machine_list();
+    for (auto &deviceInfo : m_free_device_list) {
+        delete deviceInfo.second;
+    }
+    m_free_device_list.clear();
+
+    std::vector<fnet_lan_dev_info> devInfos;
+    MultiComUtils::getLanDevList(devInfos);
+    for (auto &elem : devInfos) {
+        m_free_device_list.insert(std::make_pair(elem.serialNumber, new DeviceObject(&elem)));
+    }
+    if (devInfos.empty()) {
+        return;
+    }
+
+    /*DeviceManager *dev = wxGetApp().getDeviceManager();
+    if (!dev)
+        return;
+    m_free_machine_list = dev->get_local_machine_list();*/
 
     BOOST_LOG_TRIVIAL(trace) << "SelectMachinePopup update_other_devices start";
     this->Freeze();
     m_scrolledWindow->Freeze();
     int i = 0;
 
-    for (auto &elem : m_free_machine_list) {
-        MachineObject *     mobj = elem.second;
+    for (auto &elem : m_free_device_list) {
+        DeviceObject* deviceObj = elem.second;
+        //MachineObject *     mobj = elem.second;
         /* do not show printer bind state is empty */
-        if (!mobj->is_avaliable()) continue;
+        //if (!mobj->is_avaliable()) continue;
 
-        if (!wxGetApp().is_user_login() && !mobj->is_lan_mode_printer())
+        if (!wxGetApp().is_user_login() && !deviceObj->is_lan_mode_printer())
             continue;
 
         /* do not show printer in my list */
-        auto it = m_bind_machine_list.find(mobj->dev_id);
+        /*auto it = m_bind_machine_list.find(mobj->dev_id);
         if (it != m_bind_machine_list.end())
-            continue;
+            continue;*/
 
         MachineObjectPanel* op = nullptr;
         if (i < m_other_list_machine_panel.size()) {
@@ -568,10 +592,11 @@ void SelectMachinePopup::update_other_devices()
         }
         i++;
 
-        op->update_machine_info(mobj);
+        //op->update_machine_info(mobj);
+        op->update_device_info(deviceObj);
 
-        if (mobj->is_lan_mode_printer()) {
-            if (mobj->has_access_right()) {
+        if (deviceObj->is_lan_mode_printer()) {
+            if (deviceObj->has_access_right()) {
                 op->set_printer_state(PrinterState::IN_LAN);
             } else {
                 op->set_printer_state(PrinterState::LOCK);
@@ -579,7 +604,7 @@ void SelectMachinePopup::update_other_devices()
         } else {
             op->show_edit_printer_name(false);
             op->show_printer_bind(true, PrinterBindState::ALLOW_BIND);
-            if (mobj->is_in_printing()) {
+            if (deviceObj->is_in_printing()) {
                 op->set_printer_state(PrinterState::BUSY);
             } else {
                 op->SetToolTip(_L("Online"));
@@ -587,24 +612,26 @@ void SelectMachinePopup::update_other_devices()
             }
         }
 
-        op->Bind(EVT_CONNECT_LAN_PRINT, [this, mobj](wxCommandEvent &e) {
-            if (mobj) {
-                if (mobj->is_lan_mode_printer()) {
+        op->Bind(EVT_CONNECT_LAN_PRINT, [this, deviceObj](wxCommandEvent &e) {
+            if (deviceObj) {
+                if (deviceObj->is_lan_mode_printer()) {
                     ConnectPrinterDialog dlg(wxGetApp().mainframe, wxID_ANY, _L("Input access code"));
-                    dlg.set_machine_object(mobj);
-                    if (dlg.ShowModal() == wxID_OK) {
+                    //dlg.set_machine_object(mobj);
+                    dlg.set_device_object(deviceObj);
+                    /*if (dlg.ShowModal() == wxID_OK) {
                         wxGetApp().mainframe->jump_to_monitor(mobj->dev_id);
-                    }
+                    }*/
                 }
             }
         });
 
-        op->Bind(EVT_BIND_MACHINE, [this, mobj](wxCommandEvent &e) {
-            BindMachineDialog dlg;
+        op->Bind(EVT_BIND_MACHINE, [this, deviceObj](wxCommandEvent &e) {
+            int test = 0;
+            /*BindMachineDialog dlg;
             dlg.update_machine_info(mobj);
             int dlg_result = wxID_CANCEL;
             dlg_result     = dlg.ShowModal();
-            if (dlg_result == wxID_OK) { wxGetApp().mainframe->jump_to_monitor(mobj->dev_id); }
+            if (dlg_result == wxID_OK) { wxGetApp().mainframe->jump_to_monitor(mobj->dev_id); }*/
         });
     }
 
@@ -613,27 +640,6 @@ void SelectMachinePopup::update_other_devices()
         m_other_list_machine_panel[j]->mPanel->Hide();
     }
 
-    if (m_placeholder_panel != nullptr) {
-        m_scrolledWindow->RemoveChild(m_placeholder_panel);
-        m_placeholder_panel->Destroy();
-        m_placeholder_panel = nullptr;
-    }
-
-    m_placeholder_panel = new wxWindow(m_scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(-1,FromDIP(26)));
-    wxBoxSizer* placeholder_sizer = new wxBoxSizer(wxVERTICAL);
-
-    m_hyperlink = new wxHyperlinkCtrl(m_placeholder_panel, wxID_ANY, _L("Can't find my devices?"), wxT("https://wiki.bambulab.com/en/software/bambu-studio/failed-to-connect-printer"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
-    placeholder_sizer->Add(m_hyperlink, 0, wxALIGN_CENTER | wxALL, 5);
-
-
-    m_placeholder_panel->SetSizer(placeholder_sizer);
-    m_placeholder_panel->Layout();
-    placeholder_sizer->Fit(m_placeholder_panel);
-
-    m_placeholder_panel->SetBackgroundColour(StateColor::darkModeColorFor(*wxWHITE));
-    m_sizer_other_devices->Add(m_placeholder_panel, 0, wxEXPAND, 0);
-
-    //m_sizer_other_devices->Layout();
     if(m_other_devices_count != i) {
 		m_scrolledWindow->Fit();
     }
@@ -857,10 +863,10 @@ void SelectMachinePopup::OnLeftUp(wxMouseEvent &event)
         }
 
         //hyper link
-        auto h_rect = m_hyperlink->ClientToScreen(wxPoint(0, 0));
+        /*auto h_rect = m_hyperlink->ClientToScreen(wxPoint(0, 0));
         if (mouse_pos.x > h_rect.x && mouse_pos.y > h_rect.y && mouse_pos.x < (h_rect.x + m_hyperlink->GetSize().x) && mouse_pos.y < (h_rect.y + m_hyperlink->GetSize().y)) {
           wxLaunchDefaultBrowser(wxT("https://wiki.bambulab.com/en/software/bambu-studio/failed-to-connect-printer"));
-        }
+        }*/
     }
 }
 
@@ -936,7 +942,7 @@ SelectMachineDialog::SelectMachineDialog(Plater *plater)
     SetFont(wxGetApp().normal_font());
 
     // icon
-    std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
+    std::string icon_path = (boost::format("%1%/images/FlashSlicerTitle.ico") % resources_dir()).str();
     SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
     Freeze();
@@ -4011,74 +4017,12 @@ SelectMachineDialog::~SelectMachineDialog()
     delete m_refresh_timer;
 }
 
-void SelectMachineDialog::update_lan_machine_list()
-{
-    DeviceManager* dev = wxGetApp().getDeviceManager();
-    if (!dev) return;
-   auto  m_free_machine_list = dev->get_local_machine_list();
-
-    BOOST_LOG_TRIVIAL(trace) << "SelectMachinePopup update_other_devices start";
-
-    for (auto& elem : m_free_machine_list) {
-        MachineObject* mobj = elem.second;
-
-        /* do not show printer bind state is empty */
-        if (!mobj->is_avaliable()) continue;
-        if (!mobj->is_online()) continue;
-        if (!mobj->is_lan_mode_printer()) continue;
-        /*if (mobj->is_in_printing()) {op->set_printer_state(PrinterState::BUSY);}*/
-
-        if (mobj->has_access_right()) {
-                auto b = mobj->dev_name;
-
-                // clear machine list
-
-                //m_comboBox_printer->Clear();
-                std::vector<std::string>              machine_list;
-                wxArrayString                         machine_list_name;
-                std::map<std::string, MachineObject*> option_list;
-
-                // same machine only appear once
-
-               /* machine_list = sort_string(machine_list);
-                for (auto tt = machine_list.begin(); tt != machine_list.end(); tt++) {
-                    for (auto it = option_list.begin(); it != option_list.end(); it++) {
-                        if (it->second->dev_name == *tt) {
-                            m_list.push_back(it->second);
-                            wxString dev_name_text = from_u8(it->second->dev_name);
-                            if (it->second->is_lan_mode_printer()) {
-                                dev_name_text += "(LAN)";
-                            }
-                            machine_list_name.Add(dev_name_text);
-                            break;
-                        }
-                    }
-                }
-
-                m_comboBox_printer->Set(machine_list_name);
-
-                MachineObject* obj = dev->get_selected_machine();
-                if (obj) {
-                    m_printer_last_select = obj->dev_id;
-                }
-                else {
-                    m_printer_last_select = "";
-                }*/
-                //op->set_printer_state(PrinterState::LOCK);
-            }
-
-    }
-
-
-
-    BOOST_LOG_TRIVIAL(trace) << "SelectMachineDialog update_lan_devices end";
-}
 
 
 EditDevNameDialog::EditDevNameDialog(Plater *plater /*= nullptr*/)
     : DPIDialog(static_cast<wxWindow *>(wxGetApp().mainframe), wxID_ANY, _L("Modifying the device name"), wxDefaultPosition, wxDefaultSize, wxCAPTION | wxCLOSE_BOX)
 {
-    std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
+    std::string icon_path = (boost::format("%1%/images/FlashSlicerTitle.ico") % resources_dir()).str();
     SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
 
     SetBackgroundColour(*wxWHITE);

@@ -38,6 +38,8 @@
 #include "Widgets/ComboBox.hpp"
 #include "Widgets/ScrolledWindow.hpp"
 #include "Widgets/PopupWindow.hpp"
+#include "FlashForge/MultiComUtils.hpp"
+#include "FlashForge/DeviceData.hpp"
 #include <wx/simplebook.h>
 #include <wx/hashmap.h>
 
@@ -134,6 +136,7 @@ private:
     ScalableBitmap m_printer_in_lan;
 
     MachineObject *m_info;
+    DeviceObject  *m_devInfo;
 
 protected:
     wxStaticBitmap *m_bitmap_info;
@@ -154,6 +157,8 @@ public:
     void show_printer_bind(bool show, PrinterBindState state);
     void show_edit_printer_name(bool show);
     void update_machine_info(MachineObject *info, bool is_my_devices = false);
+    void update_device_info(DeviceObject *info, bool is_my_devices = false);
+
 protected:
     void OnPaint(wxPaintEvent &event);
     void render(wxDC &dc);
@@ -202,8 +207,6 @@ public:
 private:
     int                               m_my_devices_count{0};
     int                               m_other_devices_count{0};
-    wxWindow*                         m_placeholder_panel{nullptr};
-    wxHyperlinkCtrl*                  m_hyperlink{nullptr};
     wxBoxSizer *                      m_sizer_body{nullptr};
     wxBoxSizer *                      m_sizer_my_devices{nullptr};
     wxBoxSizer *                      m_sizer_other_devices{nullptr};
@@ -219,7 +222,10 @@ private:
     bool                              m_dismiss { false };
 
     std::map<std::string, MachineObject*> m_bind_machine_list; 
-    std::map<std::string, MachineObject*> m_free_machine_list;
+    //std::map<std::string, MachineObject*> m_free_machine_list;
+    std::map<std::string, DeviceObject*>  m_free_device_list;
+
+    std::map<std::string, std::string>  m_test_string_list;
 
 private:
     void OnLeftUp(wxMouseEvent &event);
@@ -437,7 +443,6 @@ public:
     void Enable_Send_Button(bool en);
     void on_dpi_changed(const wxRect& suggested_rect) override;
     void update_user_machine_list();
-    void update_lan_machine_list();
     void stripWhiteSpace(std::string& str);
     void update_ams_status_msg(wxString msg, bool is_warning = false);
     void update_priner_status_msg(wxString msg, bool is_warning = false);

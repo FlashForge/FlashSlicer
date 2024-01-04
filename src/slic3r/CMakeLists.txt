@@ -152,6 +152,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/FlashForge/ComCommandQue.hpp
 	GUI/FlashForge/ComConnection.cpp
 	GUI/FlashForge/ComConnection.hpp
+	GUI/FlashForge/DeviceData.cpp
+	GUI/FlashForge/DeviceData.hpp
     GUI/FlashForge/DeviceListPanel.cpp
     GUI/FlashForge/DeviceListPanel.hpp
     GUI/FlashForge/FlashNetwork.h
@@ -167,14 +169,14 @@ set(SLIC3R_GUI_SOURCES
     GUI/FlashForge/MultiComMgr.hpp
     GUI/FlashForge/MultiComUtils.cpp
     GUI/FlashForge/MultiComUtils.hpp
-    GUI/FlashForge/Singleton.hpp
-    GUI/FlashForge/WaitEvent.cpp
-    GUI/FlashForge/WaitEvent.hpp
     GUI/FlashForge/SingleDeviceState.cpp
     GUI/FlashForge/SingleDeviceState.hpp
-    GUI/FlashForge/WanDevUpdateThd.cpp
-    GUI/FlashForge/WanDevUpdateThd.hpp
-    GUI/GLModel.hpp
+    GUI/FlashForge/Singleton.hpp
+    GUI/FlashForge/UserDataUpdateThd.cpp
+    GUI/FlashForge/UserDataUpdateThd.hpp
+    GUI/FlashForge/WaitEvent.cpp
+    GUI/FlashForge/WaitEvent.hpp
+	GUI/GLModel.hpp
     GUI/GLModel.cpp
     GUI/GLTexture.hpp
     GUI/GLTexture.cpp

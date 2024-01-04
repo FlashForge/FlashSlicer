@@ -6,7 +6,7 @@ namespace Slic3r { namespace GUI {
 MultiComMgr::MultiComMgr()
     : m_idNum(0)
 {
-    m_datMap.emplace(ComInvalidId, com_dev_data_t());
+    m_datMap.emplace(ComInvalidId, com_dev_data_t{COM_CONNECT_LAN, nullptr});
 }
 
 bool MultiComMgr::initalize(const std::string &newtworkDllPath)
@@ -19,15 +19,18 @@ bool MultiComMgr::initalize(const std::string &newtworkDllPath)
         m_networkIntfc.reset(nullptr);
         return false;
     }
-    m_wanDevUpdateThd.reset(new WanDevUpdateThd(m_networkIntfc.get()));
-    m_wanDevUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
+    m_userDataUpdateThd.reset(new UserDataUpdateThd(m_networkIntfc.get()));
+    m_userDataUpdateThd->Bind(WAN_DEV_UPDATE_EVENT, &MultiComMgr::onWanDevUpdated, this);
     return true;
 }
 
 void MultiComMgr::uninitalize()
 {
-    m_wanDevUpdateThd->exit();
-    m_wanDevUpdateThd.reset(nullptr);
+    if (networkIntfc() == nullptr) {
+        return;
+    }
+    m_userDataUpdateThd->exit();
+    m_userDataUpdateThd.reset(nullptr);
     m_networkIntfc.reset(nullptr);
 }
 
@@ -38,17 +41,26 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
 
 void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
-    initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, m_networkIntfc.get())));
+    if (networkIntfc() == nullptr) {
+        return;
+    }
+    initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, networkIntfc())));
 }
 
 void MultiComMgr::setWanDevToken(const std::string &accessToken)
 {
-    m_wanDevUpdateThd->setToken(accessToken);
+    if (networkIntfc() == nullptr) {
+        return;
+    }
+    m_userDataUpdateThd->setToken(accessToken);
 }
 
 void MultiComMgr::removeWanDev()
 {
-    m_wanDevUpdateThd->setToken("");
+    if (networkIntfc() == nullptr) {
+        return;
+    }
+    m_userDataUpdateThd->setToken("");
     for (auto &comPtr : m_comPtrs) {
         comPtr.get()->disconnect(0);
     }
@@ -90,7 +102,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 {
     m_comPtrs.push_back(comPtr);
     m_ptrMap.insert(com_ptr_map_val_t(comPtr->id(), comPtr.get()));
-    m_datMap.emplace(comPtr->id(), com_dev_data_t());
+    m_datMap.emplace(comPtr->id(), com_dev_data_t{comPtr->connectMode(), nullptr});
     m_serialNumberSet.insert(comPtr->serialNumber());
 
     comPtr->Bind(COM_CONNECTION_READY_EVENT, [this](const ComConnectionReadyEvent &event) {
@@ -110,7 +122,7 @@ void MultiComMgr::initConnection(const com_ptr_t &comPtr)
 
 void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
 {
-    if (m_wanDevUpdateThd->getAccessToken() != event.accessToken) {
+    if (m_userDataUpdateThd->getAccessToken() != event.accessToken) {
         return;
     }
     fnet::FreeInDestructorArg freeDevInfos(event.devInfos, m_networkIntfc->freeWanDevList, event.devCnt);
