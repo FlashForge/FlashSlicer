@@ -8,6 +8,7 @@
 #include "Thread.hpp"
 #include "format.hpp"
 #include "nlohmann/json.hpp"
+#include "../slic3r/Utils/Http.hpp"
 
 #include <utility>
 #include <vector>
@@ -358,6 +359,7 @@ void AppConfig::set_defaults()
     if (get("print", "timelapse").empty()) {
         set_str("print", "timelapse", "1");
     }
+    set_version_check_url();
 
     // Remove legacy window positions/sizes
     erase("app", "main_frame_maximized");
@@ -366,6 +368,42 @@ void AppConfig::set_defaults()
     erase("app", "object_settings_maximized");
     erase("app", "object_settings_pos");
     erase("app", "object_settings_size");
+}
+
+void AppConfig::set_version_check_url()
+{
+    std::string url1 = "http://update.cn.sz3dp.com:20080/3dapp/public/FlashSlicer/appInfo.json";
+    std::string url2 = "http://www.ishare3d.com/3dapp/public/FlashSlicer/appInfo.json";
+
+    auto start1 = std::chrono::steady_clock::now();
+    double t1 = -1, t2 = -1;
+    Http::Ptr p1 = Http::get(url1)
+        .timeout_max(5)
+        .on_complete([&](std::string body, unsigned status) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed = end - start1;
+            t1 = elapsed.count();
+        })
+        .perform();
+
+    auto start2 = std::chrono::steady_clock::now();
+    Http::Ptr p2 = Http::get(url2)
+        .timeout_max(5)
+        .on_complete([&](std::string body, unsigned status) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed = end - start2;
+            t2 = elapsed.count();
+        })
+        .perform();
+
+    p1->thread().join();
+    p2->thread().join();
+
+    std::string quickerUrl = url1;
+    if (t1 != -1 && t2 != -1 && t1 > t2)
+        quickerUrl = url2;
+    if (get("version_check_url").empty())
+        set("version_check_url", quickerUrl);
 }
 
 #ifdef WIN32

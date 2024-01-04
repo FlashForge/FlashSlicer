@@ -697,6 +697,12 @@ void Http::cancel()
 	if (p) { p->cancel = true; }
 }
 
+std::thread &Http::thread()
+{
+    if (p)
+        return p->io_thread;
+}
+
 Http Http::get(std::string url)
 {
     return Http{std::move(url)};

@@ -50,6 +50,7 @@ public:
 	void 			   	reset();
 	// Override missing or keys with their defaults.
 	void 			   	set_defaults();
+    void				set_version_check_url();
 
 	// Load the slic3r.ini from a user profile directory (or a datadir, if configured).
 	// return error string or empty strinf
