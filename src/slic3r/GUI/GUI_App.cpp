@@ -3994,14 +3994,7 @@ std::string GUI_App::handle_web_request(std::string cmd)
 void GUI_App::handle_login_result(std::string url, std::string name)
 {
     // 原始的JSON字符串
-    std::string jsonStr = R"({
-        "command": "studio_userlogin",
-        "data": {
-            "avatar": "https://public-cdn.bambulab.cn/default/avatar.png",
-            "name": "ShanZhu"
-        },
-        "sequence_id": "10001"
-    })";
+    std::string jsonStr = R"({"command": "studio_userlogin","data": {"avatar": "https://public-cdn.bambulab.cn/default/avatar.png","name": "ShanZhu"},"sequence_id": "10001"})";
 
     // 将JSON字符串解析为JSON对象
     json jsonObj = json::parse(jsonStr);

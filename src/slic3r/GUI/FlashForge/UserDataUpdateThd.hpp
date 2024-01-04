@@ -1,10 +1,12 @@
 #ifndef slic3r_GUI_WanDevUpdateThd_hpp_
 #define slic3r_GUI_WanDevUpdateThd_hpp_
 
+#include <atomic>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <wx/event.h>
 #include "FlashNetworkIntfc.h"
+#include "MultiComDef.hpp"
 #include "WaitEvent.hpp"
 
 namespace Slic3r { namespace GUI {
@@ -32,17 +34,31 @@ public:
 
     void exit();
 
-    std::string getAccessToken();
+    void getToken(std::string &userName, std::string &accessToken);
 
-    void setToken(const std::string &accessToken);
+    void setToken(const std::string &userName, const std::string &accessToken);
+
+    void clearToken();
 
 private:
     void run();
 
+    ComErrno updateUserProfile(const std::string &accessToken);
+
+    ComErrno updateWanDev(const std::string &accessToken);
+
+    void getTokenPrivate(std::string &oldUserName, std::string &userName,
+        std::string &accessToken);
+
+    void setOldUserName(const std::string &oldUserName);
+
 private:
+    std::string              m_oldUserName;
+    std::string              m_userName;
     std::string              m_accessToken;
     boost::mutex             m_tokenMutex;
-    WaitEvent                m_exitEvent;
+    WaitEvent                m_loopWaitEvent;
+    std::atomic<bool>        m_exitThread;
     boost::thread            m_thread;
     fnet::FlashNetworkIntfc *m_networkIntfc;
 };

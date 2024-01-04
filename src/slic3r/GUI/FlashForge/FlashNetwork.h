@@ -53,6 +53,11 @@ typedef struct fnet_user_profile {
     char *headImgUrl;
 } fnet_user_profile_t;
 
+typedef struct fnet_wan_dev_bind_data {
+    char *devId;
+    char *serialNumber;
+} fnet_wan_dev_bind_data_t;
+
 typedef struct fnet_wan_dev_info {
     char *devId;
     char *name;
@@ -161,6 +166,13 @@ FNET_API void fnet_freeTokenInfo(fnet_token_info_t *tokenInfo);
 FNET_API int fnet_getUserProfile(const char *accessToken, fnet_user_profile_t **profile);
 
 FNET_API void fnet_freeUserProfile(fnet_user_profile_t *profile);
+
+FNET_API int fnet_bindWanDev(const char *accessToken, const char *serialNumber,
+    const char *model, const char *name, fnet_wan_dev_bind_data_t **bindData);
+
+FNET_API void fent_freeBindData(fnet_wan_dev_bind_data_t *bindData);
+
+FNET_API int fnet_unbindWanDev(const char *accessToken, const char *devId);
 
 FNET_API int fnet_getWanDevList(const char *accessToken, fnet_wan_dev_info_t **infos,
     int *devCnt);

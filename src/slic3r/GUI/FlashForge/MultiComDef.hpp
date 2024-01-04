@@ -30,6 +30,11 @@ struct com_token_info_t {
     std::string refreshToken;
 };
 
+struct com_user_profile_t {
+    std::string nickname;
+    std::string headImgUrl;
+};
+
 struct com_dev_data_t {
     ComConnectMode connectMode;
     fnet_dev_detail_t *devDetail;
