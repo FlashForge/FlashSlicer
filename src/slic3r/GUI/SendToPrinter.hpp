@@ -36,12 +36,42 @@
 #include "Widgets/CheckBox.hpp"
 #include "Widgets/ComboBox.hpp"
 #include "Widgets/ScrolledWindow.hpp"
+#include "Widgets/FFCheckBox.hpp"
+#include "Widgets/FFButton.hpp"
+#include "FlashForge/MultiComMgr.hpp"
 #include <wx/simplebook.h>
 #include <wx/hashmap.h>
 #include "TitleDialog.hpp"
 
 namespace Slic3r {
 namespace GUI {
+
+class MachineItem : public wxPanel
+{
+public:
+    struct MachineData
+    {
+        int         flag;   // 0 network, 1 lan
+        wxBitmap    icon;
+        wxString    name;
+    };
+
+public:
+    MachineItem(wxWindow* parent, const MachineItem& data);
+    ~MachineItem() {};
+
+    bool IsChecked() const;
+    void SetChecked(bool checked);
+    
+private:
+    void build();
+
+private:
+    FFCheckBox*     m_checkBox;
+    ThumbnailPanel*	m_iconPanel;
+    wxStaticText*   m_nameLbl;
+    wxBoxSizer*     m_mainSizer;
+};
 
 class SendToPrinterDialog : public TitleDialog
 {
@@ -83,7 +113,6 @@ private:
     wxPanel*							m_line_top{ nullptr };
     wxPanel*							m_panel_image{ nullptr };
     wxPanel*							m_rename_normal_panel{ nullptr };
-    wxPanel*							m_line_materia{ nullptr };
 	wxSimplebook*						m_simplebook{ nullptr };
 	wxStaticText*						m_statictext_finish{ nullptr };
     wxStaticText*						m_stext_sending{ nullptr };
@@ -105,11 +134,17 @@ private:
 	wxBoxSizer*							m_sizer_main;
 	wxStaticText*						m_file_name;
     PrintDialogStatus					m_print_status{ PrintStatusInit };
+    FFCheckBox*                         m_levelCkb;
+    wxStaticText*                       m_levelLbl;
+    wxStaticText*                       m_selectPrinterLbl;
+    FFButton*                           m_netBtn;
+    FFButton*                           m_lanBtn;
 
     std::shared_ptr<SendJob>			m_send_job{nullptr};
     std::vector<wxString>               m_bedtype_list;
     std::map<std::string, ::CheckBox*>	m_checkbox_list;
     std::vector<MachineObject*>			m_list;
+    com_id_list_t                       m_machineIdList;
     wxColour							m_colour_def_color{ wxColour(255, 255, 255) };
     wxColour							m_colour_bold_color{ wxColour(38, 46, 48) };
 	wxTimer*							m_refresh_timer{ nullptr };
@@ -155,6 +190,9 @@ public:
     void on_change_color_mode() { wxGetApp().UpdateDlgDarkUI(this); }
     wxString format_text(wxString& m_msg);
 	std::vector<std::string> sort_string(std::vector<std::string> strArray);
+
+private:
+    void onNetworkToggled(wxCommandEvent& event);
 };
 
 wxDECLARE_EVENT(EVT_CLEAR_IPADDRESS, wxCommandEvent);
