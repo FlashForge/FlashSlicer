@@ -33,6 +33,33 @@ wxDEFINE_EVENT(EVT_SEND_JOB_SUCCESS, wxCommandEvent);
 wxDEFINE_EVENT(EVT_CLEAR_IPADDRESS, wxCommandEvent);
 
 
+MachineItem::MachineItem(wxWindow* parent, const MachineItem& data)
+    : wxPanel(parent, wxID_ANY)
+{
+    build();
+}
+
+bool MachineItem::IsChecked() const
+{
+    return m_checkBox->GetValue();
+}
+
+void MachineItem::SetChecked(bool checked)
+{
+    m_checkBox->SetValue(checked);
+}
+    
+void MachineItem::build()
+{
+    m_checkBox = new FFCheckBox(this, wxID_ANY);
+    m_checkBox->SetValue(false);
+
+    //ThumbnailPanel*	m_iconPanel;
+    //wxStaticText*   m_nameLbl;
+    //wxBoxSizer*     m_mainSizer;
+}
+
+
 void SendToPrinterDialog::stripWhiteSpace(std::string& str)
 {
     if (str == "") { return; }
@@ -215,10 +242,6 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_stext_weight = new wxStaticText(m_scrollable_region, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
     m_sizer_basic_time->Add(m_stext_weight, 0, wxALL, FromDIP(5));
     m_sizer_basic->Add(m_sizer_basic_time, 0, wxALIGN_CENTER, 0);
-
-    m_line_materia = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
-    m_line_materia->SetForegroundColour(wxColour(238, 238, 238));
-    m_line_materia->SetBackgroundColour(wxColour(238, 238, 238));
 
     wxBoxSizer *m_sizer_printer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -456,9 +479,6 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_rename_switch_panel->AddPage(m_rename_normal_panel, wxEmptyString, true);
     m_rename_switch_panel->AddPage(m_rename_edit_panel, wxEmptyString, false);
 
-    // 
-
-
     Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& e) {
         if (e.GetKeyCode() == WXK_ESCAPE) {
             if (m_rename_switch_panel->GetSelection() == 0) {
@@ -490,17 +510,15 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
         e.Skip();
         });
 
-    wxBoxSizer* scrollableRigthSizer = new wxBoxSizer(wxVERTICAL);
-    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
-    scrollableRigthSizer->Add(m_rename_switch_panel, 0, wxALIGN_LEFT, 0);
-    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
-    scrollableRigthSizer->Add(m_sizer_basic, 0, wxALIGN_LEFT, 0);
-    scrollableRigthSizer->Add(0, 0, 0, wxTOP, FromDIP(10));
+    wxBoxSizer* rightTopSizer = new wxBoxSizer(wxVERTICAL);
+    rightTopSizer->Add(m_rename_switch_panel, 0, wxALIGN_LEFT | wxALIGN_BOTTOM, FromDIP(5));
+    rightTopSizer->Add(0, 0, 0, wxTOP, FromDIP(5));
+    rightTopSizer->Add(m_sizer_basic, 0, wxALIGN_LEFT | wxALIGN_TOP, 0);
 
     wxBoxSizer* scrollableTopSizer = new wxBoxSizer(wxHORIZONTAL);
     scrollableTopSizer->Add(m_panel_image, 0, wxALIGN_CENTER_VERTICAL, 0);    
-    scrollableTopSizer->Add(0, 0, 0, wxLEFT, FromDIP(10));
-    scrollableTopSizer->Add(scrollableRigthSizer, 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT, 0);
+    scrollableTopSizer->Add(0, 0, 0, wxLEFT, FromDIP(5));
+    scrollableTopSizer->Add(rightTopSizer, 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT, 0);
 
     m_sizer_scrollable_region->Add(scrollableTopSizer, 0, wxALIGN_CENTER_HORIZONTAL, 0);
     //m_sizer_scrollable_region->Add(0, 0, 0, wxTOP, FromDIP(10));
@@ -508,8 +526,39 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
 	m_scrollable_region->SetSizer(m_sizer_scrollable_region);
 	m_scrollable_region->Layout();
 
+    auto line_materia = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
+    line_materia->SetForegroundColour(wxColour("#DDDDDD"));
+    line_materia->SetBackgroundColour(wxColour("#DDDDDD"));
+    auto line_level = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
+    line_level->SetForegroundColour(wxColour("#DDDDDD"));
+    line_level->SetBackgroundColour(wxColour("#DDDDDD"));
+    auto line_printer = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
+    line_printer->SetForegroundColour(wxColour("#DDDDDD"));
+    line_printer->SetBackgroundColour(wxColour("#DDDDDD"));
 
+    m_levelCkb = new FFCheckBox(this);
+    m_levelCkb->SetValue(true);
+    m_levelLbl = new wxStaticText(this, wxID_ANY, _("Levelling"));
+    m_levelLbl->SetForegroundColour(wxColour("#333333"));
 
+    auto levelSizer = new wxBoxSizer(wxHORIZONTAL);
+    levelSizer->Add(m_levelCkb, 0, wxLEFT | wxALIGN_LEFT, FromDIP(10));
+    levelSizer->Add(m_levelLbl, 0, wxLEFT | wxALIGN_LEFT, FromDIP(10));
+
+    m_selectPrinterLbl = new wxStaticText(this, wxID_ANY, _("Select Printer"));
+    m_netBtn = new FFButton(this, _("Network"));
+    Bind(wxEVT_TOGGLEBUTTON, &SendToPrinterDialog::onNetworkToggled, this);
+    m_lanBtn = new FFButton(this, _("Lan"));
+    Bind(wxEVT_TOGGLEBUTTON, &SendToPrinterDialog::onNetworkToggled, this);
+    auto networkLine = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(1, -1), wxTAB_TRAVERSAL);
+    networkLine->SetForegroundColour(wxColour("#DDDDDD"));
+    networkLine->SetBackgroundColour(wxColour("#DDDDDD"));
+
+    wxBoxSizer* networkSizer = new wxBoxSizer(wxHORIZONTAL);
+    networkSizer->Add(m_selectPrinterLbl, 1, wxLEFT | wxALIGN_LEFT, FromDIP(10));
+    networkSizer->Add(m_netBtn, 0, wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxRIGHT, FromDIP(5));
+    networkSizer->Add(networkLine, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(3));
+    networkSizer->Add(m_lanBtn, 0, wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxLEFT, FromDIP(5));
 
     //m_sizer_main->Add(m_line_top, 0, wxEXPAND, 0);
     m_sizer_main->Add(0, 0, 0, wxTOP, FromDIP(10));
@@ -517,7 +566,15 @@ SendToPrinterDialog::SendToPrinterDialog(Plater *plater)
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(6));
     //m_sizer_main->Add(m_rename_switch_panel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
     //m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(6));
-    m_sizer_main->Add(m_line_materia, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
+    m_sizer_main->Add(line_materia, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
+    m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
+    m_sizer_main->Add(levelSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
+    m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
+    m_sizer_main->Add(line_level, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
+    m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
+    m_sizer_main->Add(networkSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
+    m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
+    m_sizer_main->Add(line_printer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(12));
     m_sizer_main->Add(m_sizer_printer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(30));
     m_sizer_main->Add(0, 0, 0, wxEXPAND | wxTOP, FromDIP(11));
@@ -1360,6 +1417,11 @@ bool SendToPrinterDialog::Show(bool show)
     Fit();
     if (show) { CenterOnParent(); }
     return DPIDialog::Show(show);
+}
+
+void SendToPrinterDialog::onNetworkToggled(wxCommandEvent& event)
+{
+
 }
 
 SendToPrinterDialog::~SendToPrinterDialog()

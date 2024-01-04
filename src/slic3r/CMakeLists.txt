@@ -14,6 +14,10 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/Button.hpp
     GUI/Widgets/CheckBox.cpp
     GUI/Widgets/CheckBox.hpp
+    GUI/Widgets/FFCheckBox.cpp
+    GUI/Widgets/FFCheckBox.hpp
+    GUI/Widgets/FFButton.hpp
+    GUI/Widgets/FFButton.cpp
     GUI/Widgets/RadioBox.hpp
     GUI/Widgets/RadioBox.cpp
     GUI/Widgets/ProgressDialog.hpp
