@@ -43,12 +43,13 @@ fnet::FlashNetworkIntfc *MultiComMgr::networkIntfc()
     return m_networkIntfc.get();
 }
 
-void MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
+com_id_t MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode)
 {
     if (networkIntfc() == nullptr) {
-        return;
+        return ComInvalidId;
     }
     initConnection(com_ptr_t(new ComConnection(m_idNum++, checkCode, devInfo, networkIntfc())));
+    return m_idNum;
 }
 
 void MultiComMgr::setWanDevToken(const std::string &userName, const std::string &accessToken)
@@ -70,6 +71,42 @@ void MultiComMgr::removeWanDev()
             comPtr.get()->disconnect(0);
         }
     }
+}
+
+ComErrno MultiComMgr::bindWanDev(const std::string &serialNumber, const std::string &model,
+    const std::string &name)
+{
+    std::string userName, accessToken;
+    m_userDataUpdateThd->getToken(userName, accessToken);
+    if (accessToken.empty()) {
+        return COM_ERROR;
+    }
+    fnet_wan_dev_bind_data_t *bindData;
+    int ret = m_networkIntfc->bindWanDev(
+        accessToken.c_str(), serialNumber.c_str(), model.c_str(), name.c_str(), &bindData);
+    if (ret == FNET_OK) {
+        initConnection(com_ptr_t(new ComConnection(
+            m_idNum++, accessToken, bindData->serialNumber, bindData->devId, m_networkIntfc.get())));
+    }
+    return MultiComUtils::fnetRet2ComErrno(ret);
+}
+
+ComErrno MultiComMgr::unbindWanDev(const std::string &serialNumber, const std::string &devId)
+{
+    std::string userName, accessToken;
+    m_userDataUpdateThd->getToken(userName, accessToken);
+    if (accessToken.empty()) {
+        return COM_ERROR;
+    }
+    int ret = m_networkIntfc->unbindWanDev(accessToken.c_str(), devId.c_str());
+    if (ret == FNET_OK) {
+        for (auto &comPtr : m_comPtrs) {
+            if (comPtr->deviceId() == devId) {
+                comPtr->disconnect(0);
+            }
+        }
+    }
+    return MultiComUtils::fnetRet2ComErrno(ret);
 }
 
 com_id_list_t MultiComMgr::getReadyDevList()
@@ -160,8 +197,8 @@ void MultiComMgr::onWanDevUpdated(const WanDevUpdateEvent &event)
     }
     for (int i = 0; i < event.devCnt; ++i) {
         if (m_serialNumberSet.find(event.devInfos[i].serialNumber) == m_serialNumberSet.end()) {
-            initConnection(com_ptr_t(new ComConnection(
-                m_idNum++, event.accessToken, event.devInfos[i], m_networkIntfc.get())));
+            initConnection(com_ptr_t(new ComConnection(m_idNum++, event.accessToken,
+                event.devInfos[i].serialNumber, event.devInfos[i].devId, m_networkIntfc.get())));
         }
     }
 }

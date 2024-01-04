@@ -71,7 +71,7 @@ ComErrno UserDataUpdateThd::updateUserProfile(const std::string &accessToken)
 {
     fnet_user_profile_t *fnetProfile;
     int fnetRet = m_networkIntfc->getUserProfile(accessToken.c_str(), &fnetProfile);
-    ComErrno ret = MultiComUtils::networkIntfcRet2ComErrno(fnetRet);
+    ComErrno ret = MultiComUtils::fnetRet2ComErrno(fnetRet);
     com_user_profile_t userProfile;
     if (ret == COM_OK) {
         userProfile.nickname = fnetProfile->nickname;
@@ -94,7 +94,7 @@ ComErrno UserDataUpdateThd::updateWanDev(const std::string &accessToken)
             break;
         }
     }
-    return MultiComUtils::networkIntfcRet2ComErrno(fnetRet);
+    return MultiComUtils::fnetRet2ComErrno(fnetRet);
 }
 
 void UserDataUpdateThd::getUserData(std::string &oldUserName, std::string &userName,

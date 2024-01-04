@@ -35,6 +35,9 @@ FlashNetworkIntfc::FlashNetworkIntfc(const char *libraryPath)
     INIT_FUNC_PTR(freeUserProfile, fnet_freeUserProfile);
     INIT_FUNC_PTR(downloadFile, fnet_downloadFile);
     INIT_FUNC_PTR(freeFileData, fnet_freeFileData);
+    INIT_FUNC_PTR(bindWanDev, fnet_bindWanDev);
+    INIT_FUNC_PTR(freeBindData, fent_freeBindData);
+    INIT_FUNC_PTR(unbindWanDev, fnet_unbindWanDev);
     INIT_FUNC_PTR(getWanDevList, fnet_getWanDevList);
     INIT_FUNC_PTR(freeWanDevList, fnet_freeWanDevList);
     INIT_FUNC_PTR(getWanDevDetail, fnet_getWanDevDetail);

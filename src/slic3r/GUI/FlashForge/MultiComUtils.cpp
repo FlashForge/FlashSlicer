@@ -14,7 +14,7 @@ ComErrno MultiComUtils::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
     fnet_lan_dev_info *fnetDevInfos;
     int ret = intfc->getLanDevList(&fnetDevInfos, &devCnt);
     if (ret != COM_OK) {
-        return networkIntfcRet2ComErrno(ret);
+        return fnetRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeDevInfos(fnetDevInfos, intfc->freeLanDevInfos);
     devInfos.clear();
@@ -34,7 +34,7 @@ ComErrno MultiComUtils::getTokenByPassword(const std::string &userName, const st
     fnet_token_info_t *fnetTokenInfo;
     int ret = intfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenInfo);
     if (ret != COM_OK) {
-        return networkIntfcRet2ComErrno(ret);
+        return fnetRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
     tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
@@ -52,7 +52,7 @@ ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_
     fnet_token_info_t *fnetTokenInfo;
     int ret = intfc->refreshToken(refreshToken.c_str(), &fnetTokenInfo);
     if (ret != COM_OK) {
-        return networkIntfcRet2ComErrno(ret);
+        return fnetRet2ComErrno(ret);
     }
     fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
     tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
@@ -61,7 +61,7 @@ ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_
     return COM_OK;
 }
 
-ComErrno MultiComUtils::networkIntfcRet2ComErrno(int networkRet)
+ComErrno MultiComUtils::fnetRet2ComErrno(int networkRet)
 {
     switch (networkRet) {
     case FNET_OK:

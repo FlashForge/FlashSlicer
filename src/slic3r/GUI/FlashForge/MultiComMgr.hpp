@@ -28,11 +28,16 @@ public:
 
     fnet::FlashNetworkIntfc *networkIntfc();
     
-    void addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode);
+    com_id_t addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode);
 
     void setWanDevToken(const std::string &userName, const std::string &accessToken);
 
     void removeWanDev();
+
+    ComErrno bindWanDev(const std::string &serialNumber, const std::string &model,
+        const std::string &name);
+
+    ComErrno unbindWanDev(const std::string &serialNumber, const std::string &devId);
 
     com_id_list_t getReadyDevList();
 

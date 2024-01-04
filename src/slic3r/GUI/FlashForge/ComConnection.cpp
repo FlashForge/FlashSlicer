@@ -17,13 +17,13 @@ ComConnection::ComConnection(com_id_t id, const std::string &checkCode,
 }
 
 ComConnection::ComConnection(com_id_t id, const std::string &accessToken,
-    const fnet_wan_dev_info_t &devInfo, fnet::FlashNetworkIntfc *networkIntfc)
+    const std::string &serialNumber, const std::string &devId, fnet::FlashNetworkIntfc *networkIntfc)
     : m_id(id)
     , m_connectMode(COM_CONNECT_WAN)
-    , m_serialNumber(devInfo.serialNumber)
+    , m_serialNumber(serialNumber)
     , m_port(0)
     , m_accessToken(accessToken)
-    , m_deviceId(devInfo.devId)
+    , m_deviceId(devId)
     , m_getDetailClock(clock())
     , m_networkIntfc(networkIntfc)
 {

@@ -21,14 +21,16 @@ public:
     ComConnection(com_id_t id, const std::string &checkCode, const fnet_lan_dev_info_t &devInfo,
         fnet::FlashNetworkIntfc *networkIntfc);
     
-    ComConnection(com_id_t id, const std::string &accessToken, const fnet_wan_dev_info_t &devInfo,
-        fnet::FlashNetworkIntfc *networkIntfc);
+    ComConnection(com_id_t id, const std::string &accessToken, const std::string &serialNumber,
+        const std::string &devId, fnet::FlashNetworkIntfc *networkIntfc);
 
     com_id_t id() const { return m_id; }
 
     ComConnectMode connectMode() const { return m_connectMode; }
 
     const std::string &serialNumber() const { return m_serialNumber; }
+
+    const std::string &deviceId() const { return m_deviceId; }
 
     void connect();
 
