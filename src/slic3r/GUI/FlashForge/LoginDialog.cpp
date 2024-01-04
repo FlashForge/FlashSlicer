@@ -51,6 +51,24 @@ namespace GUI {
         }
     }
 
+    VerifycodeTextCtrl::VerifycodeTextCtrl(wxBitmap verifycodebitmap,wxWindow *parent, wxWindowID id/* = wxID_ANY*/)
+                       : wxPanel(parent, id)
+    {
+        // 创建验证码输入框和锁图标
+        m_verify_staticbitmap = new wxStaticBitmap(this, wxID_ANY,verifycodebitmap);
+        m_verify_code_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
+        m_verify_code_text_ctrl->SetHint(_L("Code"));
+        m_verify_code_text_ctrl->SetMinSize(wxSize(171,33));
+
+        // 创建垂直布局并添加控件
+        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+        hbox->Add(m_verify_staticbitmap,wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT, 5));
+        hbox->Add(m_verify_code_text_ctrl, wxSizerFlags().Expand().Border(wxTOP, 12));
+
+        // 设置面板的布局
+        SetSizerAndFit(hbox);
+    }
+
     //增加正则过滤
     // 邮箱正则表达式
     const std::regex emailRegex(R"(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\b)");
@@ -91,7 +109,7 @@ namespace GUI {
         // 创建账号输入框和人像图标
         m_usr_staticbitmap = new wxStaticBitmap(this, wxID_ANY,usrnamebitmap);
         m_user_name_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
-        m_user_name_text_ctrl->SetHint("Phone Number / email");
+        m_user_name_text_ctrl->SetHint(_L("Phone Number / email"));
         m_user_name_text_ctrl->SetMinSize(wxSize(295,33));
         // wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
         // validator.SetCharIncludes("^[\w\.-]+@[\w\.-]+\.\w+$|^1[3-9]\d{9}$");
@@ -115,7 +133,7 @@ namespace GUI {
         // 创建密码输入框和眼睛图标按钮
         m_lock_staticbitmap = new wxStaticBitmap(this, wxID_ANY,lockbitmap);
         m_password_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD | wxTE_PROCESS_ENTER | wxTE_LEFT | wxBORDER_NONE);
-        m_password_text_ctrl->SetHint("Password");
+        m_password_text_ctrl->SetHint(_L("Password"));
         m_password_text_ctrl->SetMinSize(wxSize(241,33));
 
         m_showPassword_staticbitmap = new wxStaticBitmap(this, wxID_ANY,eyeoffbitmapBtn);
@@ -352,7 +370,7 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //add border
     verify_border_sizer->GetStaticBox()->SetSizeHints(-1, -1, -1, 100);
 
-    m_get_code_button = new CountdownButton(parent,"Get Code");
+    m_get_code_button = new CountdownButton(parent,_L("Get Code"));
     m_get_code_button->SetForegroundColour(wxColour(255, 255, 255));// 设置字体颜色
     m_get_code_button->SetBackgroundColour(wxColour(221,221,221)); // 设置背景色
     m_get_code_button->SetWindowStyleFlag(wxBORDER_NONE); //去除边框线
@@ -387,7 +405,7 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     m_error_label->Show(false); 
 
     //login button
-    m_login_button_page1 = new wxButton(parent, wxID_ANY, "Login");
+    m_login_button_page1 = new wxButton(parent, wxID_ANY, _L("Login"));
     m_login_button_page1->SetForegroundColour(wxColour(255, 255, 255));
     m_login_button_page1->SetBackgroundColour(wxColour(221,221,221)); 
     m_login_button_page1->SetWindowStyleFlag(wxBORDER_NONE); 
@@ -399,7 +417,7 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //check box
     wxBoxSizer* checkbox_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_login_check_box_page1 = new wxCheckBox(parent, wxID_ANY, _L(""), wxDefaultPosition, wxDefaultSize, 0);
+    m_login_check_box_page1 = new wxCheckBox(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0);
     m_login_check_box_page1->Bind(wxEVT_CHECKBOX, &LoginDialog::onAgreeCheckBoxChangedPage1, this);
 
     wxStaticText* protocol = new  wxStaticText(parent, wxID_ANY,_L("Read and Agree to Accept"));
@@ -508,13 +526,13 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     page2Sizer->Add(verify_last_sizer, 0, wxEXPAND ,0);
 
     //register / forget password
-    wxHyperlinkCtrl* register_link = new wxHyperlinkCtrl(parent, wxID_ANY, "Register", wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
+    wxHyperlinkCtrl* register_link = new wxHyperlinkCtrl(parent, wxID_ANY, _L("Register"), wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
     register_link->Bind(wxEVT_HYPERLINK, [this](wxCommandEvent& e){
         wxString url = "https://www.baidu.com/";
         wxLaunchDefaultBrowser(url);
     });
 
-    wxHyperlinkCtrl* forget_password_link = new wxHyperlinkCtrl(parent, wxID_ANY, "Forget Password", wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
+    wxHyperlinkCtrl* forget_password_link = new wxHyperlinkCtrl(parent, wxID_ANY, _L("Forget Password"), wxEmptyString, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
     forget_password_link->Bind(wxEVT_HYPERLINK, [this](wxCommandEvent& e){
         wxString url = "https://www.youku.com/";
         wxLaunchDefaultBrowser(url);
@@ -531,7 +549,7 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     page2Sizer->Add(regist_forget_hor_sizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL,0);
 
     //login button
-    m_login_button_page2 = new wxButton(parent, wxID_ANY, "Login");
+    m_login_button_page2 = new wxButton(parent, wxID_ANY, _L("Login"));
     m_login_button_page2->SetMinSize(wxSize(101,44));
     m_login_button_page2->SetFont((wxFont(wxFontInfo(16))));
     m_login_button_page2->SetForegroundColour(wxColour(255, 255, 255));
@@ -544,7 +562,7 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     //check box
     wxBoxSizer* checkbox_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_login_check_box_page2 = new wxCheckBox(parent, wxID_ANY, _L(""), wxDefaultPosition, wxDefaultSize, 0);
+    m_login_check_box_page2 = new wxCheckBox(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0);
     // m_login_check_box_page2->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [this](wxCommandEvent& e) {
     // });
     m_login_check_box_page2->Bind(wxEVT_CHECKBOX, &LoginDialog::onAgreeCheckBoxChangedPage2, this);

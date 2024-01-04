@@ -36,23 +36,7 @@ private:
 class VerifycodeTextCtrl : public wxPanel
 {
 public:
-    VerifycodeTextCtrl(wxBitmap verifycodebitmap,wxWindow *parent, wxWindowID id = wxID_ANY)
-        : wxPanel(parent, id)
-    {
-        // 创建验证码输入框和锁图标
-        m_verify_staticbitmap = new wxStaticBitmap(this, wxID_ANY,verifycodebitmap);
-        m_verify_code_text_ctrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxBORDER_NONE);
-        m_verify_code_text_ctrl->SetHint("Code");
-        m_verify_code_text_ctrl->SetMinSize(wxSize(171,33));
-
-        // 创建垂直布局并添加控件
-        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
-        hbox->Add(m_verify_staticbitmap,wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT, 5));
-        hbox->Add(m_verify_code_text_ctrl, wxSizerFlags().Expand().Border(wxTOP, 12));
-
-        // 设置面板的布局
-        SetSizerAndFit(hbox);
-    }
+    VerifycodeTextCtrl(wxBitmap verifycodebitmap,wxWindow *parent, wxWindowID id = wxID_ANY);
 
     wxString GetValue(){
         return m_verify_code_text_ctrl->GetValue();
