@@ -1341,6 +1341,11 @@ void GUI_App::shutdown()
         m_device_manager = nullptr;
     }
 
+    if (m_device_opr) {
+        delete m_device_opr;
+        m_device_opr = nullptr;
+    }
+
     if (m_agent) {
         //BBS avoid a crash on mac platform
 #ifdef __WINDOWS__
@@ -2918,6 +2923,10 @@ __retry:
 
         if (!m_device_manager)
             m_device_manager = new Slic3r::DeviceManager();
+    }
+
+    if (!m_device_opr) {
+        m_device_opr = new Slic3r::GUI::DeviceObjectOpr();
     }
 
     return true;

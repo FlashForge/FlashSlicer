@@ -75,6 +75,7 @@ struct GUI_InitParams;
 class ParamsDialog;
 class HMSQuery;
 class ModelMallDialog;
+class DeviceObjectOpr;
 
 
 enum FileType
@@ -273,6 +274,7 @@ private:
     //BBS
     bool m_is_closing {false};
     Slic3r::DeviceManager* m_device_manager { nullptr };
+    Slic3r::GUI::DeviceObjectOpr* m_device_opr { nullptr};
     NetworkAgent* m_agent { nullptr };
     std::vector<std::string> need_delete_presets;   // store setting ids of preset
     bool m_networking_compatible { false };
@@ -317,6 +319,7 @@ private:
     void show_message_box(std::string msg) { wxMessageBox(msg); }
     EAppMode get_app_mode() const { return m_app_mode; }
     Slic3r::DeviceManager* getDeviceManager() { return m_device_manager; }
+    Slic3r::GUI::DeviceObjectOpr *getDeviceObjectOpr() { return m_device_opr; }
     HMSQuery* get_hms_query() { return hms_query; }
     NetworkAgent* getAgent() { return m_agent; }
     bool is_editor() const { return m_app_mode == EAppMode::Editor; }

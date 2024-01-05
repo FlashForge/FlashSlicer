@@ -3215,7 +3215,7 @@ void MainFrame::select_tab(wxPanel* panel)
 }
 
 //BBS
-void MainFrame::jump_to_monitor(std::string dev_id)
+void MainFrame::jump_to_monitor(const std::string &dev_id)
 {
     m_tabpanel->SetSelection(tpMonitor);
     ((MonitorPanel*)m_monitor)->select_machine(dev_id);
