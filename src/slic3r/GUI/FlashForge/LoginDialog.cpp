@@ -9,6 +9,7 @@
 #include "slic3r/GUI/format.hpp"
 #include "slic3r/GUI/Widgets/Button.hpp"
 #include "MultiComUtils.hpp"
+#include "MultiComMgr.hpp"
 
 #include <wx/clipbrd.h>
 
@@ -166,17 +167,31 @@ namespace GUI {
         }
     }
 
+    void PasswordTextCtrl::RefreshEyePicPosition()
+    {
+        if(!m_encrypt){
+            //明文显示时调整眼睛图标位置
+            //m_lock_staticbitmap->SetPosition(m_eye_pic_position);
+            m_showPassword_staticbitmap->SetPosition(m_eye_pic_position);
+            m_showPassword_staticbitmap->Refresh();
+            m_showPassword_staticbitmap->Update();
+        }
+    }
+
     void PasswordTextCtrl::OnShowPasswordButtonClicked(wxMouseEvent& event)
     {
         if (m_encrypt) {
             m_encrypt = false;
             wxString password = m_password_text_ctrl->GetValue();
+            //获取眼睛图标位置(明文显示时，因为密文控件被隐藏，会导致图标显示位置变更)
+            m_eye_pic_position = m_showPassword_staticbitmap->GetPosition();
             // 如果密码输入框当前为密码模式，则切换为明文模式
             m_password_text_ctrl->SetWindowStyle(wxTE_PROCESS_ENTER | wxTE_LEFT | wxBORDER_NONE);
             m_password_text_ctrl->SetValue(password);
             m_showPassword_staticbitmap->SetBitmap(m_eye_on_bitmap);
             m_password_text_ctrl->Refresh();
             m_password_text_ctrl->Update();
+
         //替换为明文控件
             m_password_text_ctrl->Hide();
 		    wxPoint point = m_password_text_ctrl->GetPosition();
@@ -272,6 +287,7 @@ LoginDialog::LoginDialog()
         m_staticLine_password->Show();
         m_staticLine_password->Refresh();
         Layout();
+        m_password->RefreshEyePicPosition();
         });
 
     //add line
@@ -314,6 +330,12 @@ LoginDialog::LoginDialog()
 com_token_info_t LoginDialog::GetLoginToken()
 {
     return m_token_info;
+}
+
+void LoginDialog::SetToken(std::string accessToken, std::string refreshToken)
+{
+    m_token_info.accessToken = accessToken;
+    m_token_info.refreshToken = refreshToken;
 }
 
 void LoginDialog::on_dpi_changed(const wxRect &suggested_rect)
@@ -693,8 +715,17 @@ void LoginDialog::onPage2Login(wxCommandEvent& event)
     ComErrno login_result =  MultiComUtils::getTokenByPassword(usrname.ToStdString(),password.ToStdString(),token_info);
     if(login_result == ComErrno::COM_OK){
         LoginDialog::m_token_info = token_info;
-        wxGetApp().handle_login_result("","flashforge");
+        wxGetApp().handle_login_result("default.jpg",usrname.ToStdString());
         this->Hide();
+        AppConfig *app_config = wxGetApp().app_config;
+        if(app_config){
+            //主动点击登录，设置token值
+            app_config->set("access_token",token_info.accessToken);
+            app_config->set("refresh_token",token_info.refreshToken);
+            app_config->set("expire_time",std::to_string(token_info.expiresIn));
+             Slic3r::GUI::MultiComMgr::inst()->setWanDevToken(usrname.ToStdString(),token_info.accessToken);
+        }
+        
     }
 }
 

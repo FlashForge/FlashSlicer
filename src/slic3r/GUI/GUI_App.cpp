@@ -73,6 +73,8 @@
 #include "../Utils/Http.hpp"
 #include "../Utils/UndoRedo.hpp"
 #include "slic3r/Config/Snapshot.hpp"
+#include "slic3r/GUI/FlashForge/MultiComMgr.hpp"
+#include "slic3r/GUI/FlashForge/MultiComEvent.hpp"
 #include "Preferences.hpp"
 #include "Tab.hpp"
 #include "SysInfoDialog.hpp"
@@ -2771,6 +2773,7 @@ bool GUI_App::on_init_inner()
                        "The Orca-Flashforge configuration file may be corrupted and cannot be parsed.\Orca-Flashforge has attempted to recreate the "
                        "configuration file.\nPlease note, application settings will be lost, but printer profiles will not be affected."));
     }
+
     //BBS: delete splash screen
     delete scrn;
     return true;
@@ -3495,6 +3498,16 @@ void GUI_App::ShowUserLogin(bool show)
                 delete m_login_dlg;
                 m_login_dlg = new LoginDialog();
             }
+        Slic3r::GUI::MultiComMgr::inst()->Bind(COM_GET_USER_PROFILE_EVENT, [this](const ComGetUserProfileEvent &event){
+            if(event.ret == ComErrno::COM_OK){
+                if(app_config){
+                    app_config->set("usr_pic",event.userProfile.headImgUrl);
+                    app_config->set("usr_name",event.userProfile.nickname);
+                    handle_login_result(event.userProfile.headImgUrl,event.userProfile.nickname);
+                    app_config->save();
+                }
+            }
+        });    
         m_login_dlg->ShowModal();
         }catch(std::exception &e){
             ;
@@ -3840,8 +3853,20 @@ std::string GUI_App::handle_web_request(std::string cmd)
                 }
             }
             else if (command_str.compare("get_login_info") == 0) {
-                CallAfter([this] {
-                        get_login_info();
+                CallAfter([this] 
+                        {
+                        //查看token是否存在，若存在，则直接登录
+                        std::string access_token = app_config->get("access_token");
+                        std::string refresh_token = app_config->get("refresh_token");
+                        std::string usr_name = app_config->get("usr_name");
+                        std::string usr_pic = app_config->get("usr_pic");
+                        if(!access_token.empty() && !refresh_token.empty()){
+                            //判断时间是否过期，当前有效期31天
+                            //未过期，自动登录
+                            handle_login_result(usr_pic,usr_name);
+                            LoginDialog::SetToken(access_token,refresh_token);
+                        }
+                        //get_login_info();
                     });
             }
             else if (command_str.compare("homepage_login_or_register") == 0) {
@@ -3851,6 +3876,7 @@ std::string GUI_App::handle_web_request(std::string cmd)
             }
             else if (command_str.compare("homepage_logout") == 0) {
                 CallAfter([this] {
+                    Slic3r::GUI::MultiComMgr::inst()->removeWanDev();
                     wxGetApp().handle_login_out();
                 });
             }
@@ -3994,14 +4020,19 @@ std::string GUI_App::handle_web_request(std::string cmd)
 void GUI_App::handle_login_result(std::string url, std::string name)
 {
     // 原始的JSON字符串
-    std::string jsonStr = R"({"command": "studio_userlogin","data": {"avatar": "https://public-cdn.bambulab.cn/default/avatar.png","name": "ShanZhu"},"sequence_id": "10001"})";
+    std::string jsonStr = R"({"command": "studio_userlogin","data": {"avatar": "default.jpg","name": "ShanZhu"},"sequence_id": "10001"})";
 
     // 将JSON字符串解析为JSON对象
     json jsonObj = json::parse(jsonStr);
 
     // 替换"avatar"的值
-    jsonObj["data"]["avatar"] = "https://public-cdn.bambulab.cn/default/avatar.png";
-    jsonObj["data"]["name"] = name;
+    if(!url.empty()){
+        jsonObj["data"]["avatar"] = url;
+    }
+    if(!name.empty()){
+        jsonObj["data"]["name"] = name;
+    }
+
 
     // 将JSON对象转换为字符串
     std::string newJsonStr = jsonObj.dump();
