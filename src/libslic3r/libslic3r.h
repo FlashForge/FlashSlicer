@@ -2,10 +2,10 @@
 #define _libslic3r_h_
 
 #include "libslic3r_version.h"
-#define SLIC3R_APP_FULL_NAME "FlashSlicer"
-#define GCODEVIEWER_APP_NAME "FlashSlicer G-code Viewer"
-#define GCODEVIEWER_APP_KEY  "FlashSlicerGcodeViewer"
-#define GCODEVIEWER_BUILD_ID std::string("FlashSlicer G-code Viewer-") + std::string(SLIC3R_VERSION) + std::string("-RC")
+#define SLIC3R_APP_FULL_NAME "Orca-Flashforge"
+#define GCODEVIEWER_APP_NAME "Orca-Flashforge G-code Viewer"
+#define GCODEVIEWER_APP_KEY  "Orca-FlashforgeGcodeViewer"
+#define GCODEVIEWER_BUILD_ID std::string("Orca-Flashforge G-code Viewer-") + std::string(SLIC3R_VERSION) + std::string("-RC")
 
 // this needs to be included early for MSVC (listing it in Build.PL is not enough)
 #include <memory>

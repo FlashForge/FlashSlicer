@@ -68,6 +68,8 @@ public:
 
     wxString GetValue();
 
+    void RefreshEyePicPosition();
+
 private:
     void OnShowPasswordButtonClicked(wxMouseEvent& event);
 
@@ -79,6 +81,7 @@ private:
     wxStaticBitmap*  m_lock_staticbitmap{nullptr};
     wxStaticBitmap*  m_showPassword_staticbitmap{nullptr};
     bool             m_encrypt = true;
+    wxPoint          m_eye_pic_position;
 };
 
 class LoginDialog : public DPIDialog
@@ -87,6 +90,7 @@ public:
     LoginDialog();
 
     static com_token_info_t GetLoginToken();
+    static void SetToken(std::string accessToken, std::string refreshToken);
 
 protected:
     void on_dpi_changed(const wxRect &suggested_rect) override;

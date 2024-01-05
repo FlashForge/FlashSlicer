@@ -1,5 +1,5 @@
-# FlashSlicer
-FlashSlicer is an open source slicer for FDM printers.
+# Orca-Flashforge
+Orca-Flashforge is an open source slicer for FDM printers.
 
 # How to install
 **Windows**: 
@@ -10,7 +10,7 @@ FlashSlicer is an open source slicer for FDM printers.
 
 **Mac**:
 1. Download the DMG for your computer: `arm64` version for Apple Silicon and `x86_64` for Intel CPU.  
-2. Drag FlashSlicer.app to Application folder. 
+2. Drag Orca-Flashforge.app to Application folder. 
 3. *If you want to run a build from a PR, you also need following instructions bellow*  
     <details quarantine>
     - Option 1 (You only need to do this once. After that the app can be oppened normally.):
@@ -18,9 +18,9 @@ FlashSlicer is an open source slicer for FDM printers.
       - Step 2: A warning window will pop up, click _Open_  
       
     - Option 2:  
-      Execute this command in terminal: `xattr -dr com.apple.quarantine /Applications/FlashSlicer.app`
+      Execute this command in terminal: `xattr -dr com.apple.quarantine /Applications/Orca-Flashforge.app`
       ```console
-          softfever@mac:~$ xattr -dr com.apple.quarantine /Applications/FlashSlicer.app
+          softfever@mac:~$ xattr -dr com.apple.quarantine /Applications/Orca-Flashforge.app
       ```
     - Option 3:  
         - Step 1: open the app, a warning window will pop up  
@@ -50,7 +50,7 @@ resolution: 0.1
 ```
 
 # License
-FlashSlicer is licensed under the GNU Affero General Public License, version 3. FlashSlicer is based on Orca Slicer by SoftFever.
+Orca-Flashforge is licensed under the GNU Affero General Public License, version 3. Orca-Flashforge is based on Orca Slicer by SoftFever.
 
 Orca Slicer is licensed under the GNU Affero General Public License, version 3. Orca Slicer is based on Bambu Studio by BambuLab.
 
@@ -62,7 +62,7 @@ Slic3r is licensed under the GNU Affero General Public License, version 3. Slic3
 
 The GNU Affero General Public License, version 3 ensures that if you use any part of this software in any way (even behind a web server), your software must be released under the same license.
 
-FlashSlicer includes a pressure advance calibration pattern test adapted from Andrew Ellis' generator, which is licensed under GNU General Public License, version 3. Ellis' generator is itself adapted from a generator developed by Sineos for Marlin, which is licensed under GNU General Public License, version 3.
+Orca-Flashforge includes a pressure advance calibration pattern test adapted from Andrew Ellis' generator, which is licensed under GNU General Public License, version 3. Ellis' generator is itself adapted from a generator developed by Sineos for Marlin, which is licensed under GNU General Public License, version 3.
 
-The flashforge networking plugin is based on non-free libraries from FlashForge. It is optional to the FlashSlicer and provides extended functionalities for FlashForge printer users.
+The flashforge networking plugin is based on non-free libraries from FlashForge. It is optional to the Orca-Flashforge and provides extended functionalities for FlashForge printer users.
 
