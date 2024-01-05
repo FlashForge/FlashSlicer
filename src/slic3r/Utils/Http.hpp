@@ -172,7 +172,7 @@ public:
 	void perform_sync();
 	// Cancels a request in progress
 	void cancel();
-    std::thread &thread();
+    void joinThread();
 
 	// Tells whether current backend supports seting up a CA file using ca_file()
 	static bool ca_file_supported();

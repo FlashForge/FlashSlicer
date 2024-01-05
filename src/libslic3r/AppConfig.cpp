@@ -396,8 +396,8 @@ void AppConfig::set_version_check_url()
         })
         .perform();
 
-    p1->thread().join();
-    p2->thread().join();
+    p1->joinThread();
+    p2->joinThread();
 
     std::string quickerUrl = url1;
     if (t1 != -1 && t2 != -1 && t1 > t2)

@@ -697,10 +697,11 @@ void Http::cancel()
 	if (p) { p->cancel = true; }
 }
 
-std::thread &Http::thread()
+void Http::joinThread()
 {
-    if (p)
-        return p->io_thread;
+    if (p) {
+        p->io_thread.join();
+    }
 }
 
 Http Http::get(std::string url)
