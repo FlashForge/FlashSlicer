@@ -578,7 +578,7 @@ private:
 // #if BBL_INTERNAL_TESTING
             // version = _L("Internal Version") + " " + std::string(SLIC3R_VERSION);
 // #else
-            // version = _L("") + " " + std::string(FlashForge_VERSION);
+            // version = _L("") + " " + std::string(Orca_Flashforge_VERSION);
 // #endif
 
             // credits infornation
@@ -967,7 +967,7 @@ static void generic_exception_handle()
         // and terminate the app so it is at least certain to happen now.
         BOOST_LOG_TRIVIAL(error) << boost::format("std::bad_alloc exception: %1%") % ex.what();
         flush_logs();
-        wxString errmsg = wxString::Format(_L("FlashSlicer will terminate because of running out of memory."
+        wxString errmsg = wxString::Format(_L("Orca-Flashforge will terminate because of running out of memory."
                                               "It may be a bug. It will be appreciated if you report the issue to our team."));
         wxMessageBox(errmsg + "\n\n" + wxString(ex.what()), _L("Fatal error"), wxOK | wxICON_ERROR);
 
@@ -976,13 +976,13 @@ static void generic_exception_handle()
      } catch (const boost::io::bad_format_string& ex) {
      	BOOST_LOG_TRIVIAL(error) << boost::format("Uncaught exception: %1%") % ex.what();
         	flush_logs();
-        wxString errmsg = _L("FlashSlicer will terminate because of a localization error. "
+        wxString errmsg = _L("Orca-Flashforge will terminate because of a localization error. "
                              "It will be appreciated if you report the specific scenario this issue happened.");
         wxMessageBox(errmsg + "\n\n" + wxString(ex.what()), _L("Critical error"), wxOK | wxICON_ERROR);
         std::terminate();
         //throw;
     } catch (const std::exception& ex) {
-        wxLogError(format_wxstr(_L("FlashSlicer got an unhandled exception: %1%"), ex.what()));
+        wxLogError(format_wxstr(_L("Orca-Flashforge got an unhandled exception: %1%"), ex.what()));
         BOOST_LOG_TRIVIAL(error) << boost::format("Uncaught exception: %1%") % ex.what();
         flush_logs();
         throw;
@@ -1301,7 +1301,7 @@ GUI_App::GUI_App()
 	, m_removable_drive_manager(std::make_unique<RemovableDriveManager>())
 	//, m_other_instance_message_handler(std::make_unique<OtherInstanceMessageHandler>())
 {
-	//app config initializes early becasuse it is used in instance checking in FlashSlicer.cpp
+	//app config initializes early becasuse it is used in instance checking in Orca-Flashforge.cpp
     this->init_app_config();
     this->init_download_path();
 #if wxUSE_WEBVIEW_EDGE
@@ -2341,7 +2341,7 @@ bool GUI_App::on_init_inner()
     }
 #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current FlashSlicer Version %1%")%FlashForge_VERSION;
+    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current Orca-Flashforge Version %1%") % Orca_Flashforge_VERSION;
     // Enable this to get the default Win32 COMCTRL32 behavior of static boxes.
 //    wxSystemOptions::SetOption("msw.staticbox.optimized-paint", 0);
     // Enable this to disable Windows Vista themes for all wxNotebooks. The themes seem to lead to terrible
@@ -2358,7 +2358,7 @@ bool GUI_App::on_init_inner()
             RichMessageDialog
                 dlg(nullptr,
                     wxString::Format(_L("%s\nDo you want to continue?"), msg),
-                    "FlashSlicer", wxICON_QUESTION | wxYES_NO);
+                    "Orca-Flashforge", wxICON_QUESTION | wxYES_NO);
             dlg.ShowCheckBox(_L("Remember my choice"));
             if (dlg.ShowModal() != wxID_YES) return false;
 
@@ -2768,7 +2768,7 @@ bool GUI_App::on_init_inner()
         m_config_corrupted = false;
         show_error(nullptr,
                    _u8L(
-                       "The FlashSlicer configuration file may be corrupted and cannot be parsed.\nFlashSlicer has attempted to recreate the "
+                       "The Orca-Flashforge configuration file may be corrupted and cannot be parsed.\Orca-Flashforge has attempted to recreate the "
                        "configuration file.\nPlease note, application settings will be lost, but printer profiles will not be affected."));
     }
     //BBS: delete splash screen
@@ -4365,7 +4365,7 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             // metadata
             std::regex matcher("[0-9]+\\.[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9]+)?(\\+[A-Za-z0-9]+)?");
 
-            Semver current_version = get_version(FlashForge_VERSION, matcher);
+            Semver current_version = get_version(Orca_Flashforge_VERSION, matcher);
             //Semver best_pre(1, 0, 0);
             //Semver best_release(1, 0, 0);
             //std::string best_pre_url;
@@ -4610,7 +4610,7 @@ std::string GUI_App::format_display_version()
 {
     if (!version_display.empty()) return version_display;
 
-    version_display = FlashForge_VERSION;
+    version_display = Orca_Flashforge_VERSION;
     return version_display;
 }
 
@@ -5070,7 +5070,7 @@ bool GUI_App::load_language(wxString language, bool initial)
     	// Get the active language from PrusaSlicer.ini, or empty string if the key does not exist.
         language = app_config->get("language");
         if (! language.empty())
-        	BOOST_LOG_TRIVIAL(info) << boost::format("language provided by FlashSlicer.conf: %1%") % language;
+        	BOOST_LOG_TRIVIAL(info) << boost::format("language provided by Orca-Flashforge.conf: %1%") % language;
         else {
             // Get the system language.
             const wxLanguage lang_system = wxLanguage(wxLocale::GetSystemLanguage());
@@ -5127,7 +5127,7 @@ bool GUI_App::load_language(wxString language, bool initial)
 	}
 
 	if (language_info != nullptr && language_info->LayoutDirection == wxLayout_RightToLeft) {
-    	BOOST_LOG_TRIVIAL(trace) << boost::format("The following language code requires right to left layout, which is not supported by FlashSlicer: %1%") % language_info->CanonicalName.ToUTF8().data();
+    	BOOST_LOG_TRIVIAL(trace) << boost::format("The following language code requires right to left layout, which is not supported by Orca-Flashforge: %1%") % language_info->CanonicalName.ToUTF8().data();
 		language_info = nullptr;
 	}
 
@@ -5872,7 +5872,7 @@ void GUI_App::OSXStoreOpenFiles(const wxArrayString &fileNames)
         if (is_gcode_file(into_u8(filename)))
             ++ num_gcodes;
     if (fileNames.size() == num_gcodes) {
-        // Opening PrusaSlicer by drag & dropping a G-Code onto FlashSlicer icon in Finder,
+        // Opening PrusaSlicer by drag & dropping a G-Code onto Orca-Flashforge icon in Finder,
         // just G-codes were passed. Switch to G-code viewer mode.
         m_app_mode = EAppMode::GCodeViewer;
         unlock_lockfile(get_instance_hash_string() + ".lock", data_dir() + "/cache/");

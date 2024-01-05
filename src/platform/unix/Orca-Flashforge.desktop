@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=FlashSlicer
+Name=Orca-Flashforge
 GenericName=3D Printing Software
-Icon=FlashSlicer
+Icon=Orca-Flashforge
 Exec=flash-slicer %F
 Terminal=false
 Type=Application

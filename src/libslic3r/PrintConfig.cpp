@@ -6119,8 +6119,8 @@ CLIMiscConfigDef::CLIMiscConfigDef()
 
     def = this->add("config_compatibility", coEnum);
     def->label = L("Forward-compatibility rule when loading configurations from config files and project files (3MF, AMF).");
-    def->tooltip = L("This version of FlashSlicer may not understand configurations produced by the newest FlashSlicer versions. "
-                     "For example, newer FlashSlicer may extend the list of supported firmware flavors. One may decide to "
+    def->tooltip = L("This version of Orca-Flashforge may not understand configurations produced by the newest Orca-Flashforge versions. "
+                     "For example, newer Orca-Flashforge may extend the list of supported firmware flavors. One may decide to "
                      "bail out or to substitute an unknown value with a default silently or verbosely.");
     def->enum_keys_map = &ConfigOptionEnum<ForwardCompatibilitySubstitutionRule>::get_enum_values();
     def->enum_values.push_back("disable");
@@ -6166,8 +6166,8 @@ CLIMiscConfigDef::CLIMiscConfigDef()
 
     def = this->add("single_instance", coBool);
     def->label = L("Single instance mode");
-    def->tooltip = L("If enabled, the command line arguments are sent to an existing instance of GUI FlashSlicer, "
-                     "or an existing FlashSlicer window is activated. "
+    def->tooltip = L("If enabled, the command line arguments are sent to an existing instance of GUI Orca-Flashforge, "
+                     "or an existing Orca-Flashforge window is activated. "
                      "Overrides the \"single_instance\" configuration value from application preferences.");*/
 
 /*
