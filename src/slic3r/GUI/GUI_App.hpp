@@ -16,6 +16,7 @@
 #include "slic3r/GUI/Jobs/UpgradeNetworkJob.hpp"
 #include "slic3r/GUI/HttpServer.hpp"
 #include "slic3r/GUI/FlashForge/LoginDialog.hpp"
+#include "slic3r/GUI/FlashForge/ReLoginDialog.hpp"
 #include "../Utils/PrintHost.hpp"
 
 #include <wx/app.h>
@@ -286,6 +287,7 @@ private:
     ZUserLogin*     login_dlg { nullptr };
     //FlashForge login
     LoginDialog*    m_login_dlg {nullptr};
+    ReLoginDialog*  m_re_login_dlg{nullptr};
 
     VersionInfo version_info;
     VersionInfo privacy_version_info;

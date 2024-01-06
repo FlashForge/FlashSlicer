@@ -1329,9 +1329,15 @@ void GUI_App::shutdown()
     }
 
     if(m_login_dlg != nullptr){
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy login dialog");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy  flashforge login dialog");
         delete m_login_dlg;
         m_login_dlg = nullptr;
+    }
+
+    if(m_re_login_dlg != nullptr){
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy flashforge relogin dialog");
+        delete m_re_login_dlg;
+        m_re_login_dlg = nullptr;
     }
 
     if (m_is_recreating_gui) return;
@@ -3885,8 +3891,16 @@ std::string GUI_App::handle_web_request(std::string cmd)
             }
             else if (command_str.compare("homepage_logout") == 0) {
                 CallAfter([this] {
-                    Slic3r::GUI::MultiComMgr::inst()->removeWanDev();
+                    //Slic3r::GUI::MultiComMgr::inst()->removeWanDev();
                     wxGetApp().handle_login_out();
+                    if(!m_re_login_dlg){
+                        m_re_login_dlg = new ReLoginDialog();
+                    }
+                    else{
+                        delete m_re_login_dlg;
+                        m_re_login_dlg = new ReLoginDialog();
+                    }
+                    m_re_login_dlg->ShowModal();
                 });
             }
             else if (command_str.compare("homepage_modeldepot") == 0) {
