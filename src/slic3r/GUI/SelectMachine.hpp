@@ -50,7 +50,8 @@ enum PrinterState {
     IDLE,
     BUSY,
     LOCK,
-    IN_LAN
+    IN_LAN,
+    IN_WAN
 };
 
 enum PrinterBindState {
@@ -221,11 +222,9 @@ private:
     std::string                       m_print_info;
     bool                              m_dismiss { false };
 
-    std::map<std::string, MachineObject*> m_bind_machine_list; 
+    std::map<std::string, DeviceObject *> m_bind_machine_list; 
     //std::map<std::string, MachineObject*> m_free_machine_list;
     std::map<std::string, DeviceObject*>  m_free_device_list;
-
-    std::map<std::string, std::string>  m_test_string_list;
 
 private:
     void OnLeftUp(wxMouseEvent &event);

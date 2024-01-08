@@ -176,6 +176,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/FlashForge/UserDataUpdateThd.hpp
     GUI/FlashForge/WaitEvent.cpp
     GUI/FlashForge/WaitEvent.hpp
+    GUI/FlashForge/ReLoginDialog.cpp
+    GUI/FlashForge/ReLoginDialog.hpp
 	GUI/GLModel.hpp
     GUI/GLModel.cpp
     GUI/GLTexture.hpp
