@@ -46,12 +46,12 @@
 namespace Slic3r { namespace GUI {
 
 enum PrinterState {
-    OFFLINE,
+    OFFLINE_LAN,
+    OFFLINE_WAN,
     IDLE,
     BUSY,
-    LOCK,
-    IN_LAN,
-    IN_WAN
+    ONLINE_LAN,
+    ONLINE_WAN
 };
 
 enum PrinterBindState {
@@ -130,11 +130,12 @@ private:
     ScalableBitmap m_edit_name_img;
     ScalableBitmap m_select_unbind_img;
 
-    ScalableBitmap m_printer_status_offline;
+    ScalableBitmap m_printer_status_offline_lan;
+    ScalableBitmap m_printer_status_offline_wan;
     ScalableBitmap m_printer_status_busy;
     ScalableBitmap m_printer_status_idle;
-    ScalableBitmap m_printer_status_lock;
-    ScalableBitmap m_printer_in_lan;
+    ScalableBitmap m_printer_online_lan;
+    ScalableBitmap m_printer_online_wan;
 
     MachineObject *m_info;
     DeviceObject  *m_devInfo;

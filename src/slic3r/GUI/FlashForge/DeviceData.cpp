@@ -327,6 +327,7 @@ void DeviceObjectOpr::onUpdateUserMachine(ComConnectionReadyEvent& event)
 
     if (m_user_devices.find(m_selected_machine) == m_user_devices.end()) {
         DeviceObject *userObj = new DeviceObject(*devObj);
+        userObj->set_online_state(true);
         m_user_devices.emplace(make_pair(m_selected_machine, userObj));
     }
 }
