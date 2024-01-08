@@ -451,14 +451,22 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //service_link->Wrap(100);
 
     service_link->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, "Term of Sevrvice", wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+         wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Term of Sevrvice"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_service_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_service_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_service_link->SetSizer(sizer);
+        m_panel_service_link->Layout();
+        sizer->Fit(m_panel_service_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //Privacy Policy
@@ -467,14 +475,22 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //privacy_policy_link->Wrap(100);
 
     privacy_policy_link->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+        wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_policy_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_policy_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_policy_link->SetSizer(sizer);
+        m_panel_policy_link->Layout();
+        sizer->Fit(m_panel_policy_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //left gaption
@@ -598,28 +614,44 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     m_service_link_page2->SetFont((wxFont(wxFontInfo(14))));
 
     m_service_link_page2->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, "Term of Sevrvice", wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+         wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Term of Sevrvice"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_service_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_service_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_service_link->SetSizer(sizer);
+        m_panel_service_link->Layout();
+        sizer->Fit(m_panel_service_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //Privacy Policy
     m_privacy_policy_link_page2 = new wxStaticText(parent, wxID_ANY, _L("《Privacy Policy》"));
     m_privacy_policy_link_page2->SetFont((wxFont(wxFontInfo(14))));
     m_privacy_policy_link_page2->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+        wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_policy_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_policy_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_policy_link->SetSizer(sizer);
+        m_panel_policy_link->Layout();
+        sizer->Fit(m_panel_policy_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //left gaption
