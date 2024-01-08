@@ -236,7 +236,7 @@ void MonitorPanel::msw_rescale()
     Refresh();
 }
 
-void MonitorPanel::select_machine(std::string machine_sn)
+void MonitorPanel::select_machine(const std::string &machine_sn)
 {
     wxCommandEvent *event = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED);
     event->SetString(machine_sn);

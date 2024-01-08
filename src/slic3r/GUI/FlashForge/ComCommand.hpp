@@ -49,14 +49,13 @@ public:
     {
         int ret = networkIntfc->getLanDevDetail(
             ip.c_str(), port, serialNumber.c_str(), checkCode.c_str(), &m_devDetail);
-        return MultiComUtils::networkIntfcRet2ComErrno(ret);
+        return MultiComUtils::fnetRet2ComErrno(ret);
     }
     ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &accessToken,
         const std::string &deviceId)
     {
-        int ret = networkIntfc->getWanDevDetail(
-            accessToken.c_str(), deviceId.c_str(), &m_devDetail);
-        return MultiComUtils::networkIntfcRet2ComErrno(ret);
+        int ret = networkIntfc->getWanDevDetail(accessToken.c_str(), deviceId.c_str(), &m_devDetail);
+        return MultiComUtils::fnetRet2ComErrno(ret);
     }
     fnet_dev_detail_t *devDetail()
     {
@@ -91,14 +90,14 @@ public:
     {
         int ret = networkIntfc->lanDevSendGcode(
             ip.c_str(), port, serialNumber.c_str(), checkCode.c_str(), &m_sendGcodeData);
-        return MultiComUtils::networkIntfcRet2ComErrno(ret);
+        return MultiComUtils::fnetRet2ComErrno(ret);
     }
     ComErrno exec(fnet::FlashNetworkIntfc *networkIntfc, const std::string &accessToken,
         const std::string &deviceId)
     {
         int ret = networkIntfc->wanDevSendGcode(
             accessToken.c_str(), deviceId.c_str(), &m_sendGcodeData);
-        return MultiComUtils::networkIntfcRet2ComErrno(ret);
+        return MultiComUtils::fnetRet2ComErrno(ret);
     }
     void setConectionData(com_id_t comId, wxEvtHandler *evtHandler)
     {

@@ -304,7 +304,7 @@ public:
     //void        load_configbundle(wxString file = wxEmptyString);
     void        load_config(const DynamicPrintConfig& config);
     //BBS: jump to monitor
-    void        jump_to_monitor(std::string dev_id = "");
+    void        jump_to_monitor(const std::string &dev_id = "");
     //BBS: hint when jump to 3Deditor under preview only mode
     bool        preview_only_hint();
     // Select tab in m_tabpanel

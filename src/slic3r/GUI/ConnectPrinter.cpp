@@ -130,9 +130,10 @@ void ConnectPrinterDialog::on_button_confirm(wxCommandEvent &event)
     }
     if (m_devObj) {
         m_devObj->set_user_access_code(code.ToStdString());
-        /*if (m_need_connect) {
-            wxGetApp().getDeviceManager()->set_selected_machine(m_obj->dev_id);
-        }*/
+        if (m_need_connect) {
+            //wxGetApp().getDeviceManager()->set_selected_machine(m_obj->dev_id);
+            wxGetApp().getDeviceObjectOpr()->set_selected_machine(m_devObj->get_dev_id());
+        }
     }
     EndModal(wxID_OK);
 }

@@ -73,6 +73,8 @@
 #include "../Utils/Http.hpp"
 #include "../Utils/UndoRedo.hpp"
 #include "slic3r/Config/Snapshot.hpp"
+#include "slic3r/GUI/FlashForge/MultiComMgr.hpp"
+#include "slic3r/GUI/FlashForge/MultiComEvent.hpp"
 #include "Preferences.hpp"
 #include "Tab.hpp"
 #include "SysInfoDialog.hpp"
@@ -578,7 +580,7 @@ private:
 // #if BBL_INTERNAL_TESTING
             // version = _L("Internal Version") + " " + std::string(SLIC3R_VERSION);
 // #else
-            // version = _L("") + " " + std::string(FlashForge_VERSION);
+            // version = _L("") + " " + std::string(Orca_Flashforge_VERSION);
 // #endif
 
             // credits infornation
@@ -967,7 +969,7 @@ static void generic_exception_handle()
         // and terminate the app so it is at least certain to happen now.
         BOOST_LOG_TRIVIAL(error) << boost::format("std::bad_alloc exception: %1%") % ex.what();
         flush_logs();
-        wxString errmsg = wxString::Format(_L("OrcaSlicer will terminate because of running out of memory."
+        wxString errmsg = wxString::Format(_L("Orca-Flashforge will terminate because of running out of memory."
                                               "It may be a bug. It will be appreciated if you report the issue to our team."));
         wxMessageBox(errmsg + "\n\n" + wxString(ex.what()), _L("Fatal error"), wxOK | wxICON_ERROR);
 
@@ -976,13 +978,13 @@ static void generic_exception_handle()
      } catch (const boost::io::bad_format_string& ex) {
      	BOOST_LOG_TRIVIAL(error) << boost::format("Uncaught exception: %1%") % ex.what();
         	flush_logs();
-        wxString errmsg = _L("OrcaSlicer will terminate because of a localization error. "
+        wxString errmsg = _L("Orca-Flashforge will terminate because of a localization error. "
                              "It will be appreciated if you report the specific scenario this issue happened.");
         wxMessageBox(errmsg + "\n\n" + wxString(ex.what()), _L("Critical error"), wxOK | wxICON_ERROR);
         std::terminate();
         //throw;
     } catch (const std::exception& ex) {
-        wxLogError(format_wxstr(_L("OrcaSlicer got an unhandled exception: %1%"), ex.what()));
+        wxLogError(format_wxstr(_L("Orca-Flashforge got an unhandled exception: %1%"), ex.what()));
         BOOST_LOG_TRIVIAL(error) << boost::format("Uncaught exception: %1%") % ex.what();
         flush_logs();
         throw;
@@ -1301,7 +1303,7 @@ GUI_App::GUI_App()
 	, m_removable_drive_manager(std::make_unique<RemovableDriveManager>())
 	//, m_other_instance_message_handler(std::make_unique<OtherInstanceMessageHandler>())
 {
-	//app config initializes early becasuse it is used in instance checking in OrcaSlicer.cpp
+	//app config initializes early becasuse it is used in instance checking in Orca-Flashforge.cpp
     this->init_app_config();
     this->init_download_path();
 #if wxUSE_WEBVIEW_EDGE
@@ -1327,9 +1329,15 @@ void GUI_App::shutdown()
     }
 
     if(m_login_dlg != nullptr){
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy login dialog");
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy  flashforge login dialog");
         delete m_login_dlg;
         m_login_dlg = nullptr;
+    }
+
+    if(m_re_login_dlg != nullptr){
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy flashforge relogin dialog");
+        delete m_re_login_dlg;
+        m_re_login_dlg = nullptr;
     }
 
     if (m_is_recreating_gui) return;
@@ -1339,6 +1347,11 @@ void GUI_App::shutdown()
     if (m_device_manager) {
         delete m_device_manager;
         m_device_manager = nullptr;
+    }
+
+    if (m_device_opr) {
+        delete m_device_opr;
+        m_device_opr = nullptr;
     }
 
     if (m_agent) {
@@ -2068,7 +2081,7 @@ void GUI_App::init_webview_runtime()
 {
     // Check WebView Runtime
     if (!WebView::CheckWebViewRuntime()) {
-        int nRet = wxMessageBox(_L("Orca Slicer requires the Microsoft WebView2 Runtime to operate certain features.\nClick Yes to install it now."),
+        int nRet = wxMessageBox(_L("Flash Slicer requires the Microsoft WebView2 Runtime to operate certain features.\nClick Yes to install it now."),
                                 _L("WebView2 Runtime"), wxYES_NO);
         if (nRet == wxYES) {
             WebView::DownloadAndInstallWebViewRuntime();
@@ -2341,7 +2354,7 @@ bool GUI_App::on_init_inner()
     }
 #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current OrcaSlicer Version %1%")%FlashForge_VERSION;
+    BOOST_LOG_TRIVIAL(info) << boost::format("gui mode, Current Orca-Flashforge Version %1%") % Orca_Flashforge_VERSION;
     // Enable this to get the default Win32 COMCTRL32 behavior of static boxes.
 //    wxSystemOptions::SetOption("msw.staticbox.optimized-paint", 0);
     // Enable this to disable Windows Vista themes for all wxNotebooks. The themes seem to lead to terrible
@@ -2358,7 +2371,7 @@ bool GUI_App::on_init_inner()
             RichMessageDialog
                 dlg(nullptr,
                     wxString::Format(_L("%s\nDo you want to continue?"), msg),
-                    "OrcaSlicer", wxICON_QUESTION | wxYES_NO);
+                    "Orca-Flashforge", wxICON_QUESTION | wxYES_NO);
             dlg.ShowCheckBox(_L("Remember my choice"));
             if (dlg.ShowModal() != wxID_YES) return false;
 
@@ -2492,7 +2505,7 @@ bool GUI_App::on_init_inner()
                /* wxString tips = wxString::Format(_L("Click to download new version in default browser: %s"), version_info.version_str);
                 DownloadDialog dialog(this->mainframe,
                     tips,
-                    _L("New version of Orca Slicer"),
+                    _L("New version of Flash Slicer"),
                     false,
                     wxCENTER | wxICON_INFORMATION);
 
@@ -2540,7 +2553,7 @@ bool GUI_App::on_init_inner()
                 wxString tips = wxString::Format(_L("Click to download new version in default browser: %s"), version_str);
                 DownloadDialog dialog(this->mainframe,
                     tips,
-                    _L("The Orca Slicer needs an upgrade"),
+                    _L("The Flash Slicer needs an upgrade"),
                     false,
                     wxCENTER | wxICON_INFORMATION);
                 dialog.SetExtendedMessage(description_text);
@@ -2768,9 +2781,10 @@ bool GUI_App::on_init_inner()
         m_config_corrupted = false;
         show_error(nullptr,
                    _u8L(
-                       "The OrcaSlicer configuration file may be corrupted and cannot be parsed.\nOrcaSlicer has attempted to recreate the "
+                       "The Orca-Flashforge configuration file may be corrupted and cannot be parsed.\Orca-Flashforge has attempted to recreate the "
                        "configuration file.\nPlease note, application settings will be lost, but printer profiles will not be affected."));
     }
+
     //BBS: delete splash screen
     delete scrn;
     return true;
@@ -2918,6 +2932,10 @@ __retry:
 
         if (!m_device_manager)
             m_device_manager = new Slic3r::DeviceManager();
+    }
+
+    if (!m_device_opr) {
+        m_device_opr = new Slic3r::GUI::DeviceObjectOpr();
     }
 
     return true;
@@ -3495,6 +3513,16 @@ void GUI_App::ShowUserLogin(bool show)
                 delete m_login_dlg;
                 m_login_dlg = new LoginDialog();
             }
+        Slic3r::GUI::MultiComMgr::inst()->Bind(COM_GET_USER_PROFILE_EVENT, [this](const ComGetUserProfileEvent &event){
+            if(event.ret == ComErrno::COM_OK){
+                if(app_config){
+                    app_config->set("usr_pic",event.userProfile.headImgUrl);
+                    app_config->set("usr_name",event.userProfile.nickname);
+                    handle_login_result(event.userProfile.headImgUrl,event.userProfile.nickname);
+                    app_config->save();
+                }
+            }
+        });    
         m_login_dlg->ShowModal();
         }catch(std::exception &e){
             ;
@@ -3840,8 +3868,20 @@ std::string GUI_App::handle_web_request(std::string cmd)
                 }
             }
             else if (command_str.compare("get_login_info") == 0) {
-                CallAfter([this] {
-                        get_login_info();
+                CallAfter([this] 
+                        {
+                        //查看token是否存在，若存在，则直接登录
+                        std::string access_token = app_config->get("access_token");
+                        std::string refresh_token = app_config->get("refresh_token");
+                        std::string usr_name = app_config->get("usr_name");
+                        std::string usr_pic = app_config->get("usr_pic");
+                        if(!access_token.empty() && !refresh_token.empty()){
+                            //判断时间是否过期，当前有效期31天
+                            //未过期，自动登录
+                            handle_login_result(usr_pic,usr_name);
+                            LoginDialog::SetToken(access_token,refresh_token);
+                        }
+                        //get_login_info();
                     });
             }
             else if (command_str.compare("homepage_login_or_register") == 0) {
@@ -3851,7 +3891,16 @@ std::string GUI_App::handle_web_request(std::string cmd)
             }
             else if (command_str.compare("homepage_logout") == 0) {
                 CallAfter([this] {
+                    //Slic3r::GUI::MultiComMgr::inst()->removeWanDev();
                     wxGetApp().handle_login_out();
+                    if(!m_re_login_dlg){
+                        m_re_login_dlg = new ReLoginDialog();
+                    }
+                    else{
+                        delete m_re_login_dlg;
+                        m_re_login_dlg = new ReLoginDialog();
+                    }
+                    m_re_login_dlg->ShowModal();
                 });
             }
             else if (command_str.compare("homepage_modeldepot") == 0) {
@@ -3994,21 +4043,19 @@ std::string GUI_App::handle_web_request(std::string cmd)
 void GUI_App::handle_login_result(std::string url, std::string name)
 {
     // 原始的JSON字符串
-    std::string jsonStr = R"({
-        "command": "studio_userlogin",
-        "data": {
-            "avatar": "https://public-cdn.bambulab.cn/default/avatar.png",
-            "name": "ShanZhu"
-        },
-        "sequence_id": "10001"
-    })";
+    std::string jsonStr = R"({"command": "studio_userlogin","data": {"avatar": "default.jpg","name": "ShanZhu"},"sequence_id": "10001"})";
 
     // 将JSON字符串解析为JSON对象
     json jsonObj = json::parse(jsonStr);
 
     // 替换"avatar"的值
-    jsonObj["data"]["avatar"] = "https://public-cdn.bambulab.cn/default/avatar.png";
-    jsonObj["data"]["name"] = name;
+    if(!url.empty()){
+        jsonObj["data"]["avatar"] = url;
+    }
+    if(!name.empty()){
+        jsonObj["data"]["name"] = name;
+    }
+
 
     // 将JSON对象转换为字符串
     std::string newJsonStr = jsonObj.dump();
@@ -4125,7 +4172,7 @@ void GUI_App::on_http_error(wxCommandEvent &evt)
 
     // Version limit
     if (code == HttpErrorVersionLimited) {
-        MessageDialog msg_dlg(nullptr, _L("The version of Orca Slicer is too low and needs to be updated to the latest version before it can be used normally"), "", wxAPPLY | wxOK);
+        MessageDialog msg_dlg(nullptr, _L("The version of Flash Slicer is too low and needs to be updated to the latest version before it can be used normally"), "", wxAPPLY | wxOK);
         if (msg_dlg.ShowModal() == wxOK) {
             return;
         }
@@ -4372,7 +4419,7 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
             // metadata
             std::regex matcher("[0-9]+\\.[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9]+)?(\\+[A-Za-z0-9]+)?");
 
-            Semver current_version = get_version(FlashForge_VERSION, matcher);
+            Semver current_version = get_version(Orca_Flashforge_VERSION, matcher);
             //Semver best_pre(1, 0, 0);
             //Semver best_release(1, 0, 0);
             //std::string best_pre_url;
@@ -4617,7 +4664,7 @@ std::string GUI_App::format_display_version()
 {
     if (!version_display.empty()) return version_display;
 
-    version_display = FlashForge_VERSION;
+    version_display = Orca_Flashforge_VERSION;
     return version_display;
 }
 
@@ -5077,7 +5124,7 @@ bool GUI_App::load_language(wxString language, bool initial)
     	// Get the active language from PrusaSlicer.ini, or empty string if the key does not exist.
         language = app_config->get("language");
         if (! language.empty())
-        	BOOST_LOG_TRIVIAL(info) << boost::format("language provided by OrcaSlicer.conf: %1%") % language;
+        	BOOST_LOG_TRIVIAL(info) << boost::format("language provided by Orca-Flashforge.conf: %1%") % language;
         else {
             // Get the system language.
             const wxLanguage lang_system = wxLanguage(wxLocale::GetSystemLanguage());
@@ -5134,7 +5181,7 @@ bool GUI_App::load_language(wxString language, bool initial)
 	}
 
 	if (language_info != nullptr && language_info->LayoutDirection == wxLayout_RightToLeft) {
-    	BOOST_LOG_TRIVIAL(trace) << boost::format("The following language code requires right to left layout, which is not supported by OrcaSlicer: %1%") % language_info->CanonicalName.ToUTF8().data();
+    	BOOST_LOG_TRIVIAL(trace) << boost::format("The following language code requires right to left layout, which is not supported by Orca-Flashforge: %1%") % language_info->CanonicalName.ToUTF8().data();
 		language_info = nullptr;
 	}
 
@@ -5219,14 +5266,14 @@ bool GUI_App::load_language(wxString language, bool initial)
 
     if (! wxLocale::IsAvailable(language_info->Language)) {
     	// Loading the language dictionary failed.
-    	wxString message = "Switching Orca Slicer to language " + language_info->CanonicalName + " failed.";
+    	wxString message = "Switching Flash Slicer to language " + language_info->CanonicalName + " failed.";
 #if !defined(_WIN32) && !defined(__APPLE__)
         // likely some linux system
         message += "\nYou may need to reconfigure the missing locales, likely by running the \"locale-gen\" and \"dpkg-reconfigure locales\" commands.\n";
 #endif
         if (initial)
         	message + "\n\nApplication will close.";
-        wxMessageBox(message, "Orca Slicer - Switching language failed", wxOK | wxICON_ERROR);
+        wxMessageBox(message, "Flash Slicer - Switching language failed", wxOK | wxICON_ERROR);
         if (initial)
 			std::exit(EXIT_FAILURE);
 		else
@@ -5879,7 +5926,7 @@ void GUI_App::OSXStoreOpenFiles(const wxArrayString &fileNames)
         if (is_gcode_file(into_u8(filename)))
             ++ num_gcodes;
     if (fileNames.size() == num_gcodes) {
-        // Opening PrusaSlicer by drag & dropping a G-Code onto OrcaSlicer icon in Finder,
+        // Opening PrusaSlicer by drag & dropping a G-Code onto Orca-Flashforge icon in Finder,
         // just G-codes were passed. Switch to G-code viewer mode.
         m_app_mode = EAppMode::GCodeViewer;
         unlock_lockfile(get_instance_hash_string() + ".lock", data_dir() + "/cache/");

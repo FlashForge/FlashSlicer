@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Flash GCode viewer
-Exec=flash-slicer --gcodeviewer %F
-Icon=FlashSlicer-gcodeviewer
-Terminal=false
-Type=Application
-MimeType=text/x.gcode;
-Categories=Graphics;3DGraphics;
-Keywords=3D;Printing;Slicer;

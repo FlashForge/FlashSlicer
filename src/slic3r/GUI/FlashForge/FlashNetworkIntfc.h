@@ -31,6 +31,9 @@ public:
     decltype(&fnet_freeUserProfile) freeUserProfile;
     decltype(&fnet_downloadFile) downloadFile;
     decltype(&fnet_freeFileData) freeFileData;
+    decltype(&fnet_bindWanDev) bindWanDev;
+    decltype(&fent_freeBindData) freeBindData;
+    decltype(&fnet_unbindWanDev) unbindWanDev;
     decltype(&fnet_getWanDevList) getWanDevList;
     decltype(&fnet_freeWanDevList) freeWanDevList;
     decltype(&fnet_getWanDevDetail) getWanDevDetail;

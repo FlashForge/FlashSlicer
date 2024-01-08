@@ -16,6 +16,7 @@
 #include "slic3r/GUI/Jobs/UpgradeNetworkJob.hpp"
 #include "slic3r/GUI/HttpServer.hpp"
 #include "slic3r/GUI/FlashForge/LoginDialog.hpp"
+#include "slic3r/GUI/FlashForge/ReLoginDialog.hpp"
 #include "../Utils/PrintHost.hpp"
 
 #include <wx/app.h>
@@ -75,6 +76,7 @@ struct GUI_InitParams;
 class ParamsDialog;
 class HMSQuery;
 class ModelMallDialog;
+class DeviceObjectOpr;
 
 
 enum FileType
@@ -273,6 +275,7 @@ private:
     //BBS
     bool m_is_closing {false};
     Slic3r::DeviceManager* m_device_manager { nullptr };
+    Slic3r::GUI::DeviceObjectOpr* m_device_opr { nullptr};
     NetworkAgent* m_agent { nullptr };
     std::vector<std::string> need_delete_presets;   // store setting ids of preset
     bool m_networking_compatible { false };
@@ -284,6 +287,7 @@ private:
     ZUserLogin*     login_dlg { nullptr };
     //FlashForge login
     LoginDialog*    m_login_dlg {nullptr};
+    ReLoginDialog*  m_re_login_dlg{nullptr};
 
     VersionInfo version_info;
     VersionInfo privacy_version_info;
@@ -317,12 +321,13 @@ private:
     void show_message_box(std::string msg) { wxMessageBox(msg); }
     EAppMode get_app_mode() const { return m_app_mode; }
     Slic3r::DeviceManager* getDeviceManager() { return m_device_manager; }
+    Slic3r::GUI::DeviceObjectOpr *getDeviceObjectOpr() { return m_device_opr; }
     HMSQuery* get_hms_query() { return hms_query; }
     NetworkAgent* getAgent() { return m_agent; }
     bool is_editor() const { return m_app_mode == EAppMode::Editor; }
     bool is_gcode_viewer() const { return m_app_mode == EAppMode::GCodeViewer; }
     bool is_recreating_gui() const { return m_is_recreating_gui; }
-    std::string logo_name() const { return is_editor() ? "OrcaSlicer" : "OrcaSlicer-gcodeviewer"; }
+    std::string logo_name() const { return is_editor() ? "Orca-Flashforge" : "Orca-Flashforge-gcodeviewer"; }
     
     // SoftFever
     bool show_gcode_window() const { return m_show_gcode_window; }

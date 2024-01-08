@@ -126,7 +126,7 @@ public:
     void msw_rescale();
 
     StatusPanel* get_status_panel() {return m_status_info_panel;};
-	void select_machine(std::string machine_sn);
+	void select_machine(const std::string &machine_sn);
     void on_update_all(wxMouseEvent &event);
     void on_timer(wxTimerEvent& event);
     void on_select_printer(wxCommandEvent& event);

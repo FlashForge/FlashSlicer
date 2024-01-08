@@ -2059,7 +2059,7 @@ static wxMenu* generate_help_menu()
         });
 
     // Report a bug
-    //append_menu_item(helpMenu, wxID_ANY, _L("Report Bug(TODO)"), _L("Report a bug of OrcaSlicer"),
+    //append_menu_item(helpMenu, wxID_ANY, _L("Report Bug(TODO)"), _L("Report a bug of Orca-Flashforge"),
     //    [](wxCommandEvent&) {
     //        //TODO
     //    });
@@ -3215,7 +3215,7 @@ void MainFrame::select_tab(wxPanel* panel)
 }
 
 //BBS
-void MainFrame::jump_to_monitor(std::string dev_id)
+void MainFrame::jump_to_monitor(const std::string &dev_id)
 {
     m_tabpanel->SetSelection(tpMonitor);
     ((MonitorPanel*)m_monitor)->select_machine(dev_id);
