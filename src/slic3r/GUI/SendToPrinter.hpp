@@ -38,6 +38,8 @@
 #include "Widgets/ScrolledWindow.hpp"
 #include "Widgets/FFCheckBox.hpp"
 #include "Widgets/FFButton.hpp"
+#include "Widgets/FFToggleButton.hpp"
+#include "Widgets/ProgressBar.hpp"
 #include "FlashForge/MultiComMgr.hpp"
 #include <wx/simplebook.h>
 #include <wx/hashmap.h>
@@ -52,28 +54,36 @@ public:
     struct MachineData
     {
         int         flag;   // 0 network, 1 lan
-        wxBitmap    icon;
+        std::string model;
         wxString    name;
+
+        MachineData() = default;
+        MachineData(const MachineData& data) = default;//: flag(data.flag), model(data.model), name(data.name) {};
     };
 
 public:
-    MachineItem(wxWindow* parent, const MachineItem& data);
+    MachineItem(wxWindow* parent, const MachineData& data);
     ~MachineItem() {};
 
     bool IsChecked() const;
     void SetChecked(bool checked);
+    void SetDefaultColor(const wxColor& color);
     
 private:
+    static void initBitmap();
     void build();
 
 private:
+    wxColour		m_defaultColor { wxColour(255, 255, 255) };
     FFCheckBox*     m_checkBox;
     ThumbnailPanel*	m_iconPanel;
     wxStaticText*   m_nameLbl;
     wxBoxSizer*     m_mainSizer;
+    MachineData     m_data;
+    static std::map<std::string, wxImage> m_machineBitmapMap;
 };
 
-class SendToPrinterDialog : public TitleDialog
+class SendToPrinterDialog : public DPIDialog
 {
 private:
 	void init_bind();
@@ -137,20 +147,31 @@ private:
     FFCheckBox*                         m_levelCkb;
     wxStaticText*                       m_levelLbl;
     wxStaticText*                       m_selectPrinterLbl;
-    FFButton*                           m_netBtn;
-    FFButton*                           m_lanBtn;
+    FFToggleButton*                     m_netBtn;
+    FFToggleButton*                     m_lanBtn;
+    wxScrolledWindow*                   m_machinePanel;
+    wxGridSizer*                        m_machineSizer;
+    FFCheckBox*                         m_selectAll;
+    wxStaticText*                       m_selectAllLbl;
+    wxPanel*                            m_errorMsgPanel {nullptr};
+    wxStaticText*                       m_errorMsgLbl {nullptr};
+    wxPanel*                            m_progressPanel {nullptr};
+    ProgressBar*                        m_progressBar {nullptr};
+    wxStaticText*                       m_progressInfoLbl {nullptr};
+    wxStaticText*                       m_progressLbl {nullptr};
+    FFButton*                           m_progressCancelBtn {nullptr};
+    FFButton*                           m_sendBtn {nullptr};
 
     std::shared_ptr<SendJob>			m_send_job{nullptr};
     std::vector<wxString>               m_bedtype_list;
     std::map<std::string, ::CheckBox*>	m_checkbox_list;
     std::vector<MachineObject*>			m_list;
-    com_id_list_t                       m_machineIdList;
+    std::vector<MachineItem::MachineData> m_machineList;
     wxColour							m_colour_def_color{ wxColour(255, 255, 255) };
     wxColour							m_colour_bold_color{ wxColour(38, 46, 48) };
 	wxTimer*							m_refresh_timer{ nullptr };
     std::shared_ptr<BBLStatusBarSend>   m_status_bar;
 	wxScrolledWindow*                   m_sw_print_failed_info{nullptr};
-
    
 public:
 	SendToPrinterDialog(Plater* plater = nullptr);
