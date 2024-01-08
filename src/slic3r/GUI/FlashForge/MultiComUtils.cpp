@@ -25,39 +25,39 @@ ComErrno MultiComUtils::getLanDevList(std::vector<fnet_lan_dev_info> &devInfos)
 }
 
 ComErrno MultiComUtils::getTokenByPassword(const std::string &userName, const std::string &password,
-    com_token_info_t &tokenInfo)
+    com_token_data_t &tokenData)
 {
     fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
     if (intfc == nullptr) {
         return COM_UNINITIALIZED;
     }
-    fnet_token_info_t *fnetTokenInfo;
-    int ret = intfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenInfo);
+    fnet_token_data_t *fnetTokenData;
+    int ret = intfc->getTokenByPassword(userName.c_str(), password.c_str(), &fnetTokenData);
     if (ret != COM_OK) {
         return fnetRet2ComErrno(ret);
     }
-    fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
-    tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
-    tokenInfo.accessToken = fnetTokenInfo->accessToken;
-    tokenInfo.refreshToken = fnetTokenInfo->refreshToken;
+    fnet::FreeInDestructor freeTokenInfo(fnetTokenData, intfc->freeToken);
+    tokenData.expiresIn = fnetTokenData->expiresIn;
+    tokenData.accessToken = fnetTokenData->accessToken;
+    tokenData.refreshToken = fnetTokenData->refreshToken;
     return COM_OK;
 }
 
-ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo)
+ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_data_t &tokenData)
 {
     fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
     if (intfc == nullptr) {
         return COM_UNINITIALIZED;
     }
-    fnet_token_info_t *fnetTokenInfo;
-    int ret = intfc->refreshToken(refreshToken.c_str(), &fnetTokenInfo);
+    fnet_token_data_t *fnetTokenData;
+    int ret = intfc->refreshToken(refreshToken.c_str(), &fnetTokenData);
     if (ret != COM_OK) {
         return fnetRet2ComErrno(ret);
     }
-    fnet::FreeInDestructor freeTokenInfo(fnetTokenInfo, intfc->freeTokenInfo);
-    tokenInfo.expiresIn = fnetTokenInfo->expiresIn;
-    tokenInfo.accessToken = fnetTokenInfo->accessToken;
-    tokenInfo.refreshToken = fnetTokenInfo->refreshToken;
+    fnet::FreeInDestructor freeTokenInfo(fnetTokenData, intfc->freeToken);
+    tokenData.expiresIn = fnetTokenData->expiresIn;
+    tokenData.accessToken = fnetTokenData->accessToken;
+    tokenData.refreshToken = fnetTokenData->refreshToken;
     return COM_OK;
 }
 

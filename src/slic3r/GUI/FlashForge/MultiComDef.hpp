@@ -24,7 +24,7 @@ enum ComConnectMode {
     COM_CONNECT_WAN,
 };
 
-struct com_token_info_t {
+struct com_token_data_t {
     int expiresIn;
     std::string accessToken;
     std::string refreshToken;

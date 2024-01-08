@@ -16,6 +16,14 @@ ReLoginDialog::ReLoginDialog() : DPIDialog(static_cast<wxWindow *>(wxGetApp().ma
     SetFont(wxGetApp().normal_font());
     SetBackgroundColour(*wxWHITE);
 
+    AppConfig *app_config = wxGetApp().app_config;
+    std::string usr_name("usrname");
+    std::string usr_pic;
+    if(app_config){
+        usr_name = app_config->get("usr_name");
+        usr_pic = app_config->get("usr_pic");
+    }
+
 //水平布局
     wxBoxSizer *bSizer_frame = new wxBoxSizer(wxHORIZONTAL);
 
@@ -47,7 +55,8 @@ ReLoginDialog::ReLoginDialog() : DPIDialog(static_cast<wxWindow *>(wxGetApp().ma
 
     bSizer_mid->Add(m_usr_pic_staticbitmap,0, wxALIGN_CENTER,0);
 
-    m_usr_name = new Label(m_panel_page,("usrname"));
+
+    m_usr_name = new Label(m_panel_page,usr_name);
 
     //m_usr_name->Fit(m_panel_page);
 

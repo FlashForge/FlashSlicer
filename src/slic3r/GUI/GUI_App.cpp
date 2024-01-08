@@ -3487,24 +3487,35 @@ void GUI_App::ShowUserLogin(bool show)
 {
     // BBS: User Login Dialog
     if(show){
-        wxIPV4address addr;
-        addr.Hostname(wxGetHostName());
-        addr.Service(0);
-        wxString ip = addr.IPAddress();
-        bool isDomestic = ip.StartsWith("10.") ||
-                  ip.StartsWith("172.") ||
-                  ip.StartsWith("192.") ||
-                  ip.StartsWith("202.") ||
-                  ip.StartsWith("203.") ||
-                  ip.StartsWith("210.") ||
-                  ip.StartsWith("211.") ||
-                  ip.StartsWith("219.") ||
-                  ip.StartsWith("220.") ||
-                  ip.StartsWith("221.") ||
-                  ip.StartsWith("222.");
-        if(!isDomestic){
+        if(nullptr == app_config){
             return;
         }
+        //判断是否国内登录
+        std::string region = app_config->get("region");
+        if(region.compare("China") == 0){
+            //国内登录
+        }
+        else{
+            //国外登录
+            return;
+        }
+
+        //判断是否已经成功登录
+        std::string access_token = app_config->get("access_token");
+        std::string refresh_token = app_config->get("refresh_token");
+        if(!access_token.empty() && !refresh_token.empty()){
+            if(!m_re_login_dlg){
+                m_re_login_dlg = new ReLoginDialog();
+            }
+            else{
+                delete m_re_login_dlg;
+                 m_re_login_dlg = new ReLoginDialog();
+            }
+            m_re_login_dlg->ShowModal();
+            return;
+        }
+
+        //正式登录
         try{
             if(!m_login_dlg){
                 m_login_dlg = new LoginDialog();
@@ -4506,8 +4517,13 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
                             if (pos != std::string::npos) {
                                 version_info.description = body.substr(pos);
                             }
+#ifdef __APPLE__
+                            version_info.url         = mac64Url;
+                            version_info.version_str = mac64Ver;
+#else
                             version_info.url           = win64Url;
                             version_info.version_str   = win64Ver;
+#endif
                             version_info.force_upgrade = false;
                             wxCommandEvent *evt        = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
                             // evt->SetString((i_am_pre ? best_pre : best_release).to_string());

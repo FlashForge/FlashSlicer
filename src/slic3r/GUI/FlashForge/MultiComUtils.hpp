@@ -13,9 +13,9 @@ public:
     static ComErrno getLanDevList(std::vector<fnet_lan_dev_info> &devInfos);
 
     static ComErrno getTokenByPassword(const std::string &userName, const std::string &password,
-        com_token_info_t &tokenInfo);
+        com_token_data_t &tokenData);
 
-    static ComErrno refreshToken(const std::string &refreshToken, com_token_info_t &tokenInfo);
+    static ComErrno refreshToken(const std::string &refreshToken, com_token_data_t &tokenData);
 
     static ComErrno fnetRet2ComErrno(int networkRet);
 };
