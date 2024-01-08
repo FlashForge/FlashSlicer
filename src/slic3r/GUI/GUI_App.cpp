@@ -4452,8 +4452,13 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
                             if (pos != std::string::npos) {
                                 version_info.description = body.substr(pos);
                             }
+#ifdef __APPLE__
+                            version_info.url         = mac64Url;
+                            version_info.version_str = mac64Ver;
+#else
                             version_info.url           = win64Url;
                             version_info.version_str   = win64Ver;
+#endif
                             version_info.force_upgrade = false;
                             wxCommandEvent *evt        = new wxCommandEvent(EVT_SLIC3R_VERSION_ONLINE);
                             // evt->SetString((i_am_pre ? best_pre : best_release).to_string());
