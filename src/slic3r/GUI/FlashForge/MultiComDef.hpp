@@ -30,6 +30,11 @@ struct com_token_data_t {
     std::string refreshToken;
 };
 
+struct com_clinet_token_data_t {
+    int expiresIn;
+    std::string accessToken;
+};
+
 struct com_user_profile_t {
     std::string nickname;
     std::string headImgUrl;

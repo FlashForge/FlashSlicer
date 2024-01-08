@@ -17,6 +17,13 @@ public:
 
     static ComErrno refreshToken(const std::string &refreshToken, com_token_data_t &tokenData);
 
+    static ComErrno getClientToken(com_clinet_token_data_t &clinetTokenData);
+
+    static ComErrno sendSMSCode(const std::string &clinetAccessToken, const std::string &phoneNumber);
+
+    static ComErrno getTokenBySMSCode(const std::string &userName, const std::string &SMSCode,
+        com_token_data_t &tokenData);
+
     static ComErrno fnetRet2ComErrno(int networkRet);
 };
 
