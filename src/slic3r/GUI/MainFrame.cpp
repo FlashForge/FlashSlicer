@@ -951,14 +951,14 @@ void MainFrame::init_tabpanel() {
       int old_sel = e.GetOldSelection();
       int new_sel = e.GetSelection();
       if (wxGetApp().preset_bundle && wxGetApp().preset_bundle->is_bbl_vendor() && new_sel == tpMonitor) {
-          if (!wxGetApp().getAgent()) {
+          /*if (!wxGetApp().getAgent()) {
               e.Veto();
               BOOST_LOG_TRIVIAL(info) << boost::format("skipped tab switch from %1% to %2%, lack of network plugins") % old_sel % new_sel;
               if (m_plater) {
                   wxCommandEvent *evt = new wxCommandEvent(EVT_INSTALL_PLUGIN_HINT);
                   wxQueueEvent(m_plater, evt);
               }
-          }
+          }*/
       } else {
           if (new_sel == tpMonitor && wxGetApp().preset_bundle != nullptr) {
               auto     cfg = wxGetApp().preset_bundle->printers.get_edited_preset().config;
@@ -1091,23 +1091,20 @@ void MainFrame::show_device(bool bBBLPrinter) {
   }
   if (bBBLPrinter) {
     if (m_tabpanel->GetPage(tpMonitor) != m_monitor) {
-      m_printer_view->Hide();
+            m_printer_view->Show(false);
             m_monitor->Show(true);
-      m_tabpanel->RemovePage(tpMonitor);
-      m_tabpanel->InsertPage(tpMonitor, m_monitor, _L("Device"),
-                             std::string("tab_monitor_active"),
-                             std::string("tab_monitor_active"));
-      //m_tabpanel->SetSelection(tp3DEditor);
+            m_tabpanel->RemovePage(tpMonitor);
+            m_tabpanel->InsertPage(tpMonitor, m_monitor, _L("Device"), std::string("tab_monitor_active"), std::string("tab_monitor_active"));
+            // m_tabpanel->SetSelection(tp3DEditor);
     }
   } else {
     if (m_tabpanel->GetPage(tpMonitor) != m_printer_view) {
-      m_printer_view->Show();
+            m_printer_view->Show();
             m_monitor->Show(false);
-      m_tabpanel->RemovePage(tpMonitor);
-      m_tabpanel->InsertPage(tpMonitor, m_printer_view, _L("Device"),
-                          std::string("tab_monitor_active"),
-                          std::string("tab_monitor_active"));
-      //m_tabpanel->SetSelection(tp3DEditor);
+            m_tabpanel->RemovePage(tpMonitor);
+            m_tabpanel->InsertPage(tpMonitor, m_printer_view, _L("Device"), std::string("tab_monitor_active"),
+                                   std::string("tab_monitor_active"));
+            // m_tabpanel->SetSelection(tp3DEditor);
     }
   }
 
