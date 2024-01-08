@@ -52,6 +52,15 @@ com_id_t MultiComMgr::addLanDev(const fnet_lan_dev_info &devInfo, const std::str
     return m_idNum;
 }
 
+void MultiComMgr::removeLanDev(com_id_t id)
+{
+    auto it = m_ptrMap.left.find(id);
+    if (it == m_ptrMap.left.end()) {
+        return;
+    }
+    it->second->disconnect(0);
+}
+
 void MultiComMgr::setWanDevToken(const std::string &userName, const std::string &accessToken)
 {
     if (networkIntfc() == nullptr) {
@@ -76,6 +85,9 @@ void MultiComMgr::removeWanDev()
 ComErrno MultiComMgr::bindWanDev(const std::string &serialNumber, const std::string &model,
     const std::string &name)
 {
+    if (networkIntfc() == nullptr) {
+        return COM_UNINITIALIZED;
+    }
     std::string userName, accessToken;
     m_userDataUpdateThd->getToken(userName, accessToken);
     if (accessToken.empty()) {
@@ -93,6 +105,9 @@ ComErrno MultiComMgr::bindWanDev(const std::string &serialNumber, const std::str
 
 ComErrno MultiComMgr::unbindWanDev(const std::string &serialNumber, const std::string &devId)
 {
+    if (networkIntfc() == nullptr) {
+        return COM_UNINITIALIZED;
+    }
     std::string userName, accessToken;
     m_userDataUpdateThd->getToken(userName, accessToken);
     if (accessToken.empty()) {
@@ -131,14 +146,13 @@ const com_dev_data_t &MultiComMgr::devData(com_id_t id, bool *valid /* = nullptr
     }
 }
 
-bool MultiComMgr::putCommand(com_id_t id, const ComCommandPtr &command)
+void MultiComMgr::putCommand(com_id_t id, const ComCommandPtr &command)
 {
     auto it = m_ptrMap.left.find(id);
     if (it == m_ptrMap.left.end()) {
-        return false;
+        return;
     }
     m_ptrMap.left.at(id)->putCommand(command);
-    return true;
 }
 
 void MultiComMgr::initConnection(const com_ptr_t &comPtr)

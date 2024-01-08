@@ -30,6 +30,8 @@ public:
     
     com_id_t addLanDev(const fnet_lan_dev_info &devInfo, const std::string &checkCode);
 
+    void removeLanDev(com_id_t id);
+
     void setWanDevToken(const std::string &userName, const std::string &accessToken);
 
     void removeWanDev();
@@ -43,7 +45,7 @@ public:
 
     const com_dev_data_t &devData(com_id_t id, bool *valid = nullptr);
 
-    bool putCommand(com_id_t id, const ComCommandPtr &command);
+    void putCommand(com_id_t id, const ComCommandPtr &command);
 
 private:
     typedef std::shared_ptr<ComConnection> com_ptr_t;
