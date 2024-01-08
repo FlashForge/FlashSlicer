@@ -54,6 +54,55 @@ ComErrno MultiComUtils::refreshToken(const std::string &refreshToken, com_token_
     if (ret != COM_OK) {
         return fnetRet2ComErrno(ret);
     }
+    fnet::FreeInDestructor freeTokenData(fnetTokenData, intfc->freeToken);
+    tokenData.expiresIn = fnetTokenData->expiresIn;
+    tokenData.accessToken = fnetTokenData->accessToken;
+    tokenData.refreshToken = fnetTokenData->refreshToken;
+    return COM_OK;
+}
+
+ComErrno MultiComUtils::getClientToken(com_clinet_token_data_t &clinetTokenData)
+{
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
+    if (intfc == nullptr) {
+        return COM_UNINITIALIZED;
+    }
+    fnet_client_token_data *fnetClientTokenData;
+    int ret = intfc->getClientToken(&fnetClientTokenData);
+    if (ret != COM_OK) {
+        return fnetRet2ComErrno(ret);
+    }
+    fnet::FreeInDestructor freeClientTokenData(fnetClientTokenData, intfc->freeClientToken);
+    clinetTokenData.accessToken = fnetClientTokenData->accessToken;
+    clinetTokenData.expiresIn = fnetClientTokenData->expiresIn;
+    return COM_OK;
+}
+
+ComErrno MultiComUtils::sendSMSCode(const std::string &clinetAccessToken, const std::string &phoneNumber)
+{
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
+    if (intfc == nullptr) {
+        return COM_UNINITIALIZED;
+    }
+    int ret = intfc->sendSMSCode(clinetAccessToken.c_str(), phoneNumber.c_str(), "zh");
+    if (ret != COM_OK) {
+        return fnetRet2ComErrno(ret);
+    }
+    return COM_OK;
+}
+
+ComErrno MultiComUtils::getTokenBySMSCode(const std::string &userName, const std::string &SMSCode,
+    com_token_data_t &tokenData)
+{
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
+    if (intfc == nullptr) {
+        return COM_UNINITIALIZED;
+    }
+    fnet_token_data_t *fnetTokenData;
+    int ret = intfc->getTokenBySMSCode(userName.c_str(), SMSCode.c_str(), &fnetTokenData);
+    if (ret != COM_OK) {
+        return fnetRet2ComErrno(ret);
+    }
     fnet::FreeInDestructor freeTokenInfo(fnetTokenData, intfc->freeToken);
     tokenData.expiresIn = fnetTokenData->expiresIn;
     tokenData.accessToken = fnetTokenData->accessToken;
