@@ -132,10 +132,10 @@ typedef struct fnet_dev_detail {
 
 #define FNET_OK 0
 #define FNET_ERROR -1
-#define FNET_DIVICE_IS_BUSY 1
-#define FNET_VERIFY_LAN_DEV_FAILED 1001
-#define FNET_INVALID_VALIDATION 2001 // account/password/SMS code
-#define FNET_INVALID_TOKEN 2002
+#define FNET_DIVICE_IS_BUSY 2
+#define FNET_VERIFY_LAN_DEV_FAILED 1001 // invalid serialNumber/checkCode
+#define FNET_UNAUTHORIZED 2001          // invalid accessToken/clientAccessToken
+#define FNET_INVALID_VALIDATION 2002    // invalid userName/password/SMSCode
 
 #ifdef __cplusplus
 extern "C" {
