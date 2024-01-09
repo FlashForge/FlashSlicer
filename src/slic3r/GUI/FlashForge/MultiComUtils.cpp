@@ -110,15 +110,37 @@ ComErrno MultiComUtils::getTokenBySMSCode(const std::string &userName, const std
     return COM_OK;
 }
 
+ComErrno MultiComUtils::checkToken(const std::string &accessToken)
+{
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
+    if (intfc == nullptr) {
+        return COM_UNINITIALIZED;
+    }
+    return fnetRet2ComErrno(intfc->checkToken(accessToken.c_str()));
+}
+
+ComErrno MultiComUtils::signOut(const std::string &accessToken)
+{
+    fnet::FlashNetworkIntfc *intfc = MultiComMgr::inst()->networkIntfc();
+    if (intfc == nullptr) {
+        return COM_UNINITIALIZED;
+    }
+    return fnetRet2ComErrno(intfc->signOut(accessToken.c_str()));
+}
+
 ComErrno MultiComUtils::fnetRet2ComErrno(int networkRet)
 {
     switch (networkRet) {
     case FNET_OK:
         return COM_OK;
-    case FNET_VERIFY_LAN_DEV_FAILED:
-        return COM_VERIFY_LAN_DEV_FAILED;
     case FNET_DIVICE_IS_BUSY:
         return COM_DEVICE_IS_BUSY;
+    case FNET_VERIFY_LAN_DEV_FAILED:
+        return COM_VERIFY_LAN_DEV_FAILED;
+    case FNET_INVALID_VALIDATION:
+        return COM_INVALID_VALIDATION;
+    case FNET_INVALID_TOKEN:
+        return COM_INVALID_TOKEN;
     default:
         return COM_ERROR;
     }

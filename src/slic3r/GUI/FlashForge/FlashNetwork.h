@@ -131,8 +131,10 @@ typedef struct fnet_dev_detail {
 
 #define FNET_OK 0
 #define FNET_ERROR -1
-#define FNET_VERIFY_LAN_DEV_FAILED 1
-#define FNET_DIVICE_IS_BUSY 2
+#define FNET_DIVICE_IS_BUSY 1
+#define FNET_VERIFY_LAN_DEV_FAILED 1001
+#define FNET_INVALID_VALIDATION 2001 // account/password/SMS code
+#define FNET_INVALID_TOKEN 2002
 
 #ifdef __cplusplus
 extern "C" {
@@ -177,6 +179,10 @@ FNET_API int fnet_sendSMSCode(const char *clientAccessToken, const char *phoneNu
 
 FNET_API int fnet_getTokenBySMSCode(const char *userName, const char *SMSCode,
     fnet_token_data_t **tokenData);
+
+FNET_API int fnet_checkToken(const char *accessToken);
+
+FNET_API int fnet_signOut(const char *accessToken);
 
 FNET_API int fnet_getUserProfile(const char *accessToken, fnet_user_profile_t **profile);
 

@@ -31,6 +31,8 @@ public:
     decltype(&fnet_freeClientToken) freeClientToken;
     decltype(&fnet_sendSMSCode) sendSMSCode;
     decltype(&fnet_getTokenBySMSCode) getTokenBySMSCode;
+    decltype(&fnet_checkToken) checkToken;
+    decltype(&fnet_signOut) signOut;
     decltype(&fnet_getUserProfile) getUserProfile;
     decltype(&fnet_freeUserProfile) freeUserProfile;
     decltype(&fnet_downloadFile) downloadFile;
