@@ -4071,7 +4071,7 @@ void GUI_App::handle_login_result(std::string url, std::string name)
     // 将JSON对象转换为字符串
     std::string newJsonStr = jsonObj.dump();
 
-    wxString strJS = wxString::Format("window.postMessage(%s)", newJsonStr);
+    wxString strJS = wxString::Format("window.postMessage(%s)", wxString::FromUTF8(newJsonStr));
     GUI::wxGetApp().run_script(strJS);
 }
 

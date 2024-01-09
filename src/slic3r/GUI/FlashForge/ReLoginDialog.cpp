@@ -55,8 +55,7 @@ ReLoginDialog::ReLoginDialog() : DPIDialog(static_cast<wxWindow *>(wxGetApp().ma
 
     bSizer_mid->Add(m_usr_pic_staticbitmap,0, wxALIGN_CENTER,0);
 
-
-    m_usr_name = new Label(m_panel_page,usr_name);
+    m_usr_name = new Label(m_panel_page,wxString::FromUTF8(usr_name.c_str()));
 
     //m_usr_name->Fit(m_panel_page);
 

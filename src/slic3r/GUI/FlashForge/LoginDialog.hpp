@@ -107,6 +107,9 @@ private:
 
     void onPage2Login(wxCommandEvent& event);
 
+    inline void startTimer(){ m_timer.Start(5000);}
+    void OnTimer(wxTimerEvent& event);
+
 private:
     wxStaticText* m_error_label {nullptr};
     wxButton* m_login_button_page1 {nullptr};
@@ -117,6 +120,7 @@ private:
 
     UsrnameTextCtrl* m_usrname_page2 {nullptr};
     PasswordTextCtrl* m_password {nullptr};
+    wxStaticText* m_error_label_page2 {nullptr};
     wxButton* m_login_button_page2 {nullptr};
     wxCheckBox* m_login_check_box_page2 {nullptr};
 
@@ -131,6 +135,8 @@ private:
     //StaticLine* m_staticLine_password{nullptr};
     
     static com_token_data_t  m_token_data;
+
+    wxTimer m_timer;
 
 };
 } // namespace GUI
