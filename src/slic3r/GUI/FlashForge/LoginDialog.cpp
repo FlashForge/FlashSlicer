@@ -20,7 +20,7 @@ namespace GUI {
 
     wxDEFINE_EVENT(EVT_UPDATE_TEXT_LOGIN, wxCommandEvent);
 
-    com_token_info_t LoginDialog::m_token_info = {};
+    com_token_data_t LoginDialog::m_token_data = {};
 
     CountdownButton::CountdownButton(wxWindow* parent, wxString text, wxString icon /*= ""*/, long style /*= 0*/, int iconSize /*= 0*/, wxWindowID btn_id /*= wxID_ANY*/)
         : Button(parent,text,icon,style,iconSize,btn_id)
@@ -327,15 +327,15 @@ LoginDialog::LoginDialog()
     SetSizerAndFit(sizer_frame);
 }
 
-com_token_info_t LoginDialog::GetLoginToken()
+com_token_data_t LoginDialog::GetLoginToken()
 {
-    return m_token_info;
+    return m_token_data;
 }
 
 void LoginDialog::SetToken(std::string accessToken, std::string refreshToken)
 {
-    m_token_info.accessToken = accessToken;
-    m_token_info.refreshToken = refreshToken;
+    m_token_data.accessToken = accessToken;
+    m_token_data.refreshToken = refreshToken;
 }
 
 void LoginDialog::on_dpi_changed(const wxRect &suggested_rect)
@@ -451,14 +451,22 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //service_link->Wrap(100);
 
     service_link->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, "Term of Sevrvice", wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+         wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Term of Sevrvice"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_service_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_service_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_service_link->SetSizer(sizer);
+        m_panel_service_link->Layout();
+        sizer->Fit(m_panel_service_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //Privacy Policy
@@ -467,14 +475,22 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     //privacy_policy_link->Wrap(100);
 
     privacy_policy_link->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+        wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_policy_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_policy_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_policy_link->SetSizer(sizer);
+        m_panel_policy_link->Layout();
+        sizer->Fit(m_panel_policy_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //left gaption
@@ -598,28 +614,44 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
     m_service_link_page2->SetFont((wxFont(wxFontInfo(14))));
 
     m_service_link_page2->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, "Term of Sevrvice", wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+         wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Term of Sevrvice"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_service_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_service_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_service_link->SetSizer(sizer);
+        m_panel_service_link->Layout();
+        sizer->Fit(m_panel_service_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //Privacy Policy
     m_privacy_policy_link_page2 = new wxStaticText(parent, wxID_ANY, _L("《Privacy Policy》"));
     m_privacy_policy_link_page2->SetFont((wxFont(wxFontInfo(14))));
     m_privacy_policy_link_page2->Bind(wxEVT_LEFT_UP, [this,parent](wxMouseEvent& e){
-         wxTextCtrl* textCtrl = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-         textCtrl->LoadFile("");
-         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-         sizer->Add(textCtrl, wxSizerFlags(1).Expand());
 
-         wxDialog* dialog = new wxDialog(parent, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
-         dialog->SetSizer(sizer);
-         dialog->ShowModal();
+        wxDialog* dialog = new wxDialog(nullptr, wxID_ANY, _L("Privacy Policy"), wxDefaultPosition, wxSize(400, 300));
+
+        auto m_panel_policy_link = new wxPanel(dialog, wxID_ANY, wxDefaultPosition,wxSize(FromDIP(240), FromDIP(180)), wxTAB_TRAVERSAL);
+        wxTextCtrl* textCtrl = new wxTextCtrl(m_panel_policy_link, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+        textCtrl->LoadFile("");
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        sizer->Add(textCtrl, wxSizerFlags(1).Expand());
+
+        m_panel_policy_link->SetSizer(sizer);
+        m_panel_policy_link->Layout();
+        sizer->Fit(m_panel_policy_link);
+        
+        //dialog->SetSizer(sizer);
+        dialog->ShowModal();
     });
 
     //left gaption
@@ -711,19 +743,19 @@ void LoginDialog::onPage2Login(wxCommandEvent& event)
 {
     wxString usrname = m_usrname_page2->GetValue();
     wxString password = m_password->GetValue();
-    com_token_info_t token_info;
-    ComErrno login_result =  MultiComUtils::getTokenByPassword(usrname.ToStdString(),password.ToStdString(),token_info);
+    com_token_data_t token_data;
+    ComErrno login_result =  MultiComUtils::getTokenByPassword(usrname.ToStdString(),password.ToStdString(),token_data);
     if(login_result == ComErrno::COM_OK){
-        LoginDialog::m_token_info = token_info;
+        LoginDialog::m_token_data = token_data;
         wxGetApp().handle_login_result("default.jpg",usrname.ToStdString());
         this->Hide();
         AppConfig *app_config = wxGetApp().app_config;
         if(app_config){
             //主动点击登录，设置token值
-            app_config->set("access_token",token_info.accessToken);
-            app_config->set("refresh_token",token_info.refreshToken);
-            app_config->set("expire_time",std::to_string(token_info.expiresIn));
-             Slic3r::GUI::MultiComMgr::inst()->setWanDevToken(usrname.ToStdString(),token_info.accessToken);
+            app_config->set("access_token",token_data.accessToken);
+            app_config->set("refresh_token",token_data.refreshToken);
+            app_config->set("expire_time",std::to_string(token_data.expiresIn));
+             Slic3r::GUI::MultiComMgr::inst()->setWanDevToken(usrname.ToStdString(),token_data.accessToken);
         }
         
     }

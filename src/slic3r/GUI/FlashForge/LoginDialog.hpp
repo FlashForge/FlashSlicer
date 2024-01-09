@@ -89,7 +89,7 @@ class LoginDialog : public DPIDialog
 public:
     LoginDialog();
 
-    static com_token_info_t GetLoginToken();
+    static com_token_data_t GetLoginToken();
     static void SetToken(std::string accessToken, std::string refreshToken);
 
 protected:
@@ -130,7 +130,7 @@ private:
     //StaticLine* m_staticLine_verify{nullptr};
     //StaticLine* m_staticLine_password{nullptr};
     
-    static com_token_info_t  m_token_info;
+    static com_token_data_t  m_token_data;
 
 };
 } // namespace GUI

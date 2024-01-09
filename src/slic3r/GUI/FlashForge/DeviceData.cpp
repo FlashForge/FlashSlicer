@@ -33,7 +33,7 @@ bool DeviceObject::has_access_right()
     return !get_access_code().empty();
 }
 
-void DeviceObject::set_access_code(std::string code, bool only_refresh/* = true*/)
+void DeviceObject::set_access_code(const string &code, bool only_refresh /* = true*/)
 {
     m_access_code = code;
     if (only_refresh) {
@@ -58,6 +58,7 @@ void DeviceObject::set_user_access_code(const string &code, bool only_refresh /*
         AppConfig *config = GUI::wxGetApp().app_config;
         if (config) {
             GUI::wxGetApp().app_config->set_str("user_access_code", m_dev_id, code);
+            GUI::wxGetApp().app_config->set_str("user_dev_name", m_dev_id, get_dev_name());
         }
     }
 }
@@ -77,6 +78,7 @@ void DeviceObject::erase_user_access_code()
     AppConfig *config      = GUI::wxGetApp().app_config;
     if (config) {
         GUI::wxGetApp().app_config->erase("user_access_code", m_dev_id);
+        GUI::wxGetApp().app_config->erase("user_dev_name", m_dev_id);
         GUI::wxGetApp().app_config->save();
     }
 }
@@ -267,11 +269,32 @@ bool DeviceObjectOpr::set_selected_machine(const string &dev_id, bool need_disco
 
     if (it != my_machine_list.end()) {
         DeviceObject *devObj = it->second;
-        MultiComMgr::inst()->addLanDev(*devObj->get_lan_dev_info(), devObj->get_user_access_code());
+        com_id_t id = MultiComMgr::inst()->addLanDev(*devObj->get_lan_dev_info(), devObj->get_user_access_code());
+        m_dev_connect_map.emplace(dev_id, id);
 
         m_selected_machine = dev_id;
     }
     return true;
+}
+
+void DeviceObjectOpr::unbind_machine(DeviceObject* obj)
+{
+    if (obj == nullptr) {
+        return;
+    }
+
+    obj->set_access_code("");
+    obj->erase_user_access_code();
+    auto it = m_dev_connect_map.find(obj->get_dev_id());
+    if (it != m_dev_connect_map.end()) {
+        MultiComMgr::inst()->removeLanDev(it->second);
+    }
+
+    auto devIt = m_user_devices.find(obj->get_dev_id());
+    if (devIt != m_user_devices.end()) {
+        delete devIt->second;
+        m_user_devices.erase(devIt);
+    }
 }
 
 void DeviceObjectOpr::get_my_machine_list(map<string, DeviceObject*>& devList)
@@ -327,6 +350,7 @@ void DeviceObjectOpr::onUpdateUserMachine(ComConnectionReadyEvent& event)
 
     if (m_user_devices.find(m_selected_machine) == m_user_devices.end()) {
         DeviceObject *userObj = new DeviceObject(*devObj);
+        userObj->set_online_state(true);
         m_user_devices.emplace(make_pair(m_selected_machine, userObj));
     }
 }

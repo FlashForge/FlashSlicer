@@ -24,10 +24,15 @@ enum ComConnectMode {
     COM_CONNECT_WAN,
 };
 
-struct com_token_info_t {
+struct com_token_data_t {
     int expiresIn;
     std::string accessToken;
     std::string refreshToken;
+};
+
+struct com_clinet_token_data_t {
+    int expiresIn;
+    std::string accessToken;
 };
 
 struct com_user_profile_t {
