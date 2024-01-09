@@ -24,6 +24,10 @@ public:
     static ComErrno getTokenBySMSCode(const std::string &userName, const std::string &SMSCode,
         com_token_data_t &tokenData);
 
+    static ComErrno checkToken(const std::string &accessToken);
+
+    static ComErrno signOut(const std::string &accessToken);
+
     static ComErrno fnetRet2ComErrno(int networkRet);
 };
 

@@ -35,6 +35,8 @@ FlashNetworkIntfc::FlashNetworkIntfc(const char *libraryPath)
     INIT_FUNC_PTR(freeClientToken, fnet_freeClientToken);
     INIT_FUNC_PTR(sendSMSCode, fnet_sendSMSCode);
     INIT_FUNC_PTR(getTokenBySMSCode, fnet_getTokenBySMSCode);
+    INIT_FUNC_PTR(checkToken, fnet_checkToken);
+    INIT_FUNC_PTR(signOut, fnet_signOut);
     INIT_FUNC_PTR(getUserProfile, fnet_getUserProfile);
     INIT_FUNC_PTR(freeUserProfile, fnet_freeUserProfile);
     INIT_FUNC_PTR(downloadFile, fnet_downloadFile);
