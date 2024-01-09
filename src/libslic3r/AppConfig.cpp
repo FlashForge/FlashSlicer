@@ -39,7 +39,7 @@ using namespace nlohmann;
 
 namespace Slic3r {
 
-static const std::string VERSION_CHECK_URL = "http://update.cn.sz3dp.com:20080/3dapp/public/FlashSlicer/appInfo.json";
+static const std::string VERSION_CHECK_URL = "http://update.cn.sz3dp.com:20080/3dapp/public/Orca-Flashforge/appInfo.json";
 static const std::string MODELS_STR = "models";
 
 const std::string AppConfig::SECTION_FILAMENTS = "filaments";
@@ -372,8 +372,8 @@ void AppConfig::set_defaults()
 
 void AppConfig::set_version_check_url()
 {
-    std::string url1 = "http://update.cn.sz3dp.com:20080/3dapp/public/FlashSlicer/appInfo.json";
-    std::string url2 = "http://www.ishare3d.com/3dapp/public/FlashSlicer/appInfo.json";
+    std::string url1 = "http://update.cn.sz3dp.com:20080/3dapp/public/Orca-Flashforge/appInfo.json";
+    std::string url2 = "http://www.ishare3d.com/3dapp/public/Orca-Flashforge/appInfo.json";
 
     auto start1 = std::chrono::steady_clock::now();
     double t1 = -1, t2 = -1;

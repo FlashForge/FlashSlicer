@@ -586,6 +586,17 @@ void LoginDialog::setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent)
 
     page2Sizer->Add(regist_forget_hor_sizer, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL,0);
 
+//****error tips ***
+    m_error_label_page2 = new wxStaticText(parent,wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    m_error_label_page2->SetLabel(_L("Account or Password Input Error"));
+    m_error_label_page2->SetFont((wxFont(wxFontInfo(16))));
+    m_error_label_page2->SetBackgroundColour(wxColour(250, 207, 202)); // #FACFCA
+    m_error_label_page2->SetForegroundColour(wxColour(234, 53, 34)); // #EA3522
+    m_error_label_page2->SetWindowStyle(wxALIGN_CENTER_VERTICAL | wxALIGN_CENTER_HORIZONTAL);
+    m_error_label_page2->SetMinSize(wxSize(348,55));
+    page2Sizer->Add(m_error_label_page2, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
+    m_error_label_page2->Show(false); 
+
     //login button
     m_login_button_page2 = new wxButton(parent, wxID_ANY, _L("Login"));
     m_login_button_page2->SetMinSize(wxSize(101,44));
@@ -759,6 +770,18 @@ void LoginDialog::onPage2Login(wxCommandEvent& event)
         }
         
     }
+    else if (login_result == ComErrno::COM_ERROR){
+        m_timer.Bind(wxEVT_TIMER, &LoginDialog::OnTimer, this);
+        //账号、密码错误
+        m_error_label_page2->Show(true);
+        startTimer();
+    }
+}
+
+void LoginDialog::OnTimer(wxTimerEvent& event)
+{
+    m_error_label_page2->Show(false);
+    m_timer.Stop();
 }
 
 

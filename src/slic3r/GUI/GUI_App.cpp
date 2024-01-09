@@ -2045,9 +2045,9 @@ static boost::optional<Semver> parse_semver_from_ini(std::string path)
     std::stringstream buffer;
     buffer << stream.rdbuf();
     std::string body = buffer.str();
-    size_t start = body.find("OrcaSlicer ");
+    size_t start = body.find("Orca-Flashforge ");
     if (start == std::string::npos) {
-        start = body.find("OrcaSlicer ");
+        start = body.find("Orca-Flashforge ");
         if (start == std::string::npos)
             return boost::none;
     }
@@ -4071,7 +4071,7 @@ void GUI_App::handle_login_result(std::string url, std::string name)
     // 将JSON对象转换为字符串
     std::string newJsonStr = jsonObj.dump();
 
-    wxString strJS = wxString::Format("window.postMessage(%s)", newJsonStr);
+    wxString strJS = wxString::Format("window.postMessage(%s)", wxString::FromUTF8(newJsonStr));
     GUI::wxGetApp().run_script(strJS);
 }
 
@@ -6603,8 +6603,8 @@ void GUI_App::associate_files(std::wstring extend)
     ::GetModuleFileNameW(nullptr, app_path, sizeof(app_path));
 
     std::wstring prog_path = L"\"" + std::wstring(app_path) + L"\"";
-    std::wstring prog_id = L" Orca.Slicer.1";
-    std::wstring prog_desc = L"OrcaSlicer";
+    std::wstring prog_id = L" Orca.Flashforge.1";
+    std::wstring prog_desc = L"Orca-Flashforge";
     std::wstring prog_command = prog_path + L" \"%1\"";
     std::wstring reg_base = L"Software\\Classes";
     std::wstring reg_extension = reg_base + L"\\." + extend;
@@ -6626,8 +6626,8 @@ void GUI_App::disassociate_files(std::wstring extend)
     ::GetModuleFileNameW(nullptr, app_path, sizeof(app_path));
 
     std::wstring prog_path = L"\"" + std::wstring(app_path) + L"\"";
-    std::wstring prog_id = L" Orca.Slicer.1";
-    std::wstring prog_desc = L"OrcaSlicer";
+    std::wstring prog_id = L" Orca.Flashforge.1";
+    std::wstring prog_desc = L"Orca-Flashforge";
     std::wstring prog_command = prog_path + L" \"%1\"";
     std::wstring reg_base = L"Software\\Classes";
     std::wstring reg_extension = reg_base + L"\\." + extend;

@@ -337,7 +337,7 @@ AboutDialog::AboutDialog()
               (boost::format(
               "<html>"
               "<body>"
-              "<p style=\"text-align:left\"><a  href=\"https://github.com/FlashForge/FlashSlicer\">https://github.com/FlashForge/FlashSlicer</ a></p>"
+              "<p style=\"text-align:left\"><a  href=\"https://github.com/FlashForge/Orca-Flashforge\">https://github.com/FlashForge/Orca-Flashforge</ a></p>"
               "</body>"
               "</html>")
             ).str());

@@ -35,7 +35,7 @@ public:
     bool        is_lan_mode_in_scan_print();
     bool        is_lan_mode_printer();
     bool        has_access_right();
-    void        set_access_code(std::string code, bool only_refresh = true);
+    void        set_access_code(const string &code, bool only_refresh = true);
     string      get_access_code();
 
     void        set_user_access_code(const string& code, bool only_refresh = true);
@@ -98,6 +98,8 @@ public:
 
     bool set_selected_machine(const string &dev_id, bool need_disconnect = false);
 
+    void unbind_machine(DeviceObject *obj);
+
     /* return machine has access code and user machine if login*/
     void get_my_machine_list(map<string, DeviceObject *> &devList);
 
@@ -113,6 +115,7 @@ private:
     map<string, DeviceObject *>       m_scan_devices;       /* dev_id -> DeviceObject*, scan in lan (only lan connectMode, and wan connectMode)   */
     map<string, DeviceObject *>       m_user_devices;        /* dev_id -> DeviceObject*, when user login, the user's devices that has bound. */
     map<string, DeviceObject*>        m_local_devices;      /* dev_id -> DeviceObject*,  in lan connectMode, device has input access code. Read data from appconfig. */
+    map<string, com_id_t>             m_dev_connect_map;   /* dev_id -> connectId */
 };
 
 }
