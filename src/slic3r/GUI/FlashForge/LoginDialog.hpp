@@ -96,6 +96,8 @@ protected:
     void on_dpi_changed(const wxRect &suggested_rect) override;
 
 private:
+    void initWidget();
+
     void setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent);
     void setupLayoutPage2(wxBoxSizer* page2Sizer,wxPanel* parent);
 
@@ -105,12 +107,15 @@ private:
     void onUsrNameOrPasswordChangedPage2(wxCommandEvent& event);
     void onAgreeCheckBoxChangedPage2(wxCommandEvent& event);
 
+    void onPage1Login(wxCommandEvent& event);
     void onPage2Login(wxCommandEvent& event);
 
     inline void startTimer(){ m_timer.Start(5000);}
     void OnTimer(wxTimerEvent& event);
 
 private:
+    com_clinet_token_data_t m_client_SMS_token;
+
     wxStaticText* m_error_label {nullptr};
     wxButton* m_login_button_page1 {nullptr};
     UsrnameTextCtrl* m_usrname_page1 {nullptr};

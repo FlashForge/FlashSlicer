@@ -325,6 +325,9 @@ LoginDialog::LoginDialog()
     sizer_frame->Add(sizer, 0, wxALIGN_CENTER);
 
     SetSizerAndFit(sizer_frame);
+
+    initWidget();
+
 }
 
 com_token_data_t LoginDialog::GetLoginToken()
@@ -345,6 +348,14 @@ void LoginDialog::on_dpi_changed(const wxRect &suggested_rect)
     SetMinSize(size);
     Fit();
     Refresh();
+}
+
+void LoginDialog::initWidget()
+{
+   ComErrno get_result = MultiComUtils::getClientToken(m_client_SMS_token);
+   if(get_result == ComErrno::COM_ERROR){
+        BOOST_LOG_TRIVIAL(warning) << boost::format("MultiComUtils::getClientToken Failed!");
+   }
 }
 
 void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
@@ -398,6 +409,11 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     m_get_code_button->SetWindowStyleFlag(wxBORDER_NONE); //去除边框线
     m_get_code_button->SetMinSize(wxSize(114,54));
     m_get_code_button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event){
+        //发送验证码
+        ComErrno send_result =MultiComUtils::sendSMSCode(m_client_SMS_token.accessToken,m_usrname_page1->GetValue().ToStdString());
+        if(send_result == ComErrno::COM_ERROR){
+            BOOST_LOG_TRIVIAL(warning) << boost::format("MultiComUtils::sendSMSCode Failed!");
+        }
         m_get_code_button->startTimer();
     });
     //Bind(EVT_UPDATE_TEXT_LOGIN, &LoginDialog::OnUpdateText, this);
@@ -433,6 +449,7 @@ void LoginDialog::setupLayoutPage1(wxBoxSizer* page1Sizer,wxPanel* parent)
     m_login_button_page1->SetWindowStyleFlag(wxBORDER_NONE); 
     m_login_button_page1->SetMinSize(wxSize(101,44));
     m_login_button_page1->SetFont((wxFont(wxFontInfo(16))));
+    m_login_button_page1->Bind(wxEVT_BUTTON,&LoginDialog::onPage1Login, this);
 
     page1Sizer->Add(m_login_button_page1, 0, wxALIGN_CENTER_HORIZONTAL| wxUP, FromDIP(36));
 
@@ -750,6 +767,33 @@ void LoginDialog::onAgreeCheckBoxChangedPage2(wxCommandEvent& event)
         }
 }
 
+void LoginDialog::onPage1Login(wxCommandEvent& event)
+{
+    wxString usrname = m_usrname_page1->GetValue();
+    wxString verify_code = m_verify_code->GetValue();
+    com_token_data_t token_data;
+    ComErrno login_result =  MultiComUtils::getTokenBySMSCode(usrname.ToStdString(),verify_code.ToStdString(),token_data);
+    if(login_result == ComErrno::COM_OK){
+        LoginDialog::m_token_data = token_data;
+        wxGetApp().handle_login_result("default.jpg",usrname.ToStdString());
+        this->Hide();
+        AppConfig *app_config = wxGetApp().app_config;
+        if(app_config){
+            //主动点击登录，设置token值
+            app_config->set("access_token",token_data.accessToken);
+            app_config->set("refresh_token",token_data.refreshToken);
+            app_config->set("expire_time",std::to_string(token_data.expiresIn));
+             Slic3r::GUI::MultiComMgr::inst()->setWanDevToken(usrname.ToStdString(),token_data.accessToken);
+        } 
+    }
+    else if (login_result == ComErrno::COM_ERROR){
+        m_timer.Bind(wxEVT_TIMER, &LoginDialog::OnTimer, this);
+        //账号、验证码错误
+        m_error_label->Show(true);
+        startTimer();
+    }
+}
+
 void LoginDialog::onPage2Login(wxCommandEvent& event)
 {
     wxString usrname = m_usrname_page2->GetValue();
@@ -780,7 +824,13 @@ void LoginDialog::onPage2Login(wxCommandEvent& event)
 
 void LoginDialog::OnTimer(wxTimerEvent& event)
 {
-    m_error_label_page2->Show(false);
+    if(m_error_label->IsShown()){
+        m_error_label->Show(false);
+    }
+    if(m_error_label_page2->IsShown()){
+        m_error_label_page2->Show(false);
+    }
+
     m_timer.Stop();
 }
 

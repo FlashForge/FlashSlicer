@@ -18,10 +18,13 @@ ReLoginDialog::ReLoginDialog() : DPIDialog(static_cast<wxWindow *>(wxGetApp().ma
 
     AppConfig *app_config = wxGetApp().app_config;
     std::string usr_name("usrname");
-    std::string usr_pic;
+    std::string pic = "login_default_usr_pic.png";
+    std::string usr_pic((boost::filesystem::path(Slic3r::var_dir()) / pic).make_preferred().string());
     if(app_config){
         usr_name = app_config->get("usr_name");
-        usr_pic = app_config->get("usr_pic");
+        if(!app_config->get("usr_pic").empty()){
+            usr_pic = app_config->get("usr_pic");
+        }
     }
 
 //水平布局
@@ -47,13 +50,16 @@ ReLoginDialog::ReLoginDialog() : DPIDialog(static_cast<wxWindow *>(wxGetApp().ma
     bSizer_mid->Add(m_panel_separotor_0, 0, wxEXPAND | wxALL, 0);
 
 //**添加用户
-    m_usr_pic = create_scaled_bitmap("login_default_usr_pic", this, 66);
-    m_usr_pic_staticbitmap = new wxStaticBitmap(m_panel_page, wxID_ANY,m_usr_pic);
-    m_usr_pic_staticbitmap->SetMinSize(wxSize(64,64));
+    // m_usr_pic = create_scaled_bitmap("login_default_usr_pic", this, 66);
+    // m_usr_pic_staticbitmap = new wxStaticBitmap(m_panel_page, wxID_ANY,m_usr_pic);
+    // m_usr_pic_staticbitmap->SetMinSize(wxSize(64,64));
 
-    //m_usr_pic_staticbitmap->Fit(m_panel_page);
+    m_user_pic_view = WebView::CreateWebView(m_panel_page, usr_pic);
+    m_user_pic_view->SetMinSize(wxSize(64,64));
 
-    bSizer_mid->Add(m_usr_pic_staticbitmap,0, wxALIGN_CENTER,0);
+    bSizer_mid->Add(m_user_pic_view,0, wxALIGN_CENTER,0);
+
+    //bSizer_mid->Add(m_usr_pic_staticbitmap,0, wxALIGN_CENTER,0);
 
     m_usr_name = new Label(m_panel_page,wxString::FromUTF8(usr_name.c_str()));
 
